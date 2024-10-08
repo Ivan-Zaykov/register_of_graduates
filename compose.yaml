@@ -1,7 +1,7 @@
 services:
   backend:
     build:
-      context: docker/backend
+      context: docker/golang
       target: builder
     secrets:
       - db-password
