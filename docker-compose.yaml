@@ -1,0 +1,18 @@
+services:
+  react:
+    tty: true
+    build:
+      context: docker/react
+    volumes:
+      - ./react:/root
+    ports:
+      - "3000:3000"
+
+  nginx:
+    build:
+      context: docker/nginx
+    ports:
+      - "4500:4500"
+    depends_on:
+      - react
+#      - golang
