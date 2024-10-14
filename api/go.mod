@@ -1,6 +1,6 @@
-module github.com/docker/awesome-compose/nginx-golang-postgres/backend
+module api/registry_of_graduates
 
-go 1.18
+go 1.20
 
 require (
 	github.com/gorilla/handlers v1.3.0

@@ -1,8 +1,37 @@
 services:
+  golang:
+    build:
+      context: docker/golang
+      dockerfile: server.Dockerfile
+      target: dev
+    volumes:
+      - ./api:/root
+    ports:
+      - "5000:5000"
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    build:
+      context: docker/postgres
+    env_file: .env
+    volumes:
+      - ./docker/init_db:/docker-entrypoint-initdb.d/schema
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   react:
     tty: true
     build:
       context: docker/react
+      target: dev
     volumes:
       - ./react:/root
     ports:
@@ -11,8 +40,9 @@ services:
   nginx:
     build:
       context: docker/nginx
+      target: dev
     ports:
       - "4500:4500"
     depends_on:
       - react
-#      - golang
+      - golang
