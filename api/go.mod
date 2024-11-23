@@ -1,4 +1,4 @@
-module register_of_graduates
+module api
 
 go 1.23.3
 

@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"log"
 	"net/http"
-	"register_of_graduates/api/controller"
+	"api/controller"
 	"time"
 )
 
@@ -227,7 +227,7 @@ func main() {
 		log.Fatalf("Не удалось подключиться к базе данных: %v\n", err)
 	}
 	defer conn.Close(context.Background())
-	
+
 	// Создание маршрутизатора
 	r := mux.NewRouter()
 
