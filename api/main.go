@@ -5,8 +5,11 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v5"
 	"log"
+	"net/http"
+	"register_of_graduates/api/controller"
 	"time"
 )
 
@@ -219,17 +222,20 @@ func archiveStudent(conn *pgx.Conn, studentID uuid.UUID) error {
 }
 
 func main() {
-	// Подключение к базе данных
-	connStr := "postgres://vlad:1234@localhost:5432/school-project"
-	conn, err := pgx.Connect(context.Background(), connStr)
+	conn, err := pgx.Connect(context.Background(), "postgres://vlad:1234@localhost:5432/school-project")
 	if err != nil {
 		log.Fatalf("Не удалось подключиться к базе данных: %v\n", err)
 	}
-	fmt.Println("Подключение к базе данных успешно выполнено.")
+	defer conn.Close(context.Background())
+	
+	// Создание маршрутизатора
+	r := mux.NewRouter()
 
-	studentID := uuid.MustParse("770e8400-e29b-41d4-a716-446655440001")
-	err = archiveStudent(conn, studentID)
-	if err != nil {
-		log.Fatalf("Ошибка архивации студента: %v\n", err)
-	}
+	// Подключение контроллеров
+	r.HandleFunc("/students/{id}", controller.GetStudentHandler(conn)).Methods("GET")
+
+	// Запуск сервера
+	port := 8080
+	fmt.Printf("Сервер запущен на порту %d\n", port)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), r))
 }
