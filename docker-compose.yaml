@@ -1,17 +1,17 @@
 services:
-#  golang:
-#    build:
-#      context: docker/golang
-#      dockerfile: Dockerfile
-#      target: dev
-#    volumes:
-#      - ./api:/root
-#    ports:
-#      - "5000:5000"
-#    env_file: .env
-#    depends_on:
-#      postgres:
-#        condition: service_healthy
+  golang:
+    build:
+      context: api
+      dockerfile: Dockerfile
+      target: dev
+    volumes:
+      - ./api/:/root
+    ports:
+      - "5000:5000"
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   postgres:
     build:

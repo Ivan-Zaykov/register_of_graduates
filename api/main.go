@@ -1,6 +1,7 @@
 package main
 
 import (
+	"api/controller"
 	"context"
 	"database/sql"
 	"fmt"
@@ -9,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"log"
 	"net/http"
-	"api/controller"
+	"os"
 	"time"
 )
 
@@ -222,11 +223,25 @@ func archiveStudent(conn *pgx.Conn, studentID uuid.UUID) error {
 }
 
 func main() {
-	conn, err := pgx.Connect(context.Background(), "postgres://vlad:1234@localhost:5432/school-project")
+	// Читаем переменные окружения
+	dbHost := os.Getenv("POSTGRES_HOST")
+	dbPort := os.Getenv("POSTGRES_PORT")
+	dbUser := os.Getenv("POSTGRES_USER")
+	dbPassword := os.Getenv("POSTGRES_PASSWORD")
+	dbName := os.Getenv("POSTGRES_DB")
+
+	// Формируем строку подключения
+	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
+		dbUser, dbPassword, dbHost, dbPort, dbName)
+
+	// Подключаемся к базе данных
+	conn, err := pgx.Connect(context.Background(), dsn)
 	if err != nil {
 		log.Fatalf("Не удалось подключиться к базе данных: %v\n", err)
 	}
 	defer conn.Close(context.Background())
+
+	fmt.Println("Успешное подключение к базе данных")
 
 	// Создание маршрутизатора
 	r := mux.NewRouter()
