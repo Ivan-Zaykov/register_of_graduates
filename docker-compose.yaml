@@ -45,4 +45,4 @@ services:
       - "80:4500"
     depends_on:
       - react
-#      - golang
+      - golang

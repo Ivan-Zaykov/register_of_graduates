@@ -1,7 +1,6 @@
 package main
 
 import (
-	"api/controller"
 	"context"
 	"database/sql"
 	"fmt"
@@ -247,10 +246,14 @@ func main() {
 	r := mux.NewRouter()
 
 	// Подключение контроллеров
-	r.HandleFunc("/students/{id}", controller.GetStudentHandler(conn)).Methods("GET")
-
+	//r.HandleFunc("/api/students/{id}", controller.GetStudentHandler(conn)).Methods("GET")
+	r.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/plain")
+		// Пишем текст ответа
+		fmt.Fprintln(w, "Hello World")
+	})
 	// Запуск сервера
-	port := 8080
+	port := 5000
 	fmt.Printf("Сервер запущен на порту %d\n", port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), r))
 }
