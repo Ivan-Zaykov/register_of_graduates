@@ -7,21 +7,31 @@ import Nav from 'Nav/Nav'
 import Routes from 'Routes/Routes'
 import { WithUser } from 'Shared/UserContainer'
 
-const App = () => (
-  <WithUser>
-    <Helmet
-      defaultTitle="PNGR"
-      titleTemplate="%s | PNGR"
-    >
-      {/* put meta tags here for opengraph and stuff */}
-    </Helmet>
-    <Router>
-      <div id="wrapper">
-        <Nav />
-        <Routes />
-      </div>
-    </Router>
-  </WithUser>
-);
+// const App = () => (
+//   <WithUser>
+//     <Helmet
+//       defaultTitle="123"
+//       titleTemplate="%s | PNGR"
+//     >
+//       {/* put meta tags here for opengraph and stuff */}
+//     </Helmet>
+//     <Router>
+//       <div id="wrapper">
+//         <Nav /> 
+//         <Routes />
+//       </div>
+//     </Router>
+//   </WithUser>
+// );
 
+const App = () => {
+  return  (
+    <>
+      <div>SOME TEXT</div>
+      <div>More text</div>
+    </>
+  
+  );
+
+};
 export default App;
