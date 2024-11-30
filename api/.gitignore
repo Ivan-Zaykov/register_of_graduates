@@ -1,5 +1,7 @@
 .cache
-# exclude the built app from check-ins
-# sometimes you might build locally
-# and this will be the default binary name
+pkg
+.env
+.config
+bin
+.bash_history
 main
