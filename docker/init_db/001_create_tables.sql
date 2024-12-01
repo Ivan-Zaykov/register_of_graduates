@@ -1,5 +1,3 @@
-CREATE DATABASE registry_of_graduates;
-
 CREATE TABLE Faculty (
                          faculty_id UUID PRIMARY KEY,
                          faculty_name VARCHAR(100),

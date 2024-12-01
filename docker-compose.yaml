@@ -19,7 +19,7 @@ services:
       context: docker/postgres
     env_file: api/.env
     volumes:
-      - ./docker/init_db:/docker-entrypoint-initdb.d/schema
+      - ./docker/init_db:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
     healthcheck:
