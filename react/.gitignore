@@ -22,3 +22,4 @@ yarn-error.log*
 
 .npm
 .config
+.ash_history
