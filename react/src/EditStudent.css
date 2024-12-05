@@ -1,0 +1,92 @@
+.edit_top_block {
+    display: flex;
+    flex-direction: column;
+    margin-top: 30px;
+    gap: 30px;
+}
+
+
+
+.edit_student_save_button {
+    margin: 0 50px;
+    background-color: #D3A2A1;
+    font-size: 22px;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    padding: 12px 0;
+    border-radius: 30px;
+    text-align: center;
+    color: black;
+    cursor: pointer;
+    width: calc(800px + 418px + 40px + 10px);
+
+
+    /* margin: 30px 100px 30px 60px; */
+}
+
+.edit_student_save_button:hover {
+    background-color:#d4aaaa;
+}
+
+.edit_student_cancel_button {
+    width: 100%;
+    cursor: pointer;
+    background-color: #D8DAD7;
+    font-size: 22px;
+    color: #AE1010;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    padding: 12px 0;
+    border-radius: 30px;
+    text-align: center;
+
+}
+
+.edit_student_cancel_button:hover {
+    background-color:#d2d4d0;
+}
+
+.edit_student_top_edit_button {
+    /* border: 3px solid black; */
+    background-color: #D8DAD7;
+    font-size: 30px;
+    /* color: #AE1010; */
+    /* font-family: Georgia, 'Times New Roman', Times, serif; */
+    padding: 12px 0;
+    font-weight: bold;
+    border-radius: 30px;
+    text-align: center;
+    margin: 0 50px;
+    width: calc(800px + 418px + 40px + 10px);
+
+
+}
+
+
+.editable_input {
+    border: none;
+    font-size: 22px;
+    text-align: right;
+    border-bottom: 1px solid #d3a2a1;
+    cursor: pointer;
+    /* overflow-y: auto; */
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    width: 500px; 
+    box-sizing: border-box;
+    background-color: transparent; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+    white-space: nowrap;
+}
+
+.editable_input:focus {
+    outline: none; 
+}
+
+.white_border {
+    border-bottom: 1px solid #D8DAD7;
+}
+
+.big_input {
+    text-wrap: wrap;
+    resize: none;
+    width: 98%;
+}

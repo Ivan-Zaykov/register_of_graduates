@@ -1,0 +1,41 @@
+.add_student_input {
+  border: none;
+  font-size: 22px;
+  text-align: right;
+  cursor: pointer;
+  /* overflow-y: auto; */
+  /* font-family: Georgia, "Times New Roman", Times, serif; */
+  width: 500px;
+  box-sizing: border-box;
+  background-color: transparent;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.add_student_input:focus {
+    outline: none; 
+}
+
+.add_student_input::placeholder {
+    font-family: 'Cormorant Infant', sans-serif;
+    /* font-weight: bold; */
+    font-style: italic;
+}
+
+.white_placeholder::placeholder {
+    color: #D8DAD7;
+    /* font-weight: bold; */
+}
+
+.add_student_big_input {
+    text-wrap: wrap;
+    resize: none;
+    width: 98%;
+}
+
+
+.red_star {
+    color: #ae1010;
+    font-weight: bold;
+}

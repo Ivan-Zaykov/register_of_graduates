@@ -1,0 +1,209 @@
+/* ---------------Редактирование фотки (закинуть в другой файл)------------- */
+
+
+.edit_photo_icon {
+  position: absolute;
+  bottom: 13px;
+  right: 13px; 
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  padding: 4px;
+  color: #D3A2A1;
+  opacity: 0.8;
+}
+
+.edit_photo_icon:hover {
+  opacity: 1;
+}
+
+/* ----------------------------------------- */
+
+
+.student_profile_content {
+  margin: 0 60px;
+  /* border: 1px solid red; */
+}
+
+.student_profile_wrapper {
+  margin-top: 10px;
+  /* align-items: center; */
+  display: flex;
+  flex-direction: column;
+  padding: 0 10px;
+
+}
+
+
+.student_profile_top_wrapper {
+  /* border: 5px solid green; */
+  padding: 0 50px;
+  display: flex;
+  gap: 40px;
+  /* justify-content: space-around; */
+}
+
+
+.only_add {
+  margin: 10px 0 20px 0;
+}
+
+/* кнопки + картинка */
+
+.button_and_picture_block {
+  /* border: 1px solid blue; */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.buttons_block {
+  /* border: 1px solid lime; */
+  display: flex;
+  /* width: 370px; */
+  width: 100%;
+  justify-content: space-around;
+}
+
+.button_icon {
+  color: #D3A2A1;
+  width: 45px;
+  height: 45px;
+}
+
+.button_icon:hover {
+  color: #AE1010;
+}
+
+.picture_block {
+  /* border: 1px solid red; */
+  padding-top: 25px;
+  position: relative;
+}
+
+.student_photo {
+  width: 418px;
+  height: 418px;
+  border-radius: 30px;
+
+}
+
+/* таблица справа */
+
+
+
+.info_table {
+  /* width: 60%; */
+  width: 800px;
+  /* border: 1px solid red; */
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 22px;
+  /* width: 50%; */
+  /* width: 600px; */
+  font-family: Georgia, 'Times New Roman', Times, serif;
+
+}
+
+.table_line {
+ display: flex;
+ flex-direction: row;
+ justify-content: space-between;
+ background-color: #D8DAD7;
+ padding: 12px;
+}
+
+.title {
+  width: 250px;
+  /* border: 1px solid lime; */
+}
+
+.data {
+
+}
+
+
+/* края таблицы */
+
+
+.last_line {
+  border-radius: 0 0 20px 20px;
+}
+
+.first_line {
+  border-radius: 20px 20px 0 0;
+  background-color: #D3A2A1;
+
+}
+
+
+
+/* таблица снизу большая */
+
+
+
+.student_profile_bottom_wrapper {
+  /* border: 5px solid aqua; */
+  /* display: flex; */
+  margin: 0 40px;
+
+
+}
+
+.student_profile_department_info_table {
+  width: calc(800px + 418px + 40px + 17px);
+  margin: 40px 0;
+  /* border: 1px solid red; */
+  /* display: flex; */
+  /* flex-direction: column; */
+  /* gap: 7px; */
+  font-size: 22px;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  border-collapse: separate;
+  border-spacing: 7px 7px;
+}
+
+
+.student_profile_table_body {
+}
+
+.bottom_data_title {
+  padding: 12px;
+  width: 320px;
+}
+
+.bottom_data_info {
+  padding: 12px;
+  text-align: right;
+  width: calc(100% - 320px);
+}
+
+.bottom_data_title_first_left {
+  border-radius: 20px 0 0 0;
+  background-color: #D3A2A1;
+}
+
+.bottom_data_title_first_right {
+  border-radius: 0 20px 0 0;
+  background-color: #D3A2A1;
+}
+
+.bottom_data_title_last_left {
+  border-radius: 0 0 0 20px;
+}
+
+.bottom_data_title_last_right {
+  border-radius: 0 0 20px 0;
+}
+
+.table_space {
+  
+}
+
+.bottom_table_line {
+  /* display: flex;
+  flex-direction: row;
+  justify-content: space-between; */
+  background-color: #D8DAD7;
+}
