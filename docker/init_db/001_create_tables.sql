@@ -20,6 +20,7 @@ CREATE TABLE Student (
                          ticket_number VARCHAR(100) UNIQUE,
                          full_name VARCHAR(100),
                          enrollment_date DATE,
+                         education_level VARCHAR,
                          graduation_date DATE DEFAULT(NULL),
                          completion_status BOOL DEFAULT(NULL),
                          is_archived BOOL NOT NULL,
