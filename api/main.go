@@ -42,5 +42,8 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/api/student/{id}", controller.GetStudent(conn))
 	r.HandleFunc("/api/student", controller.CreateStudent(conn)).Methods("POST")
+	r.HandleFunc("/api/student", controller.UpdateStudent(conn)).Methods("PUT")
+	//r.HandleFunc("/api/students", UpdateStudentHandler(conn)).Methods(http.MethodPut)
+
 	log.Fatal(http.ListenAndServe(":5000", handlers.LoggingHandler(os.Stdout, r)))
 }
