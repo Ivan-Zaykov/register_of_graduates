@@ -12,6 +12,18 @@ import (
 	pgx "github.com/jackc/pgx/v5"
 )
 
+func StudentExistsByTicketNumber(conn *pgx.Conn, ticketNumber string) (bool, error) {
+	query := "SELECT COUNT(*) FROM student WHERE student_id = $1"
+	var count int
+
+	err := conn.QueryRow(context.Background(), query, ticketNumber).Scan(&count)
+	if err != nil {
+		return false, fmt.Errorf("ошибка при проверке существования студента: %v", err)
+	}
+
+	return count > 0, nil
+}
+
 func StudentExists(conn *pgx.Conn, studentID uuid.UUID) (bool, error) {
 	query := "SELECT COUNT(*) FROM student WHERE student_id = $1"
 	var count int
@@ -125,7 +137,7 @@ func GetStudentHandler(conn *pgx.Conn) http.HandlerFunc {
 
 func CreateStudent(conn *pgx.Conn, facultyID, departmentID uuid.UUID, ticketNumber, fullName, educationLevel string, enrollmentDate time.Time) error {
 	// Проверяем, существует ли студент с данным номером студенческого билета
-	if exists, err := StudentExists(conn, ticketNumber); err != nil {
+	if exists, err := StudentExistsByTicketNumber(conn, ticketNumber); err != nil {
 		return fmt.Errorf("ошибка проверки существования студента: %v", err)
 	} else if exists {
 		return fmt.Errorf("студент с номером студенческого '%s' уже существует", ticketNumber)
@@ -349,7 +361,7 @@ func UpdateStudentHandler(conn *pgx.Conn) http.HandlerFunc {
 
 func DeleteStudent(conn *pgx.Conn, studentID uuid.UUID) error {
 	// Проверяем, существует ли студент
-	exists, err := StudentExists(conn, studentID.String())
+	exists, err := StudentExists(conn, studentID)
 	if err != nil {
 		return fmt.Errorf("ошибка проверки существования студента: %v", err)
 	}
@@ -397,7 +409,7 @@ func DeleteStudentHandler(conn *pgx.Conn, w http.ResponseWriter, r *http.Request
 
 func ArchiveStudent(conn *pgx.Conn, studentID uuid.UUID) error {
 	// Проверяем, существует ли студент
-	exists, err := StudentExists(conn, studentID.String())
+	exists, err := StudentExists(conn, studentID)
 	if err != nil {
 		return fmt.Errorf("ошибка проверки существования студента: %v", err)
 	}
