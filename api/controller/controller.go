@@ -173,49 +173,51 @@ func CreateStudent(conn *pgx.Conn, facultyID, departmentID uuid.UUID, ticketNumb
 	return nil
 }
 
-func CreateStudentHandler(conn *pgx.Conn, w http.ResponseWriter, r *http.Request) {
-	// Парсим тело запроса
-	var req struct {
-		FacultyID      string `json:"FacultyID"`
-		DepartmentID   string `json:"DepartmentID"`
-		TicketNumber   string `json:"TicketNumber"`
-		FullName       string `json:"FullName"`
-		EducationLevel string `json:"EducationLevel"`
-		EnrollmentDate string `json:"EnrollmentDate"`
-	}
+func CreateStudentHandler(conn *pgx.Conn) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Парсим тело запроса
+		var req struct {
+			FacultyID      string `json:"FacultyID"`
+			DepartmentID   string `json:"DepartmentID"`
+			TicketNumber   string `json:"TicketNumber"`
+			FullName       string `json:"FullName"`
+			EducationLevel string `json:"EducationLevel"`
+			EnrollmentDate string `json:"EnrollmentDate"`
+		}
 
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Неверный формат данных", http.StatusBadRequest)
-		return
-	}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, "Неверный формат данных", http.StatusBadRequest)
+			return
+		}
 
-	// Парсим UUID и дату
-	facultyID, err := uuid.Parse(req.FacultyID)
-	if err != nil {
-		http.Error(w, "Неверный UUID факультета", http.StatusBadRequest)
-		return
-	}
+		// Парсим UUID и дату
+		facultyID, err := uuid.Parse(req.FacultyID)
+		if err != nil {
+			http.Error(w, "Неверный UUID факультета", http.StatusBadRequest)
+			return
+		}
 
-	departmentID, err := uuid.Parse(req.DepartmentID)
-	if err != nil {
-		http.Error(w, "Неверный UUID кафедры", http.StatusBadRequest)
-		return
-	}
+		departmentID, err := uuid.Parse(req.DepartmentID)
+		if err != nil {
+			http.Error(w, "Неверный UUID кафедры", http.StatusBadRequest)
+			return
+		}
 
-	enrollmentDate, err := time.Parse("2006-01-02", req.EnrollmentDate)
-	if err != nil {
-		http.Error(w, "Неверный формат даты", http.StatusBadRequest)
-		return
-	}
+		enrollmentDate, err := time.Parse("2006-01-02", req.EnrollmentDate)
+		if err != nil {
+			http.Error(w, "Неверный формат даты", http.StatusBadRequest)
+			return
+		}
 
-	// Вызов функции для создания студента
-	if err := CreateStudent(conn, facultyID, departmentID, req.TicketNumber, req.FullName, req.EducationLevel, enrollmentDate); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+		// Вызов функции для создания студента
+		if err := CreateStudent(conn, facultyID, departmentID, req.TicketNumber, req.FullName, req.EducationLevel, enrollmentDate); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
-	w.WriteHeader(http.StatusCreated)
-	fmt.Fprintf(w, "Студент '%s' успешно создан\n", req.FullName)
+		w.WriteHeader(http.StatusCreated)
+		fmt.Fprintf(w, "Студент '%s' успешно создан\n", req.FullName)
+	}
 }
 
 func UpdateStudent(conn *pgx.Conn, studentID uuid.UUID, facultyID *uuid.UUID, departmentID *uuid.UUID,
@@ -379,32 +381,34 @@ func DeleteStudent(conn *pgx.Conn, studentID uuid.UUID) error {
 	return nil
 }
 
-func DeleteStudentHandler(conn *pgx.Conn, w http.ResponseWriter, r *http.Request) {
-	// Разбираем ID студента из маршрута
-	vars := mux.Vars(r)
-	studentIDStr, ok := vars["id"]
-	if !ok {
-		http.Error(w, "ID студента не предоставлен", http.StatusBadRequest)
-		return
-	}
+func DeleteStudentHandler(conn *pgx.Conn) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Разбираем ID студента из маршрута
+		vars := mux.Vars(r)
+		studentIDStr, ok := vars["id"]
+		if !ok {
+			http.Error(w, "ID студента не предоставлен", http.StatusBadRequest)
+			return
+		}
 
-	// Конвертируем ID из строки в UUID
-	studentID, err := uuid.Parse(studentIDStr)
-	if err != nil {
-		http.Error(w, "Некорректный формат ID студента", http.StatusBadRequest)
-		return
-	}
+		// Конвертируем ID из строки в UUID
+		studentID, err := uuid.Parse(studentIDStr)
+		if err != nil {
+			http.Error(w, "Некорректный формат ID студента", http.StatusBadRequest)
+			return
+		}
 
-	// Удаляем студента через функцию взаимодействия с базой данных
-	err = DeleteStudent(conn, studentID)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Ошибка при удалении студента: %v", err), http.StatusInternalServerError)
-		return
-	}
+		// Удаляем студента через функцию взаимодействия с базой данных
+		err = DeleteStudent(conn, studentID)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Ошибка при удалении студента: %v", err), http.StatusInternalServerError)
+			return
+		}
 
-	// Отправляем успешный ответ
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "Студент с ID %s успешно удален", studentID)
+		// Отправляем успешный ответ
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, "Студент с ID %s успешно удален", studentID)
+	}
 }
 
 func ArchiveStudent(conn *pgx.Conn, studentID uuid.UUID) error {
@@ -440,30 +444,32 @@ func ArchiveStudent(conn *pgx.Conn, studentID uuid.UUID) error {
 	return nil
 }
 
-func ArchiveStudentHandler(conn *pgx.Conn, w http.ResponseWriter, r *http.Request) {
-	// Извлекаем ID студента из маршрута
-	vars := mux.Vars(r)
-	studentIDStr, ok := vars["id"]
-	if !ok {
-		http.Error(w, "ID студента не предоставлен", http.StatusBadRequest)
-		return
-	}
+func ArchiveStudentHandler(conn *pgx.Conn) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Извлекаем ID студента из маршрута
+		vars := mux.Vars(r)
+		studentIDStr, ok := vars["id"]
+		if !ok {
+			http.Error(w, "ID студента не предоставлен", http.StatusBadRequest)
+			return
+		}
 
-	// Конвертируем ID из строки в UUID
-	studentID, err := uuid.Parse(studentIDStr)
-	if err != nil {
-		http.Error(w, "Некорректный формат ID студента", http.StatusBadRequest)
-		return
-	}
+		// Конвертируем ID из строки в UUID
+		studentID, err := uuid.Parse(studentIDStr)
+		if err != nil {
+			http.Error(w, "Некорректный формат ID студента", http.StatusBadRequest)
+			return
+		}
 
-	// Архивируем студента через функцию взаимодействия с базой данных
-	err = ArchiveStudent(conn, studentID)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Ошибка при архивации студента: %v", err), http.StatusInternalServerError)
-		return
-	}
+		// Архивируем студента через функцию взаимодействия с базой данных
+		err = ArchiveStudent(conn, studentID)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Ошибка при архивации студента: %v", err), http.StatusInternalServerError)
+			return
+		}
 
-	// Успешный ответ
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "Студент с ID %s успешно архивирован", studentID)
+		// Успешный ответ
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, "Студент с ID %s успешно архивирован", studentID)
+	}
 }

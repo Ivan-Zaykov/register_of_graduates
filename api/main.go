@@ -3,7 +3,6 @@ package main
 import (
 	"api/controller"
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
