@@ -216,7 +216,7 @@ func CreateStudentHandler(conn *pgx.Conn) http.HandlerFunc {
 }
 
 func UpdateStudent(conn *pgx.Conn, studentID uuid.UUID, facultyID *uuid.UUID, departmentID *uuid.UUID,
-	fullName *string, enrollmentDate *time.Time, educationLevel *string, graduationDate *time.Time,
+	fullName string, enrollmentDate *time.Time, educationLevel *string, graduationDate *time.Time,
 	completionStatus *bool) error {
 
 	// Проверяем, существует ли студент
@@ -244,43 +244,43 @@ func UpdateStudent(conn *pgx.Conn, studentID uuid.UUID, facultyID *uuid.UUID, de
 	counter := 1
 
 	if facultyID != nil {
-		query += fmt.Sprintf("faculty_id = $%d, ", counter)
+		query += fmt.Sprintf("faculty_id = $%v, ", counter)
 		params = append(params, *facultyID)
 		counter++
 	}
 	if departmentID != nil {
-		query += fmt.Sprintf("department_id = $%d, ", counter)
+		query += fmt.Sprintf("department_id = $%v, ", counter)
 		params = append(params, *departmentID)
 		counter++
 	}
-	if fullName != nil {
-		query += fmt.Sprintf("full_name = $%d, ", counter)
-		params = append(params, *fullName)
+	if fullName != "" {
+		query += fmt.Sprintf("full_name = $%v, ", counter)
+		params = append(params, fullName)
 		counter++
 	}
 	if enrollmentDate != nil {
-		query += fmt.Sprintf("enrollment_date = $%d, ", counter)
+		query += fmt.Sprintf("enrollment_date = $%v, ", counter)
 		params = append(params, *enrollmentDate)
 		counter++
 	}
 	if educationLevel != nil {
-		query += fmt.Sprintf("education_level = $%d, ", counter)
+		query += fmt.Sprintf("education_level = $%v, ", counter)
 		params = append(params, *educationLevel)
 		counter++
 	}
 	if graduationDate != nil {
-		query += fmt.Sprintf("graduation_date = $%d, ", counter)
+		query += fmt.Sprintf("graduation_date = $%v, ", counter)
 		params = append(params, *graduationDate)
 		counter++
 	}
 	if completionStatus != nil {
-		query += fmt.Sprintf("completion_status = $%d, ", counter)
+		query += fmt.Sprintf("completion_status = $%v, ", counter)
 		params = append(params, *completionStatus)
 		counter++
 	}
 
 	// Добавляем обновление поля updated_at
-	query += fmt.Sprintf("updated_at = $%d, ", counter)
+	query += fmt.Sprintf("updated_at = $%v, ", counter)
 	params = append(params, time.Now())
 	counter++
 
@@ -299,23 +299,22 @@ func UpdateStudent(conn *pgx.Conn, studentID uuid.UUID, facultyID *uuid.UUID, de
 
 func UpdateStudentHandler(conn *pgx.Conn) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Получаем ID студента из параметров
 		vars := mux.Vars(r)
-		studentID, err := uuid.Parse(vars["id"])
+		StudentID, err := uuid.Parse(vars["id"])
 		if err != nil {
-			http.Error(w, "Неверный формат ID студента", http.StatusBadRequest)
+			http.Error(w, "Некорректный ID студента", http.StatusBadRequest)
 			return
 		}
 
 		// Парсим тело запроса
 		var updateData struct {
-			FacultyID        *uuid.UUID `json:"faculty_id"`
-			DepartmentID     *uuid.UUID `json:"department_id"`
-			FullName         *string    `json:"full_name"`
-			EnrollmentDate   *string    `json:"enrollment_date"`
-			EducationLevel   *string    `json:"education_level"`
-			GraduationDate   *string    `json:"graduation_date"`
-			CompletionStatus *bool      `json:"completion_status"`
+			FacultyID        *uuid.UUID `json:"FacultyID"`
+			DepartmentID     *uuid.UUID `json:"DepartmentID"`
+			FullName         *string    `json:"FullName"`
+			EnrollmentDate   *string    `json:"EnrollmentDate"`
+			EducationLevel   *string    `json:"EducationLevel"`
+			GraduationDate   *string    `json:"GraduationDate"`
+			CompletionStatus *bool      `json:"CompletionStatus"`
 		}
 
 		if err := json.NewDecoder(r.Body).Decode(&updateData); err != nil {
@@ -343,7 +342,7 @@ func UpdateStudentHandler(conn *pgx.Conn) http.HandlerFunc {
 		}
 
 		// Вызываем функцию обновления данных в БД
-		err = UpdateStudent(conn, studentID, updateData.FacultyID, updateData.DepartmentID, updateData.FullName,
+		err = UpdateStudent(conn, StudentID, updateData.FacultyID, updateData.DepartmentID, *updateData.FullName,
 			enrollmentDate, updateData.EducationLevel, graduationDate, updateData.CompletionStatus)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
