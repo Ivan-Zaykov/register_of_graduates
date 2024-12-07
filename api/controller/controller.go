@@ -54,18 +54,18 @@ func GetStudent(conn *pgx.Conn, studentID uuid.UUID) (map[string]interface{}, er
 	`
 
 	var student struct {
-		StudentID        uuid.UUID `json:"student_id"`
-		FacultyID        uuid.UUID `json:"faculty_id"`
-		DepartmentID     uuid.UUID `json:"department_id"`
-		TicketNumber     string    `json:"ticket_number"`
-		FullName         string    `json:"full_name"`
-		EnrollmentDate   string    `json:"enrollment_date"`
-		EducationLevel   string    `json:"education_level"`
-		GraduationDate   *string   `json:"graduation_date,omitempty"`
-		CompletionStatus *bool     `json:"completion_status,omitempty"`
-		IsArchived       bool      `json:"is_archived"`
-		CreatedAt        string    `json:"created_at"`
-		UpdatedAt        string    `json:"updated_at"`
+		StudentID        uuid.UUID  `json:"student_id"`
+		FacultyID        uuid.UUID  `json:"faculty_id"`
+		DepartmentID     uuid.UUID  `json:"department_id"`
+		TicketNumber     string     `json:"ticket_number"`
+		FullName         string     `json:"full_name"`
+		EnrollmentDate   *time.Time `json:"enrollment_date"`
+		EducationLevel   string     `json:"education_level"`
+		GraduationDate   *time.Time `json:"graduation_date,omitempty"`
+		CompletionStatus *bool      `json:"completion_status,omitempty"`
+		IsArchived       bool       `json:"is_archived"`
+		CreatedAt        *time.Time `json:"created_at"`
+		UpdatedAt        *time.Time `json:"updated_at"`
 	}
 
 	err = conn.QueryRow(context.Background(), query, studentID).Scan(
