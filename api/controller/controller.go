@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
@@ -162,7 +161,7 @@ func CreateStudent(conn *pgx.Conn, facultyID, departmentID uuid.UUID, ticketNumb
 	return nil
 }
 
-func CreateStudentHandler(w http.ResponseWriter, r *http.Request) {
+func CreateStudentHandler(conn *pgx.Conn, w http.ResponseWriter, r *http.Request) {
 	// Парсим тело запроса
 	var req struct {
 		FacultyID      string `json:"FacultyID"`
@@ -368,7 +367,7 @@ func DeleteStudent(conn *pgx.Conn, studentID uuid.UUID) error {
 	return nil
 }
 
-func DeleteStudentHandler(w http.ResponseWriter, r *http.Request) {
+func DeleteStudentHandler(conn *pgx.Conn, w http.ResponseWriter, r *http.Request) {
 	// Разбираем ID студента из маршрута
 	vars := mux.Vars(r)
 	studentIDStr, ok := vars["id"]
@@ -429,7 +428,7 @@ func ArchiveStudent(conn *pgx.Conn, studentID uuid.UUID) error {
 	return nil
 }
 
-func ArchiveStudentHandler(w http.ResponseWriter, r *http.Request) {
+func ArchiveStudentHandler(conn *pgx.Conn, w http.ResponseWriter, r *http.Request) {
 	// Извлекаем ID студента из маршрута
 	vars := mux.Vars(r)
 	studentIDStr, ok := vars["id"]
