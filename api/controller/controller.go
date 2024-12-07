@@ -13,7 +13,7 @@ import (
 )
 
 func StudentExistsByTicketNumber(conn *pgx.Conn, ticketNumber string) (bool, error) {
-	query := "SELECT COUNT(*) FROM student WHERE student_id = $1"
+	query := "SELECT COUNT(*) FROM student WHERE ticket_number = $1"
 	var count int
 
 	err := conn.QueryRow(context.Background(), query, ticketNumber).Scan(&count)
@@ -130,7 +130,7 @@ func GetStudentHandler(conn *pgx.Conn) http.HandlerFunc {
 	}
 }
 
-func CreateStudent(conn *pgx.Conn, facultyID, departmentID uuid.UUID, ticketNumber, fullName, educationLevel string, enrollmentDate time.Time) error {
+func CreateStudent(conn *pgx.Conn, facultyID, departmentID uuid.UUID, ticketNumber string, fullName string, educationLevel string, enrollmentDate time.Time) error {
 	// Проверяем, существует ли студент с данным номером студенческого билета
 	if exists, err := StudentExistsByTicketNumber(conn, ticketNumber); err != nil {
 		return fmt.Errorf("ошибка проверки существования студента: %v", err)
