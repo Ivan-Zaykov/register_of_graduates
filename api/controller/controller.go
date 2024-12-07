@@ -108,15 +108,10 @@ func GetStudent(conn *pgx.Conn, studentID uuid.UUID) (map[string]interface{}, er
 func GetStudentHandler(conn *pgx.Conn) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Извлекаем student_id из параметров запроса
-		studentIDStr := r.URL.Query().Get("student_id")
-		if studentIDStr == "" {
-			http.Error(w, "Не указан student_id", http.StatusBadRequest)
-			return
-		}
-
-		studentID, err := uuid.Parse(studentIDStr)
+		vars := mux.Vars(r)
+		studentID, err := uuid.Parse(vars["id"])
 		if err != nil {
-			http.Error(w, "Некорректный UUID", http.StatusBadRequest)
+			http.Error(w, "Некорректный ID студента", http.StatusBadRequest)
 			return
 		}
 
