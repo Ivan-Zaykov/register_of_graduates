@@ -13,253 +13,446 @@ import (
 	pgx "github.com/jackc/pgx/v5"
 )
 
-// Структура для обработки ответа о студенте
-type Student struct {
-	StudentID        uuid.UUID `json:"student_id"`
-	FacultyID        uuid.UUID `json:"faculty_id"`
-	DepartmentID     uuid.UUID `json:"department_id"`
-	TicketNumber     string    `json:"ticket_number"`
-	FullName         string    `json:"full_name"`
-	EnrollmentDate   string    `json:"enrollment_date"`
-	GraduationDate   *string   `json:"graduation_date,omitempty"`
-	CompletionStatus *bool     `json:"completion_status,omitempty"`
-	IsArchived       bool      `json:"is_archived"`
-	CreatedAt        string    `json:"created_at"`
-	UpdatedAt        string    `json:"updated_at"`
-}
+func StudentExists(conn *pgx.Conn, studentID uuid.UUID) (bool, error) {
+	query := "SELECT COUNT(*) FROM student WHERE student_id = $1"
+	var count int
 
-// Получить информацию о студенте
-func GetStudent(conn *pgx.Conn) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		studentID, err := uuid.Parse(vars["id"])
-		if err != nil {
-			http.Error(w, "Некорректный ID студента", http.StatusBadRequest)
-			return
-		}
-
-		// Запрос в базу данных
-		var student Student
-		query := `
-			SELECT student_id, faculty_id, department_id, ticket_number, full_name,
-				enrollment_date, graduation_date, completion_status, is_archived, created_at, updated_at
-			FROM student
-			WHERE student_id = $1
-		`
-		row := conn.QueryRow(context.Background(), query, studentID)
-
-		var enrollmentDate, createdAt, updatedAt time.Time
-		var graduationDate *time.Time
-
-		err = row.Scan(
-			&student.StudentID, &student.FacultyID, &student.DepartmentID, &student.TicketNumber, &student.FullName,
-			&enrollmentDate, &graduationDate, &student.CompletionStatus, &student.IsArchived, &createdAt, &updatedAt,
-		)
-		if err != nil {
-			if err == pgx.ErrNoRows {
-				http.Error(w, "Студент не найден", http.StatusNotFound)
-				return
-			}
-			http.Error(w, "Ошибка базы данных: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		// Преобразование дат
-		student.EnrollmentDate = enrollmentDate.Format("2006-01-02")
-		student.CreatedAt = createdAt.Format(time.RFC3339)
-		student.UpdatedAt = updatedAt.Format(time.RFC3339)
-		if graduationDate != nil {
-			formattedGraduationDate := graduationDate.Format("2006-01-02")
-			student.GraduationDate = &formattedGraduationDate
-		}
-
-		// Отправляем ответ в формате JSON
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(student)
+	err := conn.QueryRow(context.Background(), query, studentID).Scan(&count)
+	if err != nil {
+		return false, fmt.Errorf("ошибка при проверке существования студента: %v", err)
 	}
+
+	return count > 0, nil
 }
 
-type CreateStudentRequest struct {
-	FacultyID      string `json:"FacultyID"`
-	DepartmentID   string `json:"DepartmentID"`
-	TicketNumber   string `json:"TicketNumber"`
-	FullName       string `json:"FullName"`
-	EnrollmentDate string `json:"EnrollmentDate"`
-}
-
-func CreateStudent(conn *pgx.Conn) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		// Проверяем метод запроса
-		if r.Method != http.MethodPost {
-			http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
-			return
-		}
-
-		// Парсим тело запроса
-		var req CreateStudentRequest
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			http.Error(w, "Некорректный JSON: "+err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		// Проверяем обязательные поля
-		if req.FacultyID == "" || req.DepartmentID == "" || req.TicketNumber == "" || req.FullName == "" || req.EnrollmentDate == "" {
-			http.Error(w, "Все поля обязательны для заполнения", http.StatusBadRequest)
-			return
-		}
-
-		// Парсим UUID
-		facultyID, err := uuid.Parse(req.FacultyID)
-		if err != nil {
-			http.Error(w, "Некорректный UUID для faculty_id: "+err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		departmentID, err := uuid.Parse(req.DepartmentID)
-		if err != nil {
-			http.Error(w, "Некорректный UUID для department_id: "+err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		// Парсим дату
-		enrollmentDate, err := time.Parse("2006-01-02", req.EnrollmentDate)
-		if err != nil {
-			http.Error(w, "Некорректный формат даты (используйте YYYY-MM-DD): "+err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		// Проверяем, существует ли студент с таким номером студенческого
-		query := `SELECT 1 FROM student WHERE ticket_number = $1`
-		row := conn.QueryRow(context.Background(), query, req.TicketNumber)
-
-		var exists int
-		err = row.Scan(&exists)
-		if err == nil {
-			http.Error(w, "Студент с таким номером студенческого уже существует", http.StatusConflict)
-			return
-		}
-
-		// Добавляем студента в базу данных
-		insertQuery := `INSERT INTO student (student_id, faculty_id, department_id, ticket_number, full_name, enrollment_date, is_archived, created_at, updated_at)
-						VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
-
-		_, err = conn.Exec(context.Background(), insertQuery, uuid.New(), facultyID, departmentID, req.TicketNumber, req.FullName,
-			enrollmentDate, false, time.Now(), time.Now())
-
-		if err != nil {
-			log.Printf("Ошибка при добавлении студента: %v\n", err)
-			http.Error(w, "Ошибка при добавлении студента: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		// Успешный ответ
-		w.WriteHeader(http.StatusCreated)
-		fmt.Fprintf(w, "Студент '%s' успешно добавлен\n", req.FullName)
+func GetStudent(conn *pgx.Conn, studentID uuid.UUID) (map[string]interface{}, error) {
+	// Проверяем существование студента
+	exists, err := StudentExists(conn, studentID)
+	if err != nil {
+		return nil, fmt.Errorf("ошибка проверки существования студента: %w", err)
 	}
+	if !exists {
+		return nil, fmt.Errorf("студент с ID %s не найден", studentID)
+	}
+
+	// Запрос данных студента
+	query := `
+		SELECT student_id, faculty_id, department_id, ticket_number, full_name, enrollment_date, education_level,
+		       graduation_date, completion_status, is_archived, created_at, updated_at
+		FROM student WHERE student_id = $1
+	`
+
+	var student struct {
+		StudentID        uuid.UUID `json:"student_id"`
+		FacultyID        uuid.UUID `json:"faculty_id"`
+		DepartmentID     uuid.UUID `json:"department_id"`
+		TicketNumber     string    `json:"ticket_number"`
+		FullName         string    `json:"full_name"`
+		EnrollmentDate   string    `json:"enrollment_date"`
+		EducationLevel   string    `json:"education_level"`
+		GraduationDate   *string   `json:"graduation_date,omitempty"`
+		CompletionStatus *bool     `json:"completion_status,omitempty"`
+		IsArchived       bool      `json:"is_archived"`
+		CreatedAt        string    `json:"created_at"`
+		UpdatedAt        string    `json:"updated_at"`
+	}
+
+	err = conn.QueryRow(context.Background(), query, studentID).Scan(
+		&student.StudentID,
+		&student.FacultyID,
+		&student.DepartmentID,
+		&student.TicketNumber,
+		&student.FullName,
+		&student.EnrollmentDate,
+		&student.EducationLevel,
+		&student.GraduationDate,
+		&student.CompletionStatus,
+		&student.IsArchived,
+		&student.CreatedAt,
+		&student.UpdatedAt,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("ошибка извлечения студента: %w", err)
+	}
+
+	// Возвращаем результат в виде карты (для JSON)
+	result := map[string]interface{}{
+		"student_id":        student.StudentID,
+		"faculty_id":        student.FacultyID,
+		"department_id":     student.DepartmentID,
+		"ticket_number":     student.TicketNumber,
+		"full_name":         student.FullName,
+		"enrollment_date":   student.EnrollmentDate,
+		"education_level":   student.EducationLevel,
+		"graduation_date":   student.GraduationDate,
+		"completion_status": student.CompletionStatus,
+		"is_archived":       student.IsArchived,
+		"created_at":        student.CreatedAt,
+		"updated_at":        student.UpdatedAt,
+	}
+
+	return result, nil
 }
 
-type UpdateStudentRequest struct {
-	FullName         *string `json:"FullName,omitempty"`
-	FacultyID        *string `json:"FacultyID,omitempty"`
-	DepartmentID     *string `json:"DepartmentID,omitempty"`
-	EnrollmentDate   *string `json:"EnrollmentDate,omitempty"`
-	GraduationDate   *string `json:"GraduationDate,omitempty"`
-	CompletionStatus *bool   `json:"CompletionStatus,omitempty"`
-}
-
-func UpdateStudent(conn *pgx.Conn) http.HandlerFunc {
+func GetStudentHandler(conn *pgx.Conn) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPut {
-			http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
-			return
-		}
-
-		// Извлечение ID студента из параметров запроса
-		studentID := r.URL.Query().Get("student_id")
-		if studentID == "" {
+		// Извлекаем student_id из параметров запроса
+		studentIDStr := r.URL.Query().Get("student_id")
+		if studentIDStr == "" {
 			http.Error(w, "Не указан student_id", http.StatusBadRequest)
 			return
 		}
 
-		// Проверка валидности UUID
-		studentUUID, err := uuid.Parse(studentID)
+		studentID, err := uuid.Parse(studentIDStr)
 		if err != nil {
-			http.Error(w, "Некорректный UUID student_id: "+err.Error(), http.StatusBadRequest)
+			http.Error(w, "Некорректный UUID", http.StatusBadRequest)
 			return
 		}
 
-		// Парсинг тела запроса
-		var req UpdateStudentRequest
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			http.Error(w, "Некорректный JSON: "+err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		// Проверка, существует ли студент
-		var isArchived bool
-		err = conn.QueryRow(context.Background(), `SELECT is_archived FROM student WHERE student_id = $1`, studentUUID).Scan(&isArchived)
-		if err == pgx.ErrNoRows {
-			http.Error(w, "Студент не найден", http.StatusNotFound)
-			return
-		} else if err != nil {
-			http.Error(w, "Ошибка при проверке существования студента: "+err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		// Проверка архивного статуса
-		if isArchived {
-			http.Error(w, "Нельзя обновлять данные архивного студента", http.StatusBadRequest)
-			return
-		}
-
-		// Построение запроса для обновления
-		updateQuery := `UPDATE student SET `
-		params := []interface{}{}
-		paramIndex := 1
-
-		if req.FullName != nil {
-			updateQuery += `full_name = $` + fmt.Sprint(paramIndex) + `, `
-			params = append(params, *req.FullName)
-			paramIndex++
-		}
-		if req.FacultyID != nil {
-			updateQuery += `faculty_id = $` + fmt.Sprint(paramIndex) + `, `
-			params = append(params, *req.FacultyID)
-			paramIndex++
-		}
-		if req.DepartmentID != nil {
-			updateQuery += `department_id = $` + fmt.Sprint(paramIndex) + `, `
-			params = append(params, *req.DepartmentID)
-			paramIndex++
-		}
-		if req.EnrollmentDate != nil {
-			updateQuery += `enrollment_date = $` + fmt.Sprint(paramIndex) + `, `
-			params = append(params, *req.EnrollmentDate)
-			paramIndex++
-		}
-		if req.GraduationDate != nil {
-			updateQuery += `graduation_date = $` + fmt.Sprint(paramIndex) + `, `
-			params = append(params, *req.GraduationDate)
-			paramIndex++
-		}
-		if req.CompletionStatus != nil {
-			updateQuery += `completion_status = $` + fmt.Sprint(paramIndex) + `, `
-			params = append(params, *req.CompletionStatus)
-			paramIndex++
-		}
-
-		// Удаляем последнюю запятую и добавляем WHERE
-		updateQuery = updateQuery[:len(updateQuery)-2] + ` WHERE student_id = $` + fmt.Sprint(paramIndex)
-		params = append(params, studentUUID)
-
-		// Выполнение запроса
-		_, err = conn.Exec(context.Background(), updateQuery, params...)
+		// Получаем данные студента из базы
+		studentData, err := GetStudent(conn, studentID)
 		if err != nil {
-			http.Error(w, "Ошибка при обновлении данных студента: "+err.Error(), http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
 
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "Студент с ID %s успешно обновлен\n", studentUUID)
+		// Возвращаем данные студента в формате JSON
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(studentData); err != nil {
+			http.Error(w, "Ошибка кодирования JSON", http.StatusInternalServerError)
+		}
 	}
+}
+
+func CreateStudent(conn *pgx.Conn, facultyID, departmentID uuid.UUID, ticketNumber, fullName, educationLevel string, enrollmentDate time.Time) error {
+	// Проверяем, существует ли студент с данным номером студенческого билета
+	if exists, err := StudentExists(conn, ticketNumber); err != nil {
+		return fmt.Errorf("ошибка проверки существования студента: %v", err)
+	} else if exists {
+		return fmt.Errorf("студент с номером студенческого '%s' уже существует", ticketNumber)
+	}
+
+	// SQL-запрос на создание студента
+	query := `
+		INSERT INTO student (
+			student_id, faculty_id, department_id, ticket_number, 
+			full_name, enrollment_date, education_level, 
+			is_archived, created_at, updated_at
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
+
+	_, err := conn.Exec(
+		context.Background(),
+		query,
+		uuid.New(),     // student_id
+		facultyID,      // faculty_id
+		departmentID,   // department_id
+		ticketNumber,   // ticket_number
+		fullName,       // full_name
+		enrollmentDate, // enrollment_date
+		educationLevel, // education_level
+		false,          // is_archived
+		time.Now(),     // created_at
+		time.Now(),     // updated_at
+	)
+
+	if err != nil {
+		return fmt.Errorf("ошибка при добавлении студента: %v", err)
+	}
+
+	return nil
+}
+
+func CreateStudentHandler(w http.ResponseWriter, r *http.Request) {
+	// Парсим тело запроса
+	var req struct {
+		FacultyID      string `json:"FacultyID"`
+		DepartmentID   string `json:"DepartmentID"`
+		TicketNumber   string `json:"TicketNumber"`
+		FullName       string `json:"FullName"`
+		EducationLevel string `json:"EducationLevel"`
+		EnrollmentDate string `json:"EnrollmentDate"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Неверный формат данных", http.StatusBadRequest)
+		return
+	}
+
+	// Парсим UUID и дату
+	facultyID, err := uuid.Parse(req.FacultyID)
+	if err != nil {
+		http.Error(w, "Неверный UUID факультета", http.StatusBadRequest)
+		return
+	}
+
+	departmentID, err := uuid.Parse(req.DepartmentID)
+	if err != nil {
+		http.Error(w, "Неверный UUID кафедры", http.StatusBadRequest)
+		return
+	}
+
+	enrollmentDate, err := time.Parse("2006-01-02", req.EnrollmentDate)
+	if err != nil {
+		http.Error(w, "Неверный формат даты", http.StatusBadRequest)
+		return
+	}
+
+	// Вызов функции для создания студента
+	if err := CreateStudent(conn, facultyID, departmentID, req.TicketNumber, req.FullName, req.EducationLevel, enrollmentDate); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	fmt.Fprintf(w, "Студент '%s' успешно создан\n", req.FullName)
+}
+
+func UpdateStudent(conn *pgx.Conn, studentID uuid.UUID, facultyID *uuid.UUID, departmentID *uuid.UUID,
+	fullName *string, enrollmentDate *time.Time, educationLevel *string, graduationDate *time.Time,
+	completionStatus *bool) error {
+
+	// Проверяем, существует ли студент
+	exists, err := StudentExists(conn, studentID)
+	if err != nil {
+		return fmt.Errorf("ошибка при проверке существования студента: %v", err)
+	}
+	if !exists {
+		return fmt.Errorf("студент с ID %s не найден", studentID)
+	}
+
+	// Проверяем, не архивный ли студент
+	var isArchived bool
+	err = conn.QueryRow(context.Background(), `SELECT is_archived FROM student WHERE student_id = $1`, studentID).Scan(&isArchived)
+	if err != nil {
+		return fmt.Errorf("ошибка при проверке архивности студента: %v", err)
+	}
+	if isArchived {
+		return fmt.Errorf("нельзя изменять данные архивного студента")
+	}
+
+	// Формируем запрос на обновление
+	query := `UPDATE student SET `
+	params := []interface{}{}
+	counter := 1
+
+	if facultyID != nil {
+		query += fmt.Sprintf("faculty_id = $%d, ", counter)
+		params = append(params, *facultyID)
+		counter++
+	}
+	if departmentID != nil {
+		query += fmt.Sprintf("department_id = $%d, ", counter)
+		params = append(params, *departmentID)
+		counter++
+	}
+	if fullName != nil {
+		query += fmt.Sprintf("full_name = $%d, ", counter)
+		params = append(params, *fullName)
+		counter++
+	}
+	if enrollmentDate != nil {
+		query += fmt.Sprintf("enrollment_date = $%d, ", counter)
+		params = append(params, *enrollmentDate)
+		counter++
+	}
+	if educationLevel != nil {
+		query += fmt.Sprintf("education_level = $%d, ", counter)
+		params = append(params, *educationLevel)
+		counter++
+	}
+	if graduationDate != nil {
+		query += fmt.Sprintf("graduation_date = $%d, ", counter)
+		params = append(params, *graduationDate)
+		counter++
+	}
+	if completionStatus != nil {
+		query += fmt.Sprintf("completion_status = $%d, ", counter)
+		params = append(params, *completionStatus)
+		counter++
+	}
+
+	// Добавляем обновление поля updated_at
+	query += fmt.Sprintf("updated_at = $%d, ", counter)
+	params = append(params, time.Now())
+	counter++
+
+	// Удаляем последнюю запятую и добавляем WHERE
+	query = query[:len(query)-2] + fmt.Sprintf(" WHERE student_id = $%d", counter)
+	params = append(params, studentID)
+
+	// Выполняем запрос
+	_, err = conn.Exec(context.Background(), query, params...)
+	if err != nil {
+		return fmt.Errorf("ошибка при обновлении студента: %v", err)
+	}
+
+	return nil
+}
+
+func UpdateStudentHandler(conn *pgx.Conn) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Получаем ID студента из параметров
+		vars := mux.Vars(r)
+		studentID, err := uuid.Parse(vars["id"])
+		if err != nil {
+			http.Error(w, "Неверный формат ID студента", http.StatusBadRequest)
+			return
+		}
+
+		// Парсим тело запроса
+		var updateData struct {
+			FacultyID        *uuid.UUID `json:"faculty_id"`
+			DepartmentID     *uuid.UUID `json:"department_id"`
+			FullName         *string    `json:"full_name"`
+			EnrollmentDate   *string    `json:"enrollment_date"`
+			EducationLevel   *string    `json:"education_level"`
+			GraduationDate   *string    `json:"graduation_date"`
+			CompletionStatus *bool      `json:"completion_status"`
+		}
+
+		if err := json.NewDecoder(r.Body).Decode(&updateData); err != nil {
+			http.Error(w, "Неверный формат тела запроса", http.StatusBadRequest)
+			return
+		}
+
+		// Конвертируем даты, если они были переданы
+		var enrollmentDate, graduationDate *time.Time
+		if updateData.EnrollmentDate != nil {
+			date, err := time.Parse("2006-01-02", *updateData.EnrollmentDate)
+			if err != nil {
+				http.Error(w, "Неверный формат даты для enrollment_date (ожидается YYYY-MM-DD)", http.StatusBadRequest)
+				return
+			}
+			enrollmentDate = &date
+		}
+		if updateData.GraduationDate != nil {
+			date, err := time.Parse("2006-01-02", *updateData.GraduationDate)
+			if err != nil {
+				http.Error(w, "Неверный формат даты для graduation_date (ожидается YYYY-MM-DD)", http.StatusBadRequest)
+				return
+			}
+			graduationDate = &date
+		}
+
+		// Вызываем функцию обновления данных в БД
+		err = UpdateStudent(conn, studentID, updateData.FacultyID, updateData.DepartmentID, updateData.FullName,
+			enrollmentDate, updateData.EducationLevel, graduationDate, updateData.CompletionStatus)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Успешный ответ
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintln(w, "Студент успешно обновлён")
+	}
+}
+
+func DeleteStudent(conn *pgx.Conn, studentID uuid.UUID) error {
+	// Проверяем, существует ли студент
+	exists, err := StudentExists(conn, studentID.String())
+	if err != nil {
+		return fmt.Errorf("ошибка проверки существования студента: %v", err)
+	}
+	if !exists {
+		return fmt.Errorf("студент с ID '%s' не найден", studentID)
+	}
+
+	// Удаляем запись из базы данных
+	query := `DELETE FROM student WHERE student_id = $1`
+	_, err = conn.Exec(context.Background(), query, studentID)
+	if err != nil {
+		return fmt.Errorf("ошибка удаления студента: %v", err)
+	}
+
+	return nil
+}
+
+func DeleteStudentHandler(w http.ResponseWriter, r *http.Request) {
+	// Разбираем ID студента из маршрута
+	vars := mux.Vars(r)
+	studentIDStr, ok := vars["id"]
+	if !ok {
+		http.Error(w, "ID студента не предоставлен", http.StatusBadRequest)
+		return
+	}
+
+	// Конвертируем ID из строки в UUID
+	studentID, err := uuid.Parse(studentIDStr)
+	if err != nil {
+		http.Error(w, "Некорректный формат ID студента", http.StatusBadRequest)
+		return
+	}
+
+	// Удаляем студента через функцию взаимодействия с базой данных
+	err = DeleteStudent(conn, studentID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Ошибка при удалении студента: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Отправляем успешный ответ
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "Студент с ID %s успешно удален", studentID)
+}
+
+func ArchiveStudent(conn *pgx.Conn, studentID uuid.UUID) error {
+	// Проверяем, существует ли студент
+	exists, err := StudentExists(conn, studentID.String())
+	if err != nil {
+		return fmt.Errorf("ошибка проверки существования студента: %v", err)
+	}
+	if !exists {
+		return fmt.Errorf("студент с ID '%s' не найден", studentID)
+	}
+
+	// Проверяем, завершил ли студент обучение
+	query := `SELECT completion_status, graduation_date FROM student WHERE student_id = $1`
+	var completionStatus *bool
+	var graduationDate *time.Time
+	err = conn.QueryRow(context.Background(), query, studentID).Scan(&completionStatus, &graduationDate)
+	if err != nil {
+		return fmt.Errorf("ошибка получения данных о студенте: %v", err)
+	}
+
+	if completionStatus == nil || *completionStatus == false {
+		return fmt.Errorf("студент не завершил обучение, архивация невозможна")
+	}
+
+	// Архивируем студента, обновляем флаг is_archived
+	updateQuery := `UPDATE student SET is_archived = true, updated_at = $2 WHERE student_id = $1`
+	_, err = conn.Exec(context.Background(), updateQuery, studentID, time.Now())
+	if err != nil {
+		return fmt.Errorf("ошибка архивации студента: %v", err)
+	}
+
+	return nil
+}
+
+func ArchiveStudentHandler(w http.ResponseWriter, r *http.Request) {
+	// Извлекаем ID студента из маршрута
+	vars := mux.Vars(r)
+	studentIDStr, ok := vars["id"]
+	if !ok {
+		http.Error(w, "ID студента не предоставлен", http.StatusBadRequest)
+		return
+	}
+
+	// Конвертируем ID из строки в UUID
+	studentID, err := uuid.Parse(studentIDStr)
+	if err != nil {
+		http.Error(w, "Некорректный формат ID студента", http.StatusBadRequest)
+		return
+	}
+
+	// Архивируем студента через функцию взаимодействия с базой данных
+	err = ArchiveStudent(conn, studentID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Ошибка при архивации студента: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Успешный ответ
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "Студент с ID %s успешно архивирован", studentID)
 }
