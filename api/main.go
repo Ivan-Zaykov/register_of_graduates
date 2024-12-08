@@ -1,15 +1,12 @@
 package main
 
 import (
-	"api/controller"
+	"api/routes"
 	"context"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 
-	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
 	pgx "github.com/jackc/pgx/v5"
 	"github.com/joho/godotenv"
 )
@@ -37,14 +34,5 @@ func main() {
 
 	fmt.Println("Успешное подключение к базе данных")
 
-	log.Print("Listening 5000")
-
-	r := mux.NewRouter()
-	r.HandleFunc("/api/student/{id}", controller.GetStudentHandler(conn)).Methods(http.MethodGet)
-	r.HandleFunc("/api/student", controller.CreateStudentHandler(conn)).Methods(http.MethodPost)
-	r.HandleFunc("/api/student/{id}", controller.UpdateStudentHandler(conn)).Methods(http.MethodPut)
-	r.HandleFunc("/api/student/{id}", controller.DeleteStudentHandler(conn)).Methods(http.MethodDelete)
-	//r.HandleFunc("/api/students/archive", ArchiveStudentHandler(conn)).Methods(http.MethodPost)
-
-	log.Fatal(http.ListenAndServe(":5000", handlers.LoggingHandler(os.Stdout, r)))
+	routes.ConfigureRouter(conn)
 }
