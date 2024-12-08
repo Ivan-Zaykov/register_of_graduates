@@ -43,7 +43,7 @@ CREATE TABLE Coursework (
                             superviser_id UUID,
                             coursework_title VARCHAR(200),
                             coursework_grade INT,
-                            FOREIGN KEY (student_id) REFERENCES Student (student_id),
+                            FOREIGN KEY (student_id) REFERENCES Student (student_id) ON DELETE CASCADE,
                             FOREIGN KEY (superviser_id) REFERENCES Scientific_Supervisor (superviser_id)
 );
 
@@ -53,6 +53,6 @@ CREATE TABLE Diploma (
                          superviser_id UUID,
                          diploma_title VARCHAR(200),
                          diploma_grade INT,
-                         FOREIGN KEY (student_id) REFERENCES Student (student_id),
+                         FOREIGN KEY (student_id) REFERENCES Student (student_id) ON DELETE CASCADE,
                          FOREIGN KEY (superviser_id) REFERENCES Scientific_Supervisor (superviser_id)
 );

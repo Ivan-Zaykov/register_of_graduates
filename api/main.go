@@ -40,13 +40,10 @@ func main() {
 	log.Print("Listening 5000")
 
 	r := mux.NewRouter()
-	r.HandleFunc("/api/student/{id}", controller.GetStudentHandler(conn)).Methods("GET")
-	r.HandleFunc("/api/student", controller.CreateStudentHandler(conn)).Methods("POST")
-	r.HandleFunc("/api/student/{id}", controller.UpdateStudentHandler(conn)).Methods("PUT")
-	r.HandleFunc("/api/student", controller.DeleteStudentHandler(conn)).Methods("DEL")
-	//r.HandleFunc("/api/student", controller.ArchiveStudentHandler(conn)).Methods("PUT")
-	//r.HandleFunc("/api/students", UpdateStudentHandler(conn)).Methods(http.MethodPut)
-	//r.HandleFunc("/api/students", DeleteStudentHandler(conn)).Methods(http.MethodDelete)
+	r.HandleFunc("/api/student/{id}", controller.GetStudentHandler(conn)).Methods(http.MethodGet)
+	r.HandleFunc("/api/student", controller.CreateStudentHandler(conn)).Methods(http.MethodPost)
+	r.HandleFunc("/api/student/{id}", controller.UpdateStudentHandler(conn)).Methods(http.MethodPut)
+	r.HandleFunc("/api/student/{id}", controller.DeleteStudentHandler(conn)).Methods(http.MethodDelete)
 	//r.HandleFunc("/api/students/archive", ArchiveStudentHandler(conn)).Methods(http.MethodPost)
 
 	log.Fatal(http.ListenAndServe(":5000", handlers.LoggingHandler(os.Stdout, r)))
