@@ -1,3 +1,6 @@
 .idea
-react/.vite
+# env file
+.env
 pkg
+api/.config
+react/.vite
