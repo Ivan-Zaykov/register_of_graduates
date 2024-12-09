@@ -1,34 +1,4 @@
-import student_272727 from "./pictures/272727.png";
-import student_424242 from "./pictures/424242.jpg";
-import student_324455 from "./pictures/324455.jpg";
 
-
-export const facultsData =    [
-  {
-    id: "649c2a64-88c3-4b61-b8e7-f25f09693d2",
-    name: "Математический",
-    dean: "Самый Лучший Мужчина",
-    deputyDean: "Самая Лучшая Женщина",
-  },
-  {
-    id: "5e73359f-2538-4f6b-9d87-a4ecdd0048f7",
-    name: "Исторический",
-    dean: "Владимир Ильич Ленин",
-    deputyDean: "Иосиф Виссарионович Сталин",
-  },
-  {
-    id: "e9930668-35df-482a-b773-b947481cac46",
-    name: "Информационно-вычислительных технологий",
-    dean: "Билли Херрингтон",
-    deputyDean: "Ван Даркхолм",
-  },
-  {
-    id: "3dddf576-c333-4856-906c-03ffe86fafb9",
-    name: "Юридический",
-    dean: "Ещё И Ректор",
-    deputyDean: "Ноль Идей Господа",
-  },
-];
 
 export const departsData =   [
   {
@@ -58,5 +28,5 @@ export const departsData =   [
 ]
 
 
-export default {facultsData, departsData};
+export default {departsData};
 // export default facultsData;

@@ -1,20 +1,43 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import "./FacultetsPage.css";
 import Header from "./Header";
 import { ReactComponent as StarIcon } from "./pictures/star_icon.svg";
 import { ReactComponent as SearchIcon } from "./pictures/search_icon.svg";
-import { facultsData } from "./AllData";
+
 
 const FacultetsPage = () => {
-  const [data, setData] = useState(facultsData);
+  const [faculties, setFaculties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // Функция для получения данных с API
+    const fetchFaculties = async () => {
+      try {
+        const response = await fetch("http://localhost/api/faculties");
+        if (!response.ok) {
+          throw new Error(`Ошибка HTTP: ${response.status}`);
+        }
+        const data = await response.json();
+        setFaculties(data); // Устанавливаем полученные данные
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchFaculties(); // Вызываем функцию
+  }, []); // Пустой массив зависимостей означает, что эффект сработает один раз при монтировании
+
 
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",
   });
 
-  const sortedData = [...data].sort((a, b) => {
+  const sortedData = [...faculties].sort((a, b) => {
     if (sortConfig.key) {
       const order = sortConfig.direction === "ascending" ? 1 : -1;
       return a[sortConfig.key] > b[sortConfig.key] ? order : -order;
@@ -42,6 +65,13 @@ const FacultetsPage = () => {
     event.preventDefault();
     console.log("Поиск по факультетам:", searchFacult); // cохраняем введенную строку
   };
+  if (loading) {
+    return <div>Загрузка...</div>;
+  }
+
+  if (error) {
+    return <div>Ошибка: {error}</div>;
+  }
 
   return (
     <>
@@ -122,11 +152,11 @@ const FacultetsPage = () => {
             </thead>
             <tbody className="facult_tbody">
               {sortedData.map((faculty) => (
-                <tr className="facult_tr" key={faculty.id}>
-                  <td className="facult_td">{faculty.id}</td>
-                  <td className="facult_td">{faculty.name}</td>
-                  <td className="facult_td">{faculty.dean}</td>
-                  <td className="facult_td">{faculty.deputyDean}</td>
+                <tr className="facult_tr" key={faculty.faculty_id}>
+                  <td className="facult_td">{faculty.faculty_id}</td>
+                  <td className="facult_td">{faculty.faculty_name}</td>
+                  <td className="facult_td">{faculty.faculty_dean}</td>
+                  <td className="facult_td">{faculty.faculty_substitute}</td>
                 </tr>
               ))}
               {/* <tr className="facult_tr">
