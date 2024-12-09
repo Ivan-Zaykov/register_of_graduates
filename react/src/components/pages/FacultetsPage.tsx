@@ -37,7 +37,7 @@ const FacultetsPage = () => {
     direction: "ascending",
   });
 
-  const sortedData = [...faculties].sort((a, b) => {
+  const sortedData = [...data].sort((a, b) => {
     if (sortConfig.key) {
       const order = sortConfig.direction === "ascending" ? 1 : -1;
       return a[sortConfig.key] > b[sortConfig.key] ? order : -order;
