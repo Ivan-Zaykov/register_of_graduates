@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -11,6 +12,23 @@ import (
 	"github.com/gorilla/mux"
 	pgx "github.com/jackc/pgx/v5"
 )
+
+type Student struct {
+	StudentID        uuid.UUID  `json:"student_id"`
+	FacultyID        uuid.UUID  `json:"faculty_id"`
+	FacultyName      string     `json:"faculty_name"`
+	DepartmentID     uuid.UUID  `json:"department_id"`
+	DepartmentName   string     `json:"department_name"`
+	TicketNumber     string     `json:"ticket_number"`
+	FullName         string     `json:"full_name"`
+	EnrollmentDate   *time.Time `json:"enrollment_date"`
+	EducationLevel   string     `json:"education_level"`
+	GraduationDate   *time.Time `json:"graduation_date,omitempty"`
+	CompletionStatus *bool      `json:"completion_status,omitempty"`
+	IsArchived       bool       `json:"is_archived"`
+	CreatedAt        *time.Time `json:"created_at"`
+	UpdatedAt        *time.Time `json:"updated_at"`
+}
 
 func StudentExistsByTicketNumber(conn *pgx.Conn, ticketNumber string) (bool, error) {
 	query := "SELECT COUNT(*) FROM student WHERE ticket_number = $1"
@@ -53,34 +71,20 @@ func GetStudent(conn *pgx.Conn, studentID uuid.UUID) (map[string]interface{}, er
 		FROM student WHERE student_id = $1
 	`
 
-	var student struct {
-		StudentID        uuid.UUID  `json:"student_id"`
-		FacultyID        uuid.UUID  `json:"faculty_id"`
-		DepartmentID     uuid.UUID  `json:"department_id"`
-		TicketNumber     string     `json:"ticket_number"`
-		FullName         string     `json:"full_name"`
-		EnrollmentDate   *time.Time `json:"enrollment_date"`
-		EducationLevel   string     `json:"education_level"`
-		GraduationDate   *time.Time `json:"graduation_date,omitempty"`
-		CompletionStatus *bool      `json:"completion_status,omitempty"`
-		IsArchived       bool       `json:"is_archived"`
-		CreatedAt        *time.Time `json:"created_at"`
-		UpdatedAt        *time.Time `json:"updated_at"`
-	}
-
+	var Student Student
 	err = conn.QueryRow(context.Background(), query, studentID).Scan(
-		&student.StudentID,
-		&student.FacultyID,
-		&student.DepartmentID,
-		&student.TicketNumber,
-		&student.FullName,
-		&student.EnrollmentDate,
-		&student.EducationLevel,
-		&student.GraduationDate,
-		&student.CompletionStatus,
-		&student.IsArchived,
-		&student.CreatedAt,
-		&student.UpdatedAt,
+		&Student.StudentID,
+		&Student.FacultyID,
+		&Student.DepartmentID,
+		&Student.TicketNumber,
+		&Student.FullName,
+		&Student.EnrollmentDate,
+		&Student.EducationLevel,
+		&Student.GraduationDate,
+		&Student.CompletionStatus,
+		&Student.IsArchived,
+		&Student.CreatedAt,
+		&Student.UpdatedAt,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка извлечения студента: %w", err)
@@ -88,18 +92,18 @@ func GetStudent(conn *pgx.Conn, studentID uuid.UUID) (map[string]interface{}, er
 
 	// Возвращаем результат в виде карты (для JSON)
 	result := map[string]interface{}{
-		"student_id":        student.StudentID,
-		"faculty_id":        student.FacultyID,
-		"department_id":     student.DepartmentID,
-		"ticket_number":     student.TicketNumber,
-		"full_name":         student.FullName,
-		"enrollment_date":   student.EnrollmentDate,
-		"education_level":   student.EducationLevel,
-		"graduation_date":   student.GraduationDate,
-		"completion_status": student.CompletionStatus,
-		"is_archived":       student.IsArchived,
-		"created_at":        student.CreatedAt,
-		"updated_at":        student.UpdatedAt,
+		"student_id":        Student.StudentID,
+		"faculty_id":        Student.FacultyID,
+		"department_id":     Student.DepartmentID,
+		"ticket_number":     Student.TicketNumber,
+		"full_name":         Student.FullName,
+		"enrollment_date":   Student.EnrollmentDate,
+		"education_level":   Student.EducationLevel,
+		"graduation_date":   Student.GraduationDate,
+		"completion_status": Student.CompletionStatus,
+		"is_archived":       Student.IsArchived,
+		"created_at":        Student.CreatedAt,
+		"updated_at":        Student.UpdatedAt,
 	}
 
 	return result, nil
@@ -465,5 +469,69 @@ func ArchiveStudentHandler(conn *pgx.Conn) http.HandlerFunc {
 		// Успешный ответ
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, "Студент с ID %s успешно архивирован", studentID)
+	}
+}
+
+func GetAllStudentsHandler(conn *pgx.Conn) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.Background()
+		// SQL-запрос
+		query := `
+        SELECT
+            s.student_id,
+            f.faculty_id,
+            s.ticket_number,
+            s.full_name,
+            s.education_level,
+            f.faculty_name,
+            d.department_id,
+            d.department_name,
+            s.is_archived
+        FROM student s
+        LEFT JOIN faculty f ON s.faculty_id = f.faculty_id
+        LEFT JOIN departments d ON s.department_id = d.department_id;
+    `
+
+		rows, err := conn.Query(ctx, query)
+		if err != nil {
+			http.Error(w, "Failed to fetch students", http.StatusInternalServerError)
+			log.Println("Query error:", err)
+			return
+		}
+		defer rows.Close()
+
+		// Считываем данные из запроса
+		var students []Student
+		for rows.Next() {
+			var student Student
+			err := rows.Scan(
+				&student.StudentID,
+				&student.FacultyID,
+				&student.TicketNumber,
+				&student.FullName,
+				&student.EducationLevel,
+				&student.FacultyName,
+				&student.DepartmentID,
+				&student.DepartmentName,
+				&student.IsArchived,
+			)
+			if err != nil {
+				http.Error(w, "Error scanning rows", http.StatusInternalServerError)
+				log.Println("Row scan error:", err)
+				return
+			}
+			students = append(students, student)
+		}
+
+		// Проверяем ошибки после обработки rows
+		if err := rows.Err(); err != nil {
+			http.Error(w, "Error reading rows", http.StatusInternalServerError)
+			log.Println("Rows error:", err)
+			return
+		}
+
+		// Устанавливаем заголовок и отправляем JSON-ответ
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(students)
 	}
 }
