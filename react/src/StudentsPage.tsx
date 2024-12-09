@@ -1,55 +1,45 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { ReactComponent as StarIcon } from "./pictures/star_icon.svg";
 import { ReactComponent as SearchIcon } from "./pictures/search_icon.svg";
 import { ReactComponent as AddStudentIcon } from "./pictures/add_student_icon.svg";
 
 import "./StudentsPage.css";
-import { studentsData } from "./AllData";
 
 const StudentsPage = () => {
-  const [data, setData] = useState(studentsData);
-
-  //   {
-  //     id: "27272727",
-  //     name: "Дело В Шляпе",
-  //     level: "Кошачья",
-  //     faculty: "Шляпниковый",
-  //     department: "Винный сад",
-  //     archive: 0,
-  //   },
-  //   {
-  //     id: "69696969",
-  //     name: "Илон Рив Маск",
-  //     level: "Магистратура",
-  //     faculty: "Омереканский",
-  //     department: "Теслоракетостроение",
-  //     archive: 0,
-  //   },
-  //   {
-  //     id: "42424242",
-  //     name: "Патрик Глейдсон Бейтман",
-  //     level: "Бакалавриат",
-  //     faculty: "Сигмовый",
-  //     department: "Убиватбубивать",
-  //     archive: 1,
-  //   },
-  //   {
-  //     id: "22822822",
-  //     name: "Тайлер Дёрден",
-  //     level: "Бакалавриат",
-  //     faculty: "Бойцовский",
-  //     department: "Воображаемая",
-  //     archive: 1,
-  //   },
-  // ]);
+  const [students, setStudents] = useState([]); // Состояние для хранения данных студентов
+  const [isLoading, setIsLoading] = useState(true); // Состояние загрузки
+  const [error, setError] = useState(null); // Состояние для ошибок
 
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",
   });
 
-  const sortedData = [...data].sort((a, b) => {
+  const [searchStudent, setSearchStudent] = useState("");
+
+
+  useEffect(() => {
+    // Функция для получения данных
+    const fetchStudents = async () => {
+      try {
+        const response = await fetch("/api/students"); // Запрос к API
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json(); // Парсим JSON
+        setStudents(data); // Сохраняем данные в состояние
+        setIsLoading(false); // Отключаем индикатор загрузки
+      } catch (err) {
+        setError(err.message); // Сохраняем сообщение об ошибке
+        setIsLoading(false);
+      }
+    };
+
+    fetchStudents(); // Вызываем функцию при монтировании компонента
+  }, []);
+
+  const sortedData = [...students].sort((a, b) => {
     if (sortConfig.key) {
       const order = sortConfig.direction === "ascending" ? 1 : -1;
       return a[sortConfig.key] > b[sortConfig.key] ? order : -order;
@@ -65,9 +55,9 @@ const StudentsPage = () => {
     setSortConfig({ key, direction });
   };
 
-  //search field
-
-  const [searchStudent, setSearchStudent] = useState(""); //строка ввода
+  // Отображение данных
+  if (isLoading) return <div>Загрузка...</div>;
+  if (error) return <div>Ошибка: {error}</div>;
 
   const handleSearchStudentChange = (event) => {
     setSearchStudent(event.target.value); // обновляем ввод
@@ -145,58 +135,58 @@ const StudentsPage = () => {
           <table className="student_table">
             <thead className="student_thead">
               <tr className="student_tr">
-                <th className="student_th" onClick={() => requestSort("id")}>
+                <th className="student_th" onClick={() => requestSort("ticket_number")}>
                   Номер студенческого
                 </th>
-                <th className="student_th" onClick={() => requestSort("name")}>
+                <th className="student_th" onClick={() => requestSort("full_name")}>
                   ФИО
                 </th>
-                <th className="student_th" onClick={() => requestSort("level")}>
+                <th className="student_th" onClick={() => requestSort("education_level")}>
                   Ступень обучения
                 </th>
                 <th
                   className="student_th"
-                  onClick={() => requestSort("faculty")}>
+                  onClick={() => requestSort("faculty_name")}>
                   Факультет
                 </th>
                 <th
                   className="student_th"
-                  onClick={() => requestSort("department")}>
+                  onClick={() => requestSort("department_name")}>
                   Кафедра
                 </th>
                 <th
                   className="student_th"
-                  onClick={() => requestSort("archive")}>
+                  onClick={() => requestSort("is_archived")}>
                   Архив
                 </th>
               </tr>
             </thead>
             <tbody className="student_tbody">
               {sortedData.map((student) => (
-                <tr className="student_tr" key={student.id}>
+                <tr className="student_tr" key={student.student_id}>
                   <td className="student_td">
                     {/* <Link to={`/students/${student.id}`}>{student.id}</Link> */}
                     <a
-                      href={`/students/${student.studentId}`}
+                      href={`/student/${student.student_id}`}
                       // target="_blank"
                     >
-                      {student.studentId}
+                      {student.ticket_number}
                     </a>
                   </td>
                   <td className="student_td">
                     {/* <Link to={`/students/${student.id}`}>{student.name}</Link> */}
                     <a
-                      href={`/students/${student.studentId}`}
+                      href={`/student/${student.studentId}`}
                       // target="_blank"
                     >
-                      {student.name}
+                      {student.full_name}
                     </a>
                   </td>
-                  <td className="student_td">{student.level}</td>
-                  <td className="student_td">{student.faculty}</td>
-                  <td className="student_td">{student.department}</td>
+                  <td className="student_td">{student.education_level}</td>
+                  <td className="student_td">{student.faculty_name}</td>
+                  <td className="student_td">{student.department_name}</td>
                   <td className="student_td">
-                    {student.archive === 1 ? "Да" : "Нет"}
+                    {student.is_archived === 1 ? "Да" : "Нет"}
                   </td>
                 </tr>
               ))}
