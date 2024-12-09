@@ -1,0 +1,49 @@
+/* CustomAlert.css */
+.custom-alert {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #D3A2A1;
+    padding: 15px;
+    font-size: 25px;
+    font-weight: bold;
+    color: black;
+    border-radius: 30px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    align-items: center;
+    /* width: 300px; */
+    width: 500px;
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  .alert-content {
+    text-align: center;
+  }
+    
+  .alert-content p {
+    margin: 0 auto;
+    text-align: center;
+
+  }
+  
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: inherit;
+    cursor: pointer;
+  }
+  
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+  

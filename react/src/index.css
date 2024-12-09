@@ -1,8 +1,230 @@
-.wrapper {
-  padding-top: 2.85714286em;
-  min-height: 100vh;
+body {
+  background-color: #E3E6E2;
+  font-family: 'Cormorant Infant', serif;
+  margin: auto;
 }
 
-a {
-  text-decoration: underline;
+
+.student_not_found {
+  margin: 30px 60px;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* --------------- Шапка ---------------*/
+
+.header {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background-color: #E3E6E2; 
+  padding: 40px 100px 25px 100px; 
+  /* border: 1px solid red; */
+  /* margin: 0 50px; */
+}
+
+.nav-link {
+  font-size: 2em; 
+  text-decoration: none;
+  color: black;
+  font-family: 'Cormorant Infant', serif;
+
+}
+
+.nav-link.active {
+  color: #AE1010; 
+  font-weight: bold;
+}
+
+.nav-link:hover {
+  text-decoration: none;
+  color: #AE1010; 
+}
+
+
+/* --------------- Содержимое "Главная" ---------------*/
+
+
+.main_block {
+  /* border: 1px solid blue; */
+  display: flex;
+  margin-top: 25px;
+}
+
+
+.main_pict {
+  width: 42%;
+}
+
+.project_students_block {
+  /* border: 1px solid limegreen; */
+  text-align: center;
+  padding: 20px 50px;
+  /* margin: 0 auto; */
+  /* width: 100%; */
+}
+
+.our_team {
+  font-size: 2.5em; 
+  color: #AE1010; 
+  /* font-weight: bold; */
+  margin: 20px 0;
+}
+
+.team_list {
+  /* border: 1px solid red; */
+  font-size: 2em; 
+  padding-left: 30px;
+}
+
+.list_item {
+  /* border: 1px solid purple; */
+  padding: 10px;
+  text-align: left;
+}
+
+/* --------------- Строка в шапке ---------------*/
+
+
+
+.header_line {
+  /* border: 1px solid red; */
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 25px;
+  font-size: 1.2rem;
+}
+
+.student_profile_header_line {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 60px;
+  width: calc(800px + 418px + 40px);
+  font-size: 1.2rem;
+}
+
+
+.path_line {
+  /* border: 1px solid blue; */
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.path_line_text, .path_line_add_student_text {
+  /* border: 1px solid lime; */
+  color: inherit;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  text-decoration: none;
+}
+
+.path_line_add_student_text:hover {
+  cursor: pointer;
+}
+
+.path_line_text:hover {
+  /* border: 1px solid lime; */
+  text-decoration: none;
+  color: #AE1010;
+  cursor: pointer;
+}
+
+
+.add_and_input_block {
+  /* border: 1px solid red; */
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.add_icon {
+  color: black;
+  cursor: pointer;
+}
+
+.add_icon:hover {
+  color: #AE1010;
+}
+
+/* --------------- Строка поиска ---------------*/
+
+.search_field {
+  border: 1px solid #acadab;
+  display: flex;
+  align-items: center;
+  background-color: #D8DAD7; 
+  border-radius: 20px; 
+  padding: 0px 5px;
+  min-width: 400px;
+  height: 32px;
+}
+
+.search_input {
+  flex-grow: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0px 8px;
+  font-size: 20px;
+  font-family: 'Cormorant Infant', serif;
+  font-weight: bold;
+}
+
+.search_input::placeholder {
+  color: #9c9c9c;
+}
+
+.search_button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 3px;
+  display: flex;
+  align-items: center;
+}
+
+
+.search_button svg {
+ 
+}
+
+/* --------------- Оболочка таблицы + скролл ---------------*/
+
+
+.table_wrapper {
+  margin-top: 10px;
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+.table_wrapper::-webkit-scrollbar {
+  width: 10px;
+}
+
+.table_wrapper::-webkit-scrollbar-track {
+  background: #d8dad7;
+  border-radius: 10px;
+}
+
+.table_wrapper::-webkit-scrollbar-thumb {
+  background: #d6b0ae;
+  border-radius: 10px;
+  border: 1px solid #d8dad7;
+}
+
+.table_wrapper::-webkit-scrollbar-thumb:hover {
+  border: none;
+}
+
+
+
+/* Убираем стрелочки для всех браузеров */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield; 
 }

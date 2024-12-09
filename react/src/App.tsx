@@ -1,27 +1,33 @@
-import React from 'react'
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, NavLink } from "react-router-dom";
+import MainPage from "./MainPage";
+import StudentsPage from "./StudentsPage";
+import FacultetsPage from "./FacultetsPage";
+import DepartmentsPage from "./DepartmentsPage";
+import StudentProfile from "./StudentProfile";
+import EditStudent from "./EditStudent";
+import AddNewStudent from "./AddNewStudent";
 
-import { Helmet } from 'react-helmet'
-import { BrowserRouter as Router } from 'react-router-dom'
 
-import Nav from 'Nav/Nav'
-import Routes from 'Routes/Routes'
-import { WithUser } from 'Shared/UserContainer'
 
-const App = () => (
-  <WithUser>
-    <Helmet
-      defaultTitle="PNGR"
-      titleTemplate="%s | PNGR"
-    >
-      {/* put meta tags here for opengraph and stuff */}
-    </Helmet>
+const App = () => {
+  return (
     <Router>
-      <div id="wrapper">
-        <Nav />
-        <Routes />
+      <div className="app">
+        <main className="content">
+          <Routes>
+            <Route path="/" element={<MainPage />} />
+            <Route path="/facultets" element={<FacultetsPage />} />
+            <Route path="/departments" element={<DepartmentsPage />} />
+            <Route path="/students" element={<StudentsPage />} />
+            <Route path="/students/:studentId" element={<StudentProfile />} />
+            <Route path="/students/edit/:studentId" element={<EditStudent />} />
+            <Route path="/students/add_new_student" element={<AddNewStudent />} />
+          </Routes>
+        </main>
       </div>
     </Router>
-  </WithUser>
-);
+  );
+};
 
 export default App;
