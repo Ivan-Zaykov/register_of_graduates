@@ -167,8 +167,8 @@ const StudentsPage = () => {
                   <td className="student_td">
                     {/* <Link to={`/students/${student.id}`}>{student.id}</Link> */}
                     <a
-                      href={`/student/${student.student_id}`}
-                      // target="_blank"
+                      href={`/students/${student.student_id}`}
+                      target="_blank"
                     >
                       {student.ticket_number}
                     </a>
@@ -176,8 +176,8 @@ const StudentsPage = () => {
                   <td className="student_td">
                     {/* <Link to={`/students/${student.id}`}>{student.name}</Link> */}
                     <a
-                      href={`/student/${student.studentId}`}
-                      // target="_blank"
+                      href={`/students/${student.student_id}`}
+                      target="_blank"
                     >
                       {student.full_name}
                     </a>

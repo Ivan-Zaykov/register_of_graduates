@@ -66,20 +66,36 @@ func GetStudent(conn *pgx.Conn, studentID uuid.UUID) (map[string]interface{}, er
 
 	// Запрос данных студента
 	query := `
-		SELECT student_id, faculty_id, department_id, ticket_number, full_name, enrollment_date, education_level,
-		       graduation_date, completion_status, is_archived, created_at, updated_at
-		FROM student WHERE student_id = $1
+		SELECT
+            s.student_id,
+            f.faculty_id,
+            s.ticket_number,
+            s.full_name,
+            s.education_level,
+            f.faculty_name,
+            d.department_id,
+            d.department_name,
+            s.graduation_date,
+            s.completion_status,
+            s.is_archived,
+            s.created_at,
+            s.updated_at
+        FROM student s
+        LEFT JOIN faculty f ON s.faculty_id = f.faculty_id
+        LEFT JOIN departments d ON s.department_id = d.department_id
+		WHERE student_id = $1
 	`
 
 	var Student Student
 	err = conn.QueryRow(context.Background(), query, studentID).Scan(
 		&Student.StudentID,
 		&Student.FacultyID,
-		&Student.DepartmentID,
 		&Student.TicketNumber,
 		&Student.FullName,
-		&Student.EnrollmentDate,
 		&Student.EducationLevel,
+		&Student.FacultyName,
+		&Student.DepartmentID,
+		&Student.DepartmentName,
 		&Student.GraduationDate,
 		&Student.CompletionStatus,
 		&Student.IsArchived,
@@ -94,6 +110,7 @@ func GetStudent(conn *pgx.Conn, studentID uuid.UUID) (map[string]interface{}, er
 	result := map[string]interface{}{
 		"student_id":        Student.StudentID,
 		"faculty_id":        Student.FacultyID,
+		"faculty_name":      Student.FacultyName,
 		"department_id":     Student.DepartmentID,
 		"ticket_number":     Student.TicketNumber,
 		"full_name":         Student.FullName,
