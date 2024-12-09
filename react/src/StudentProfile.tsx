@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
 
@@ -15,12 +15,40 @@ import CustomAlert from "./CustomAlert";
 
 const StudentProfile = () => {
   const { studentId } = useParams();
-  const student = studentsData.find((s) => s.studentId === studentId);
-
+  const [student, setStudent] = useState(null); // Состояние для данных студента
+  const [isLoading, setIsLoading] = useState(true); // Состояние загрузки
+  const [error, setError] = useState(null); // Состояние для ошибок
   const [alert, setAlert] = useState(null);
 
+  useEffect(() => {
+    const fetchStudentData = async () => {
+      try {
+        const response = await fetch(`/api/student/${studentId}`);
+        if (!response.ok) {
+          throw new Error(`Ошибка: ${response.status}`);
+        }
+        const data = await response.json();
+        setStudent(data); // Сохраняем данные студента
+      } catch (err) {
+        setError(err.message); // Обрабатываем ошибку
+      } finally {
+        setIsLoading(false); // Выключаем индикатор загрузки
+      }
+    };
+
+    fetchStudentData(); // Запрос данных при монтировании компонента
+  }, [studentId]);
+
+  if (isLoading) {
+    return <div>Загрузка...</div>; // Показываем индикатор загрузки
+  }
+
+  if (error) {
+    return <div>Ошибка: {error}</div>; // Показываем сообщение об ошибке
+  }
+
   const handleDelete = () => {
-    if (student.archive) {
+    if (student.is_archived) {
       setAlert({
         message: "Вы не можете удалить архивного студента!",
       });
@@ -33,7 +61,7 @@ const StudentProfile = () => {
   };
 
   const handleArchive = () => {
-    if (student.archive) {
+    if (student.is_archived) {
       // запрос на архив/разархив!!!!
       setAlert({
         message: "Студент успешно разархивирован.",
@@ -134,45 +162,45 @@ const StudentProfile = () => {
             <div className="info_table">
               <div className="table_line first_line">
                 <div className="title">ID:</div>
-                <div className="data">{student.id}</div>
+                <div className="data">{student.student_id}</div>
               </div>
               <div className="table_line">
                 <div className="title">ФИО:</div>
-                <div className="data">{student.name}</div>
+                <div className="data">{student.full_name}</div>
               </div>
               <div className="table_line">
                 <div className="title">Студенческий:</div>
-                <div className="data">{student.studentId}</div>
+                <div className="data">{student.ticket_number}</div>
               </div>
 
               <div className="table_line">
                 <div className="title">Факультет:</div>
-                <div className="data">{student.faculty}</div>
+                <div className="data">{student.faculty_name}</div>
               </div>
 
               <div className="table_line">
                 <div className="title">Год поступления:</div>
-                <div className="data">{student.yearOfAdmission}</div>
+                <div className="data">{student.enrollment_date}</div>
               </div>
 
               <div className="table_line">
                 <div className="title">Ступень образования:</div>
-                <div className="data">{student.level}</div>
+                <div className="data">{student.education_level}</div>
               </div>
 
               <div className="table_line">
                 <div className="title">Архивность:</div>
-                <div className="data">{student.archive ? "Да" : "Нет"}</div>
+                <div className="data">{student.is_archived ? "Да" : "Нет"}</div>
               </div>
 
               <div className="table_line">
                 <div className="title">Дата создания:</div>
-                <div className="data">{student.creationDate}</div>
+                <div className="data">{student.created_at}</div>
               </div>
 
               <div className="table_line last_line">
                 <div className="title">Дата обновления:</div>
-                <div className="data">{student.updateDate}</div>
+                <div className="data">{student.updated_at}</div>
               </div>
             </div>
           </div>
@@ -185,7 +213,7 @@ const StudentProfile = () => {
                     Кафедра:
                   </td>
                   <td className="bottom_data_info bottom_data_title_first_right">
-                    {student.department}
+                    {student.department_id}
                   </td>
                 </tr>
                 <tr className="bottom_table_line">
@@ -195,7 +223,7 @@ const StudentProfile = () => {
                     Научный руководитель <br></br> курсовой работы:
                   </td>
                   <td className="bottom_data_info">
-                    {student.courseSupervisor}
+                    {student.course_supervisor}
                   </td>
                 </tr>
                 <tr className="bottom_table_line">
@@ -203,14 +231,14 @@ const StudentProfile = () => {
                     Название курсовой работы:
                   </td>
                   <td className="bottom_data_info">
-                    {student.courseWorkTitle}
+                    {student.coursework_title}
                   </td>
                 </tr>
                 <tr className="bottom_table_line">
                   <td className="bottom_data_title">
                     Оценка за курсовую работу:
                   </td>
-                  <td className="bottom_data_info">{student.courseGrade}</td>
+                  <td className="bottom_data_info">{student.coursework_grade}</td>
                 </tr>
                 <tr className="bottom_table_line">
                   <td
@@ -219,24 +247,24 @@ const StudentProfile = () => {
                     Научный руководитель <br></br> дипломной работы:
                   </td>
                   <td className="bottom_data_info">
-                    {student.diplomaSupervisor}
+                    {student.diploma_supervisor}
                   </td>
                 </tr>
                 <tr className="bottom_table_line">
                   <td className="bottom_data_title">
                     Название дипломной работы:{" "}
                   </td>
-                  <td className="bottom_data_info">{student.diplomaTitle}</td>
+                  <td className="bottom_data_info">{student.diploma_title}</td>
                 </tr>
                 <tr className="bottom_table_line">
                   <td className="bottom_data_title">
                     Оценка за дипломную работу:
                   </td>
-                  <td className="bottom_data_info">{student.diplomaGrade}</td>
+                  <td className="bottom_data_info">{student.diploma_grade}</td>
                 </tr>
                 <tr className="bottom_table_line">
                   <td className="bottom_data_title">Год окончания:</td>
-                  <td className="bottom_data_info">{student.graduationYear}</td>
+                  <td className="bottom_data_info">{student.graduation_date}</td>
                 </tr>
 
                 <tr className="bottom_table_line">
@@ -244,7 +272,7 @@ const StudentProfile = () => {
                     Успешность окончания:
                   </td>
                   <td className="bottom_data_info bottom_data_title_last_right">
-                    {student.successAssessment}
+                    {student.completion_status}
                   </td>
                 </tr>
               </tbody>
