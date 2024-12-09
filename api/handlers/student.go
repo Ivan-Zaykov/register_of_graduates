@@ -14,20 +14,26 @@ import (
 )
 
 type Student struct {
-	StudentID        uuid.UUID  `json:"student_id"`
-	FacultyID        uuid.UUID  `json:"faculty_id"`
-	FacultyName      string     `json:"faculty_name"`
-	DepartmentID     uuid.UUID  `json:"department_id"`
-	DepartmentName   string     `json:"department_name"`
-	TicketNumber     string     `json:"ticket_number"`
-	FullName         string     `json:"full_name"`
-	EnrollmentDate   *time.Time `json:"enrollment_date"`
-	EducationLevel   string     `json:"education_level"`
-	GraduationDate   *time.Time `json:"graduation_date,omitempty"`
-	CompletionStatus *bool      `json:"completion_status,omitempty"`
-	IsArchived       bool       `json:"is_archived"`
-	CreatedAt        *time.Time `json:"created_at"`
-	UpdatedAt        *time.Time `json:"updated_at"`
+	StudentID         uuid.UUID  `json:"student_id"`
+	FacultyID         uuid.UUID  `json:"faculty_id"`
+	FacultyName       string     `json:"faculty_name"`
+	DepartmentID      uuid.UUID  `json:"department_id"`
+	DepartmentName    string     `json:"department_name"`
+	TicketNumber      string     `json:"ticket_number"`
+	FullName          string     `json:"full_name"`
+	EnrollmentDate    *time.Time `json:"enrollment_date"`
+	EducationLevel    string     `json:"education_level"`
+	GraduationDate    *time.Time `json:"graduation_date,omitempty"`
+	CompletionStatus  *bool      `json:"completion_status,omitempty"`
+	IsArchived        bool       `json:"is_archived"`
+	CreatedAt         *time.Time `json:"created_at"`
+	UpdatedAt         *time.Time `json:"updated_at"`
+	CourseworkTitle   *string    `json:"coursework_title"`
+	CourseworkGrade   *string    `json:"coursework_grade"`
+	CourseSupervisor  *string    `json:"course_supervisor"`
+	DiplomaSupervisor *string    `json:"diploma_supervisor"`
+	DiplomaTitle      *string    `json:"diploma_title"`
+	DiplomaGrade      *string    `json:"diploma_grade"`
 }
 
 func StudentExistsByTicketNumber(conn *pgx.Conn, ticketNumber string) (bool, error) {
@@ -66,25 +72,61 @@ func GetStudent(conn *pgx.Conn, studentID uuid.UUID) (map[string]interface{}, er
 
 	// Запрос данных студента
 	query := `
-		SELECT student_id, faculty_id, department_id, ticket_number, full_name, enrollment_date, education_level,
-		       graduation_date, completion_status, is_archived, created_at, updated_at
-		FROM student WHERE student_id = $1
-	`
+		SELECT
+            st.student_id,
+            st.ticket_number,
+            st.full_name,
+            fct.faculty_id,
+            fct.faculty_name,
+            dpts.department_id,
+            dpts.department_name,
+            st.education_level,
+            st.enrollment_date,
+            st.graduation_date,
+            st.completion_status,
+            st.is_archived,
+            st.created_at,
+            st.updated_at,
+            cswk.coursework_title,
+            cswk.coursework_grade,
+            css.full_name as course_supervisor,
+            dps.full_name as diploma_supervisor,
+            dpm.diploma_title,
+            dpm.diploma_grade
+        FROM student st
+        JOIN faculty fct ON st.faculty_id = fct.faculty_id
+        JOIN departments dpts ON st.department_id = dpts.department_id
+        LEFT JOIN coursework cswk ON st.student_id = cswk.student_id
+        LEFT JOIN diploma dpm ON st.student_id = dpm.student_id
+        /* Руководитель курсовой */
+		LEFT JOIN scientific_supervisor css ON cswk.supervisor_id = css.supervisor_id
+		/* Руководитель диплома */
+		LEFT JOIN scientific_supervisor dps ON dpm.supervisor_id = dps.supervisor_id
+        
+		WHERE st.student_id = $1`
 
 	var Student Student
 	err = conn.QueryRow(context.Background(), query, studentID).Scan(
 		&Student.StudentID,
-		&Student.FacultyID,
-		&Student.DepartmentID,
 		&Student.TicketNumber,
 		&Student.FullName,
-		&Student.EnrollmentDate,
+		&Student.FacultyID,
+		&Student.FacultyName,
+		&Student.DepartmentID,
+		&Student.DepartmentName,
 		&Student.EducationLevel,
+		&Student.EnrollmentDate,
 		&Student.GraduationDate,
 		&Student.CompletionStatus,
 		&Student.IsArchived,
 		&Student.CreatedAt,
 		&Student.UpdatedAt,
+		&Student.CourseworkTitle,
+		&Student.CourseworkGrade,
+		&Student.CourseSupervisor,
+		&Student.DiplomaSupervisor,
+		&Student.DiplomaTitle,
+		&Student.DiplomaGrade,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка извлечения студента: %w", err)
@@ -92,18 +134,26 @@ func GetStudent(conn *pgx.Conn, studentID uuid.UUID) (map[string]interface{}, er
 
 	// Возвращаем результат в виде карты (для JSON)
 	result := map[string]interface{}{
-		"student_id":        Student.StudentID,
-		"faculty_id":        Student.FacultyID,
-		"department_id":     Student.DepartmentID,
-		"ticket_number":     Student.TicketNumber,
-		"full_name":         Student.FullName,
-		"enrollment_date":   Student.EnrollmentDate,
-		"education_level":   Student.EducationLevel,
-		"graduation_date":   Student.GraduationDate,
-		"completion_status": Student.CompletionStatus,
-		"is_archived":       Student.IsArchived,
-		"created_at":        Student.CreatedAt,
-		"updated_at":        Student.UpdatedAt,
+		"student_id":         Student.StudentID,
+		"ticket_number":      Student.TicketNumber,
+		"full_name":          Student.FullName,
+		"faculty_id":         Student.FacultyID,
+		"faculty_name":       Student.FacultyName,
+		"department_id":      Student.DepartmentID,
+		"department_name":    Student.DepartmentName,
+		"education_level":    Student.EducationLevel,
+		"enrollment_date":    Student.EnrollmentDate,
+		"graduation_date":    Student.GraduationDate,
+		"completion_status":  Student.CompletionStatus,
+		"is_archived":        Student.IsArchived,
+		"created_at":         Student.CreatedAt,
+		"updated_at":         Student.UpdatedAt,
+		"coursework_title":   Student.CourseworkTitle,
+		"coursework_grade":   Student.CourseworkGrade,
+		"course_supervisor":  Student.CourseSupervisor,
+		"diploma_supervisor": Student.DiplomaSupervisor,
+		"diploma_title":      Student.DiplomaTitle,
+		"diploma_grade":      Student.DiplomaGrade,
 	}
 
 	return result, nil

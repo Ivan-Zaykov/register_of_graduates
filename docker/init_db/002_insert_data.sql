@@ -26,7 +26,7 @@ VALUES
     ('660e8400-e29b-41d4-a716-446655440007', '550e8400-e29b-41d4-a716-446655440003', 'Кафедра сетевых технологий', 'Савин Михаил Евгеньевич');
 
 
-INSERT INTO Scientific_Supervisor (superviser_id, department_id, full_name)
+INSERT INTO Scientific_Supervisor (supervisor_id, department_id, full_name)
 VALUES
     -- Математический факультет, Кафедра алгебры
     ('880e8400-e29b-41d4-a716-446655440000', '660e8400-e29b-41d4-a716-446655440000', 'Пифагор Самосский'),
@@ -112,7 +112,7 @@ VALUES
     ('770e8400-e29b-41d4-a716-446655440039', '550e8400-e29b-41d4-a716-446655440003', '660e8400-e29b-41d4-a716-446655440007', 'ICT2005', 'Давыдов Владислав Игоревич', '2023-09-01', 'master',NULL, NULL, FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 
-INSERT INTO Coursework (coursework_id, student_id, superviser_id, coursework_title, coursework_grade)
+INSERT INTO Coursework (coursework_id, student_id, supervisor_id, coursework_title, coursework_grade)
 VALUES
     -- Математический факультет, Кафедра алгебры
 --     ('990e8400-e29b-41d4-a716-446655440000', '770e8400-e29b-41d4-a716-446655440000', '880e8400-e29b-41d4-a716-446655440000', 'Как я пытался доказать теорему Ферма и что из этого вышло', 4),
@@ -138,7 +138,7 @@ VALUES
     -- Информационно-вычислительных технологий факультет, Кафедра сетевых технологий
     ('990e8400-e29b-41d4-a716-446655440007', '770e8400-e29b-41d4-a716-446655440035', '880e8400-e29b-41d4-a716-446655440007', 'Как заставить роутер перестать мигать: практическое руководство', 4);
 
-INSERT INTO Diploma (diploma_id, student_id, superviser_id, diploma_title, diploma_grade)
+INSERT INTO Diploma (diploma_id, student_id, supervisor_id, diploma_title, diploma_grade)
 VALUES
     -- Математический факультет, Кафедра алгебры
 --     ('991e8400-e29b-41d4-a716-446655440000', '770e8400-e29b-41d4-a716-446655440000', '880e8400-e29b-41d4-a716-446655440000', 'Почему дважды два не всегда четыре: теория заговоров в математике', 5),
