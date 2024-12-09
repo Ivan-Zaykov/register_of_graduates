@@ -21,6 +21,10 @@ func ConfigureRouter(conn *pgx.Conn) {
 	r.HandleFunc("/api/students", handlers.GetAllStudentsHandler(conn)).Methods(http.MethodGet)
 	//r.HandleFunc("/api/students/archive", ArchiveStudentHandler(conn)).Methods(http.MethodPost)
 
+	r.HandleFunc("/api/faculties", handlers.GetAllFacultyHandler(conn)).Methods(http.MethodGet)
+
+	r.HandleFunc("/api/departments", handlers.GetAllDepartmentHandler(conn)).Methods(http.MethodGet)
+
 	log.Print("Listening 5000")
 	log.Fatal(http.ListenAndServe(":5000", logHandlers.LoggingHandler(os.Stdout, r)))
 }
