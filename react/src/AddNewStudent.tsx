@@ -10,7 +10,6 @@ import { ReactComponent as EditIcon } from "./pictures/edit_icon.svg";
 import { ReactComponent as ArchiveIcon } from "./pictures/archive_icon.svg";
 import { ReactComponent as DeleteIcon } from "./pictures/delete_icon.svg";
 
-// import { studentsData } from "./AllData";
 import default_student_photo from "./pictures/default_student_photo.png";
 
 import CustomAlert from "./CustomAlert";
