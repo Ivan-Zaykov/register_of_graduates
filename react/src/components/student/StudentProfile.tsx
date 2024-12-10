@@ -20,6 +20,17 @@ const StudentProfile = () => {
   const [error, setError] = useState(null); // Состояние для ошибок
   const [alert, setAlert] = useState(null);
 
+  
+  // Новое для модалки
+  const [modal, setModal] = useState({
+    isOpen: false,
+    action: null,
+    text: "",
+    buttonText: "",
+  });
+
+
+
   useEffect(() => {
     const fetchStudentData = async () => {
       try {
@@ -47,48 +58,48 @@ const StudentProfile = () => {
     return <div>Ошибка: {error}</div>; // Показываем сообщение об ошибке
   }
 
-  const handleDelete = async () => {
-    const url = `/api/student/${student.student_id}`;
+   // Новое для модалки
+   const openModal = (action, text, buttonText) => {
+    setModal({ isOpen: true, action, text, buttonText });
+  };
 
-    if (student.is_archived) {
-      setAlert({
-        message: "Вы не можете удалить архивного студента!",
-      });
-    } else {
-      try {
-        const response = await fetch(url, {
-          method: 'DELETE',
-        });
+  const closeModal = () => {
+    setModal({ isOpen: false, action: null, text: "", buttonText: "" });
+  };
 
-        if (!response.ok) {
-          throw new Error(`Ошибка при удалении студента: ${response.status}`);
+  const handleDelete = () => {
+    openModal(
+      () => {
+        if (student.archive) {
+          setAlert({ message: "Вы не можете удалить архивного студента!" });
+        } else {
+          setAlert({ message: "Студент успешно удалён." });
         }
-
-        setAlert({
-          message: "Студент успешно удалён.",
-        });
-      } catch (error) {
-        console.error('Ошибка:', error.message);
-      }
-    }
+      },
+      "Вы уверены, что хотите удалить этого студента?",
+      "Удалить"
+    );
   };
 
   const handleArchive = () => {
-    if (student.is_archived) {
-      // запрос на архив/разархив!!!!
-      setAlert({
-        message: "Студент успешно разархивирован.",
-      });
-    } else {
-      setAlert({
-        message: "Студент успешно архивирован.",
-      });
-    }
+    const archiveMessage = student.is_archived
+      ? "Студент успешно разархивирован."
+      : "Студент успешно архивирован.";
+
+    openModal(
+      () => {
+        setAlert({ message: archiveMessage });
+      },
+      `Вы уверены, что хотите ${
+        student.is_archived ? "убрать этого студента из архива" : "добавить этого студента в архив"
+      }?`,
+      student.is_archived ? "Разархивировать" : "Архивировать"
+    );
   };
 
 
   const handleEdit = () => {
-    if (student.archive) {
+    if (student.is_archived) {
       setAlert({
         message: "Вы не можете редактировать архивного студента!",
       });
@@ -120,6 +131,25 @@ const StudentProfile = () => {
 
   return (
     <>
+      {/* // Новое для модалки */}
+      {modal.isOpen && (
+        <div className="custom_modal">
+          <div className="custom_modal_content">
+            <p>{modal.text}</p>
+            <button
+              className="modal_button confirm_button"
+              onClick={() => {
+                modal.action();
+                closeModal();
+              }}>
+              {modal.buttonText}
+            </button>
+            <button className="modal_button cancel_button" onClick={closeModal}>
+              Отмена
+            </button>
+          </div>
+        </div>
+      )}
       {alert && (
         <CustomAlert message={alert.message} onClose={handleAlertClose} />
       )}
