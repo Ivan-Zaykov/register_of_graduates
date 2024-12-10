@@ -27,7 +27,7 @@
 
 .student_profile_wrapper {
   margin-top: 10px;
-  /* align-items: center; */
+  align-items: center;
   display: flex;
   flex-direction: column;
   padding: 0 10px;
@@ -206,4 +206,65 @@
   flex-direction: row;
   justify-content: space-between; */
   background-color: #D8DAD7;
+}
+
+
+/* --------------------------------- */
+/* Новое для модалки */
+.custom_modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  font-size: 26px;
+  color: black;
+}
+
+.custom_modal_content {
+  background-color: #E3E6E2;
+  padding: 10px;
+  text-align: center;
+  font-family: 'Cormorant Infant', serif;
+  font-weight: bold;
+  width: 500px;
+  border-radius: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 260px;
+}
+
+.modal_button {
+  font-size: 25px;
+  font-family: 'Cormorant Infant', serif;
+  font-weight: bold;
+  padding: 10px 0;
+  margin: 2px 20px;
+  font-weight: bold;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+}
+
+.confirm_button {
+  background-color: #D3A2A1;
+}
+
+.confirm_button:hover {
+  background-color:#d4aaaa;
+}
+
+.cancel_button {
+  background-color: #D8DAD7;
+  color: #AE1010;
+}
+
+.cancel_button:hover {
+  background-color:#d2d4d0;
 }
