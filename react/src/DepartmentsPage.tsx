@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
 
 import Header from "./Header";
@@ -6,17 +6,38 @@ import { ReactComponent as StarIcon } from "./pictures/star_icon.svg";
 import { ReactComponent as SearchIcon } from "./pictures/search_icon.svg";
 
 import "./DepartmentPage.css";
-import { departsData } from "./AllData";
 
 const DepartmentsPage = () => {
-  const [data, setData] = useState(departsData);
+  const [departsData, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("/api/departments");
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const result = await response.json();
+        setData(result);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []); // Пустой массив означает, что эффект выполнится только при монтировании
 
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",
   });
 
-  const sortedData = [...data].sort((a, b) => {
+  const sortedData = [...departsData].sort((a, b) => {
     if (sortConfig.key) {
       const order = sortConfig.direction === "ascending" ? 1 : -1;
       return a[sortConfig.key] > b[sortConfig.key] ? order : -order;
@@ -44,6 +65,9 @@ const DepartmentsPage = () => {
     event.preventDefault();
     console.log("Поиск по кафедрам:", searchDepart); // cохраняем введенную строку
   };
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
 
   return (
     <>
@@ -106,13 +130,13 @@ const DepartmentsPage = () => {
           <table className="depart_table">
             <thead className="depart_thead">
               <tr className="depart_tr">
-                <th className="depart_th" onClick={() => requestSort("id")}>
+                <th className="depart_th" onClick={() => requestSort("department_id")}>
                   Идентификатор кафедры
                 </th>
-                <th className="depart_th" onClick={() => requestSort("name")}>
+                <th className="depart_th" onClick={() => requestSort("department_name")}>
                   Наименование кафедры
                 </th>
-                <th className="depart_th" onClick={() => requestSort("head")}>
+                <th className="depart_th" onClick={() => requestSort("head_of_department")}>
                   Заведующий кафедрой
                 </th>
                 <th className="depart_th" onClick={() => requestSort("deputy")}>
@@ -122,10 +146,10 @@ const DepartmentsPage = () => {
             </thead>
             <tbody className="depart_tbody">
               {sortedData.map((department) => (
-                <tr className="depart_tr" key={department.id}>
-                  <td className="depart_td">{department.id}</td>
-                  <td className="depart_td">{department.name}</td>
-                  <td className="depart_td">{department.head}</td>
+                <tr className="depart_tr" key={department.department_id}>
+                  <td className="depart_td">{department.department_id}</td>
+                  <td className="depart_td">{department.department_name}</td>
+                  <td className="depart_td">{department.head_of_department}</td>
                   <td className="depart_td">{department.deputy}</td>
                 </tr>
               ))}      
