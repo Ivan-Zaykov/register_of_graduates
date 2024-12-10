@@ -98,7 +98,8 @@ body {
 .student_profile_header_line {
   display: flex;
   justify-content: space-between;
-  margin: 0 60px;
+  /* margin: 0 60px; */
+  margin: 0 auto;
   width: calc(800px + 418px + 40px);
   font-size: 1.2rem;
 }

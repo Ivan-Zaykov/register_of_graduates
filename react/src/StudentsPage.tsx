@@ -186,42 +186,10 @@ const StudentsPage = () => {
                   <td className="student_td">{student.faculty_name}</td>
                   <td className="student_td">{student.department_name}</td>
                   <td className="student_td">
-                    {student.is_archived === 1 ? "Да" : "Нет"}
+                    {student.is_archived? "Да" : "Нет"}
                   </td>
                 </tr>
               ))}
-              <tr className="student_tr">
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-              </tr>
-              <tr className="student_tr">
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-              </tr>
-              <tr className="student_tr">
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-              </tr>
-              <tr className="student_tr">
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-              </tr>
               <tr className="student_tr">
                 <td className="student_td"></td>
                 <td className="student_td"></td>

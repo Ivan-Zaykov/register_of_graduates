@@ -15,7 +15,7 @@ const FacultetsPage = () => {
     // Функция для получения данных с API
     const fetchFaculties = async () => {
       try {
-        const response = await fetch("http://localhost/api/faculties");
+        const response = await fetch("/api/faculties");
         if (!response.ok) {
           throw new Error(`Ошибка HTTP: ${response.status}`);
         }
@@ -134,18 +134,18 @@ const FacultetsPage = () => {
           <table className="facult_table">
             <thead className="facult_thead">
               <tr className="facult_tr">
-                <th className="facult_th" onClick={() => requestSort("id")}>
+                <th className="facult_th" onClick={() => requestSort("faculty_id")}>
                   Идентификатор факультета
                 </th>
-                <th className="facult_th" onClick={() => requestSort("name")}>
+                <th className="facult_th" onClick={() => requestSort("faculty_name")}>
                   Наименование факультета
                 </th>
-                <th className="facult_th" onClick={() => requestSort("dean")}>
+                <th className="facult_th" onClick={() => requestSort("faculty_dean")}>
                   ФИО декана
                 </th>
                 <th
                   className="facult_th"
-                  onClick={() => requestSort("deputyDean")}>
+                  onClick={() => requestSort("faculty_substitute")}>
                   ФИО зам. декана
                 </th>
               </tr>
@@ -159,42 +159,6 @@ const FacultetsPage = () => {
                   <td className="facult_td">{faculty.faculty_substitute}</td>
                 </tr>
               ))}
-              {/* <tr className="facult_tr">
-            <td className="facult_td"></td>
-            <td className="facult_td"></td>
-            <td className="facult_td"></td>
-            <td className="facult_td"></td>
-          </tr> */}
-              <tr className="facult_tr">
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-              </tr>
-              <tr className="facult_tr">
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-              </tr>
-              <tr className="facult_tr">
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-              </tr>
-              <tr className="facult_tr">
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-              </tr>
-              <tr className="facult_tr">
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-              </tr>
               <tr className="facult_tr">
                 <td className="facult_td"></td>
                 <td className="facult_td"></td>
