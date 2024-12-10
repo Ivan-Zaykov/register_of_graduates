@@ -207,38 +207,6 @@ const StudentsPage = () => {
                 <td className="student_td"></td>
               </tr>
               <tr className="student_tr">
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-              </tr>
-              <tr className="student_tr">
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-              </tr>
-              <tr className="student_tr">
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-              </tr>
-              <tr className="student_tr">
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-                <td className="student_td"></td>
-              </tr>
-              <tr className="student_tr">
                 <td className="student_td bottom_td"></td>
                 <td className="student_td bottom_td"></td>
                 <td className="student_td bottom_td"></td>

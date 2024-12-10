@@ -159,42 +159,6 @@ const FacultetsPage = () => {
                   <td className="facult_td">{faculty.faculty_substitute}</td>
                 </tr>
               ))}
-              {/* <tr className="facult_tr">
-            <td className="facult_td"></td>
-            <td className="facult_td"></td>
-            <td className="facult_td"></td>
-            <td className="facult_td"></td>
-          </tr> */}
-              <tr className="facult_tr">
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-              </tr>
-              <tr className="facult_tr">
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-              </tr>
-              <tr className="facult_tr">
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-              </tr>
-              <tr className="facult_tr">
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-              </tr>
-              <tr className="facult_tr">
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-              </tr>
               <tr className="facult_tr">
                 <td className="facult_td"></td>
                 <td className="facult_td"></td>
