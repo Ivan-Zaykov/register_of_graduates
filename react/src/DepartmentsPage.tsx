@@ -128,13 +128,7 @@ const DepartmentsPage = () => {
                   <td className="depart_td">{department.head}</td>
                   <td className="depart_td">{department.deputy}</td>
                 </tr>
-              ))}
-              {/* <tr className="depart_tr">
-            <td className="depart_td"></td>
-            <td className="depart_td"></td>
-            <td className="depart_td"></td>
-            <td className="depart_td"></td>
-          </tr> */}
+              ))}      
               <tr className="depart_tr">
                 <td className="depart_td"></td>
                 <td className="depart_td"></td>
@@ -147,43 +141,6 @@ const DepartmentsPage = () => {
                 <td className="depart_td"></td>
                 <td className="depart_td"></td>
               </tr>
-              <tr className="depart_tr">
-                <td className="depart_td"></td>
-                <td className="depart_td"></td>
-                <td className="depart_td"></td>
-                <td className="depart_td"></td>
-              </tr>
-              <tr className="depart_tr">
-                <td className="depart_td"></td>
-                <td className="depart_td"></td>
-                <td className="depart_td"></td>
-                <td className="depart_td"></td>
-              </tr>
-              <tr className="depart_tr">
-                <td className="depart_td"></td>
-                <td className="depart_td"></td>
-                <td className="depart_td"></td>
-                <td className="depart_td"></td>
-              </tr>
-              <tr className="depart_tr">
-                <td className="depart_td"></td>
-                <td className="depart_td"></td>
-                <td className="depart_td"></td>
-                <td className="depart_td"></td>
-              </tr>
-              <tr className="depart_tr">
-                <td className="depart_td"></td>
-                <td className="depart_td"></td>
-                <td className="depart_td"></td>
-                <td className="depart_td"></td>
-              </tr>
-              <tr className="depart_tr">
-                <td className="depart_td"></td>
-                <td className="depart_td"></td>
-                <td className="depart_td"></td>
-                <td className="depart_td"></td>
-              </tr>
-
               <tr className="depart_tr">
                 <td className="depart_td bottom_td"></td>
                 <td className="depart_td bottom_td"></td>
