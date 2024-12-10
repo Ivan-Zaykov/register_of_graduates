@@ -31,7 +31,7 @@ CREATE TABLE Student (
 );
 
 CREATE TABLE Scientific_Supervisor (
-                                       superviser_id UUID PRIMARY KEY,
+                                       supervisor_id UUID PRIMARY KEY,
                                        department_id UUID,
                                        full_name VARCHAR(100),
                                        FOREIGN KEY (department_id) REFERENCES Departments (department_id)
@@ -40,19 +40,19 @@ CREATE TABLE Scientific_Supervisor (
 CREATE TABLE Coursework (
                             coursework_id UUID PRIMARY KEY,
                             student_id UUID,
-                            superviser_id UUID,
+                            supervisor_id UUID,
                             coursework_title VARCHAR(200),
                             coursework_grade INT,
                             FOREIGN KEY (student_id) REFERENCES Student (student_id) ON DELETE CASCADE,
-                            FOREIGN KEY (superviser_id) REFERENCES Scientific_Supervisor (superviser_id)
+                            FOREIGN KEY (supervisor_id) REFERENCES Scientific_Supervisor (supervisor_id)
 );
 
 CREATE TABLE Diploma (
                          diploma_id UUID PRIMARY KEY,
                          student_id UUID,
-                         superviser_id UUID,
+                         supervisor_id UUID,
                          diploma_title VARCHAR(200),
                          diploma_grade INT,
                          FOREIGN KEY (student_id) REFERENCES Student (student_id) ON DELETE CASCADE,
-                         FOREIGN KEY (superviser_id) REFERENCES Scientific_Supervisor (superviser_id)
+                         FOREIGN KEY (supervisor_id) REFERENCES Scientific_Supervisor (supervisor_id)
 );
