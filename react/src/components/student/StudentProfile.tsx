@@ -20,7 +20,7 @@ const StudentProfile = () => {
   const [error, setError] = useState(null); // Состояние для ошибок
   const [alert, setAlert] = useState(null);
 
-  
+
   // Новое для модалки
   const [modal, setModal] = useState({
     isOpen: false,
