@@ -47,16 +47,29 @@ const StudentProfile = () => {
     return <div>Ошибка: {error}</div>; // Показываем сообщение об ошибке
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
+    const url = `/api/student/${student.student_id}`;
+
     if (student.is_archived) {
       setAlert({
         message: "Вы не можете удалить архивного студента!",
       });
-    }
-    else {
-      setAlert({
-        message: "Студент успешно удалён.",
-      });
+    } else {
+      try {
+        const response = await fetch(url, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          throw new Error(`Ошибка при удалении студента: ${response.status}`);
+        }
+
+        setAlert({
+          message: "Студент успешно удалён.",
+        });
+      } catch (error) {
+        console.error('Ошибка:', error.message);
+      }
     }
   };
 
