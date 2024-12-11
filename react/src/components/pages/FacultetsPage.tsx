@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-import "./FacultetsPage.css";
-import Header from "./Header";
-import { ReactComponent as StarIcon } from "./pictures/star_icon.svg";
-import { ReactComponent as SearchIcon } from "./pictures/search_icon.svg";
+import "../../css/FacultetsPage.css";
+import Header from "../Header";
+import { ReactComponent as StarIcon } from "../../pictures/star_icon.svg";
+import { ReactComponent as SearchIcon } from "../../pictures/search_icon.svg";
 
 
 const FacultetsPage = () => {

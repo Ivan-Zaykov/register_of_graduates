@@ -1,6 +1,6 @@
 // CustomAlert.js
 import React, { useEffect } from "react";
-import "./CustomAlert.css"; // Стили для кастомного alert
+import "../css/CustomAlert.css"; // Стили для кастомного alert
 
 const CustomAlert = ({ message, onClose}) => {
   useEffect(() => {

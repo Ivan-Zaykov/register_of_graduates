@@ -1,6 +1,6 @@
 import React from "react";
-import Header from "./Header";
-import main_picture from "./pictures/main_picture.png";
+import Header from "../Header";
+import main_picture from "../../pictures/main_picture.png";
 
 const MainPage = () => {
   return (
