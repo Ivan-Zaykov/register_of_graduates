@@ -1,7 +1,6 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
-import Header from "./Header";
-import main_picture from "./pictures/main_picture.png";
+import Header from "../Header";
+import main_picture from "../../pictures/main_picture.png";
 
 const MainPage = () => {
   return (

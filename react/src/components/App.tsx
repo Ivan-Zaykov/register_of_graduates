@@ -1,12 +1,12 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, NavLink } from "react-router-dom";
-import MainPage from "./MainPage";
-import StudentsPage from "./StudentsPage";
-import FacultetsPage from "./FacultetsPage";
-import DepartmentsPage from "./DepartmentsPage";
-import StudentProfile from "./StudentProfile";
-import EditStudent from "./EditStudent";
-import AddNewStudent from "./AddNewStudent";
+import MainPage from "./pages/MainPage";
+import StudentsPage from "./pages/StudentsPage";
+import FacultetsPage from "./pages/FacultetsPage";
+import DepartmentsPage from "./pages/DepartmentsPage";
+import StudentProfile from "./student/StudentProfile";
+import EditStudent from "./student/EditStudent";
+import AddNewStudent from "./student/AddNewStudent";
 
 
 

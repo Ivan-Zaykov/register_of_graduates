@@ -1,28 +1,15 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { useParams } from "react-router-dom";
 
-import Header from "./Header";
-import { ReactComponent as StarIcon } from "./pictures/star_icon.svg";
-import { ReactComponent as AddStudentIcon } from "./pictures/add_student_icon.svg";
-import { ReactComponent as BackIcon } from "./pictures/back_icon.svg";
-import { ReactComponent as EditIcon } from "./pictures/edit_icon.svg";
-import { ReactComponent as ArchiveIcon } from "./pictures/archive_icon.svg";
-import { ReactComponent as DeleteIcon } from "./pictures/delete_icon.svg";
+import default_student_photo from "../../pictures/default_student_photo.png";
 
-import default_student_photo from "./pictures/default_student_photo.png";
+import CustomAlert from "../CustomAlert";
 
-import CustomAlert from "./CustomAlert";
-
-import "./StudentProfile.css";
-import "./EditStudent.css";
-import "./AddNewStudent.css";
+import "../../css/StudentProfile.css";
+import "../../css/EditStudent.css";
+import "../../css/AddNewStudent.css";
 
 const AddNewStudent = () => {
   const [alert, setAlert] = useState(null);
-
-  //   const { studentId } = useParams();
-  //   const student = studentsData.find((s) => s.studentId === studentId);
 
   // Код для замены фото студента (значок редактирования в углу фото)
   const [image, setImage] = useState(default_student_photo); // Изначальная картинка

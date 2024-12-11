@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { ReactComponent as StarIcon } from "./pictures/star_icon.svg";
-import { ReactComponent as SearchIcon } from "./pictures/search_icon.svg";
-import { ReactComponent as AddStudentIcon } from "./pictures/add_student_icon.svg";
+import { ReactComponent as StarIcon } from "../../pictures/star_icon.svg";
+import { ReactComponent as SearchIcon } from "../../pictures/search_icon.svg";
+import { ReactComponent as AddStudentIcon } from "../../pictures/add_student_icon.svg";
 
-import "./StudentsPage.css";
+import "../../css/StudentsPage.css";
 
 const StudentsPage = () => {
   const [students, setStudents] = useState([]); // Состояние для хранения данных студентов
@@ -168,7 +168,7 @@ const StudentsPage = () => {
                     {/* <Link to={`/students/${student.id}`}>{student.id}</Link> */}
                     <a
                       href={`/students/${student.student_id}`}
-                      target="_blank"
+                      // target="_blank"
                     >
                       {student.ticket_number}
                     </a>
@@ -177,7 +177,7 @@ const StudentsPage = () => {
                     {/* <Link to={`/students/${student.id}`}>{student.name}</Link> */}
                     <a
                       href={`/students/${student.student_id}`}
-                      target="_blank"
+                      // target="_blank"
                     >
                       {student.full_name}
                     </a>
