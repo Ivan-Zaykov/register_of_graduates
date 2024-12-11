@@ -2,16 +2,16 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
 
-import Header from "./Header";
-import { ReactComponent as StarIcon } from "./pictures/star_icon.svg";
-import { ReactComponent as AddStudentIcon } from "./pictures/add_student_icon.svg";
-import { ReactComponent as BackIcon } from "./pictures/back_icon.svg";
-import { ReactComponent as EditIcon } from "./pictures/edit_icon.svg";
-import { ReactComponent as ArchiveIcon } from "./pictures/archive_icon.svg";
-import { ReactComponent as DeleteIcon } from "./pictures/delete_icon.svg";
+import Header from "../Header";
+import { ReactComponent as StarIcon } from "../../pictures/star_icon.svg";
+import { ReactComponent as AddStudentIcon } from "../../pictures/add_student_icon.svg";
+import { ReactComponent as BackIcon } from "../../pictures/back_icon.svg";
+import { ReactComponent as EditIcon } from "../../pictures/edit_icon.svg";
+import { ReactComponent as ArchiveIcon } from "../../pictures/archive_icon.svg";
+import { ReactComponent as DeleteIcon } from "../../pictures/delete_icon.svg";
 
-import "./StudentProfile.css";
-import CustomAlert from "./CustomAlert";
+import "../../css/StudentProfile.css";
+import CustomAlert from "../CustomAlert";
 
 const StudentProfile = () => {
   const { studentId } = useParams();

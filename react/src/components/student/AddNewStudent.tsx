@@ -1,28 +1,18 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { useParams } from "react-router-dom";
 
-import Header from "./Header";
-import { ReactComponent as StarIcon } from "./pictures/star_icon.svg";
-import { ReactComponent as AddStudentIcon } from "./pictures/add_student_icon.svg";
-import { ReactComponent as BackIcon } from "./pictures/back_icon.svg";
-import { ReactComponent as EditIcon } from "./pictures/edit_icon.svg";
-import { ReactComponent as ArchiveIcon } from "./pictures/archive_icon.svg";
-import { ReactComponent as DeleteIcon } from "./pictures/delete_icon.svg";
+import default_student_photo from "../../pictures/default_student_photo.png";
 
-import CustomAlert from "./CustomAlert"; 
+import CustomAlert from "../CustomAlert";
 
-import "./StudentProfile.css";
-import "./EditStudent.css";
+import "../../css/StudentProfile.css";
+import "../../css/EditStudent.css";
+import "../../css/AddNewStudent.css";
 
-const EditStudent = () => {
-  const { studentId } = useParams();
-  const student = studentsData.find((s) => s.studentId === studentId);
-  const [alert, setAlert] = useState(null); 
+const AddNewStudent = () => {
+  const [alert, setAlert] = useState(null);
 
   // Код для замены фото студента (значок редактирования в углу фото)
-  const [image, setImage] = useState(student.image); // Изначальная картинка
-  
+  const [image, setImage] = useState(default_student_photo); // Изначальная картинка
 
   const handleImageChange = (event) => {
     const file = event.target.files[0]; // Берём первый выбранный файл
@@ -33,62 +23,68 @@ const EditStudent = () => {
     }
   };
 
-  const [editableStudent, setEditableStudent] = useState({
-    name: student.name,
-    faculty: student.faculty,
-    studentId: student.studentId,
-    yearOfAdmission: student.yearOfAdmission,
-    level: student.level,
-    archive: student.archive,
-    department: student.department,
-    courseSupervisor: student.courseSupervisor,
-    courseWorkTitle: student.courseWorkTitle,
-    courseGrade: student.courseGrade,
-    diplomaSupervisor: student.diplomaSupervisor,
-    diplomaTitle: student.diplomaTitle,
-    diplomaGrade: student.diplomaGrade,
-    graduationYear: student.graduationYear,
-    successAssessment: student.successAssessment,
+  const [addNewStudent, setAddNewStudent] = useState({
+    name: "",
+    faculty: "",
+    studentId: "",
+    yearOfAdmission: "",
+    level: "",
+    archive: "Нет (по дефолту, если что - добавим туда)",
+    department: "",
+    courseSupervisor: "",
+    courseWorkTitle: "",
+    courseGrade: "",
+    diplomaSupervisor: "",
+    diplomaTitle: "",
+    diplomaGrade: "",
+    graduationYear: "",
+    successAssessment: "",
   });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setEditableStudent((prev) => ({
+    setAddNewStudent((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
   const handleSave = () => {
-    console.log("Сохраненные данные:", editableStudent);
-    setAlert({
-      message: "Студент успешно изменён.",
-      // можно добавить проверку на наличие изменений, тогда не выводить alert
-    });
-    // Логика отправки данных на сервер
-    // НЕ ЗАБЫТЬ ПРО КАРТИНКУ!!!
+    const requiredFields = [
+      "studentId",
+      "name",
+      "faculty",
+      "yearOfAdmission",
+      "level",
+    ];
+    const isAllFieldsFilled = requiredFields.every(
+      (field) => addNewStudent[field].trim() !== ""
+    );
+
+    if (!isAllFieldsFilled) {
+      // alert("Не все обязательные поля заполнены");
+      setAlert({
+        message: "Не все обязательные поля заполнены!",
+      });
+    } else {
+      console.log("Сохраненные данные о студенте:", addNewStudent);
+      // alert("Студент успешно создан");
+      setAlert({
+        message: "Студент успешно создан.",
+      });
+      // window.location.href = "/students";
+
+      // Добавить логику сохранения данных
+    }
   };
 
   const handleAlertClose = () => {
     setAlert(null); // Закрытие alert
   };
 
-  if (!student) {
-    // Можно убрать
-    return (
-      <>
-        <Header />
-        <div className="student_not_found">
-          Карточка студента с id = {studentId} не найдена, редактирование
-          недоступно
-        </div>
-      </>
-    );
-  }
-
   return (
     <>
-     {alert && (
+      {alert && (
         <CustomAlert
           message={alert.message}
           onClose={handleAlertClose}
@@ -98,13 +94,11 @@ const EditStudent = () => {
         <div className="student_profile_wrapper">
           <div className="edit_top_block">
             <div className="edit_student_top_edit_button">
-              Редактирование студента
+              Создание студента
             </div>
             <a
               className="edit_student_save_button"
-              // href={`/students/${studentId}`} 
-              // Новая информация идет в консоль, из-за перехода назад может быть не видно,
-              // так что пока закомментируй эту строчку
+              // href="/students"
               onClick={handleSave}
               style={{ textDecoration: "none" }}>
               Сохранить
@@ -113,19 +107,19 @@ const EditStudent = () => {
               <div className="button_and_picture_block">
                 <a
                   className="edit_student_cancel_button"
-                  href={`/students/${studentId}`}
+                  href="/students"
                   style={{ textDecoration: "none" }}>
                   Отмена
                 </a>
 
                 <div className="picture_block">
-                  <img
-                    src={image}
-                    alt={student.name}
-                    className="student_photo"
-                  />
                   <label htmlFor="file-input">
-                    <EditIcon className="edit_photo_icon" />
+                    <img
+                      src={image}
+                      style={{ cursor: "pointer" }}
+                      alt="дефолт"
+                      className="student_photo"
+                    />
                   </label>
                   <input
                     id="file-input"
@@ -139,84 +133,100 @@ const EditStudent = () => {
               <div className="info_table">
                 <div className="table_line first_line">
                   <div className="title">ID:</div>
-                  <div className="data">{student.id}</div>
+                  <div className="data">Сгенерировать</div>
                 </div>
                 <div className="table_line">
-                  <div className="title">ФИО:</div>
+                  <div className="title">
+                    Студенческий<span className="red_star">*</span>:
+                  </div>
+                  {/* <div className="data">{student.studentId}</div> */}
+                  <input
+                    type="number"
+                    placeholder="Введите номер..."
+                    name="studentId"
+                    value={addNewStudent.studentId}
+                    onChange={handleInputChange}
+                    className="add_student_input"
+                  />
+                </div>
+                <div className="table_line">
+                  <div className="title">
+                    ФИО<span className="red_star">*</span>:
+                  </div>
                   {/* <div className="data">{student.name}</div> */}
                   <input
                     type="text"
                     name="name"
-                    value={editableStudent.name}
+                    value={addNewStudent.name}
+                    placeholder="Введите ФИО..."
                     onChange={handleInputChange}
-                    className="editable_input"
-                  />
-                </div>
-                <div className="table_line">
-                  <div className="title">Студенческий:</div>
-                  {/* <div className="data">{student.studentId}</div> */}
-                  <input
-                    type="number"
-                    name="studentId"
-                    value={editableStudent.studentId}
-                    onChange={handleInputChange}
-                    className="editable_input"
+                    className="add_student_input"
                   />
                 </div>
 
                 <div className="table_line">
-                  <div className="title">Факультет:</div>
+                  <div className="title">
+                    Факультет<span className="red_star">*</span>:
+                  </div>
                   {/* <div className="data">{student.faculty}</div> */}
                   <input
                     type="text"
                     name="faculty"
-                    value={editableStudent.faculty}
+                    placeholder="Введите факультет..."
+                    value={addNewStudent.faculty}
                     onChange={handleInputChange}
-                    className="editable_input"
+                    className="add_student_input"
                   />
                 </div>
 
                 <div className="table_line">
-                  <div className="title">Год поступления:</div>
+                  <div className="title">
+                    Год поступления<span className="red_star">*</span>:
+                  </div>
                   {/* <div className="data">{student.yearOfAdmission}</div> */}
                   <input
                     type="number"
                     min="1900"
                     max="2024"
+                    placeholder="Введите год..."
                     name="yearOfAdmission"
-                    value={editableStudent.yearOfAdmission}
+                    value={addNewStudent.yearOfAdmission}
                     onChange={handleInputChange}
-                    className="editable_input"
+                    className="add_student_input"
                   />
                 </div>
 
                 <div className="table_line">
-                  <div className="title">Ступень образования:</div>
+                  <div className="title">
+                    Ступень образования<span className="red_star">*</span>:
+                  </div>
                   {/* <div className="data">{student.level}</div> */}
                   <input
                     type="text"
                     name="level"
-                    value={editableStudent.level}
+                    placeholder="Введите ступень..."
+                    value={addNewStudent.level}
                     onChange={handleInputChange}
-                    className="editable_input"
+                    className="add_student_input"
                   />
                 </div>
 
                 <div className="table_line">
                   <div className="title">Архивность:</div>
                   <div className="data">
-                    {student.archive ? "Да" : "Нет"}
+                    {/* {student.archive ? "Да" : "Нет"} */}
+                    {addNewStudent.archive}
                   </div>
                 </div>
 
                 <div className="table_line">
                   <div className="title">Дата создания:</div>
-                  <div className="data">{student.creationDate}</div>
+                  <div className="data">Сгенерировать</div>
                 </div>
 
                 <div className="table_line last_line">
                   <div className="title">Дата обновления:</div>
-                  <div className="data">{student.updateDate}</div>
+                  <div className="data">Сгенерировать</div>
                 </div>
               </div>
             </div>
@@ -234,9 +244,10 @@ const EditStudent = () => {
                     <input
                       type="text"
                       name="department"
-                      value={editableStudent.department}
+                      placeholder="Введите кафедру..."
+                      value={addNewStudent.department}
                       onChange={handleInputChange}
-                      className="editable_input big_input white_border"
+                      className="add_student_input add_student_big_input white_placeholder"
                     />
                   </td>
                 </tr>
@@ -251,9 +262,10 @@ const EditStudent = () => {
                     <input
                       type="text"
                       name="courseSupervisor"
-                      value={editableStudent.courseSupervisor}
+                      placeholder="Введите научного руководителя..."
+                      value={addNewStudent.courseSupervisor}
                       onChange={handleInputChange}
-                      className="editable_input big_input"
+                      className="add_student_input add_student_big_input"
                     />
                   </td>
                 </tr>
@@ -265,10 +277,11 @@ const EditStudent = () => {
                     {/* {student.courseWorkTitle} */}
                     <textarea
                       type="text"
+                      placeholder="Введите название..."
                       name="courseWorkTitle"
-                      value={editableStudent.courseWorkTitle}
+                      value={addNewStudent.courseWorkTitle}
                       onChange={handleInputChange}
-                      className="editable_input big_input"
+                      className="add_student_input add_student_big_input"
                       row="2"
                     />
                   </td>
@@ -284,9 +297,10 @@ const EditStudent = () => {
                       //   min="" //указать пределы оценки!!!!!
                       //   max=""
                       name="courseGrade"
-                      value={editableStudent.courseGrade}
+                      placeholder="Введите оценку..."
+                      value={addNewStudent.courseGrade}
                       onChange={handleInputChange}
-                      className="editable_input big_input"
+                      className="add_student_input add_student_big_input"
                     />
                   </td>
                 </tr>
@@ -301,9 +315,10 @@ const EditStudent = () => {
                     <input
                       type="text"
                       name="diplomaSupervisor"
-                      value={editableStudent.diplomaSupervisor}
+                      placeholder="Введите научного руководителя..."
+                      value={addNewStudent.diplomaSupervisor}
                       onChange={handleInputChange}
-                      className="editable_input big_input"
+                      className="add_student_input add_student_big_input"
                     />
                   </td>
                 </tr>
@@ -316,9 +331,10 @@ const EditStudent = () => {
                     <textarea
                       type="text"
                       name="diplomaTitle"
-                      value={editableStudent.diplomaTitle}
+                      placeholder="Введите название работы..."
+                      value={addNewStudent.diplomaTitle}
                       onChange={handleInputChange}
-                      className="editable_input big_input"
+                      className="add_student_input add_student_big_input"
                       row="2"
                     />
                   </td>
@@ -334,9 +350,10 @@ const EditStudent = () => {
                       //   min="" //указать пределы оценки!!!!!
                       //   max=""
                       name="diplomaGrade"
-                      value={editableStudent.diplomaGrade}
+                      placeholder="Введите оценку..."
+                      value={addNewStudent.diplomaGrade}
                       onChange={handleInputChange}
-                      className="editable_input big_input"
+                      className="add_student_input add_student_big_input"
                     />
                   </td>
                 </tr>
@@ -349,9 +366,10 @@ const EditStudent = () => {
                       min="1900"
                       max="2024" // изменить пределы?
                       name="graduationYear"
-                      value={editableStudent.graduationYear}
+                      placeholder="Введите год..."
+                      value={addNewStudent.graduationYear}
                       onChange={handleInputChange}
-                      className="editable_input big_input"
+                      className="add_student_input add_student_big_input"
                     />
                   </td>
                 </tr>
@@ -365,9 +383,10 @@ const EditStudent = () => {
                     <input
                       type="text"
                       name="successAssessment"
-                      value={editableStudent.successAssessment}
+                      placeholder="Введите успешность..."
+                      value={addNewStudent.successAssessment}
                       onChange={handleInputChange}
-                      className="editable_input big_input"
+                      className="add_student_input add_student_big_input"
                     />
                   </td>
                 </tr>
@@ -380,4 +399,4 @@ const EditStudent = () => {
   );
 };
 
-export default EditStudent;
+export default AddNewStudent;

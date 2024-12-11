@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
-import Header from "./Header";
-import { ReactComponent as StarIcon } from "./pictures/star_icon.svg";
-import { ReactComponent as SearchIcon } from "./pictures/search_icon.svg";
+import Header from "../Header";
+import { ReactComponent as StarIcon } from "../../pictures/star_icon.svg";
+import { ReactComponent as SearchIcon } from "../../pictures/search_icon.svg";
 
-import "./DepartmentPage.css";
+import "../../css/DepartmentPage.css";
 
 const DepartmentsPage = () => {
   const [departsData, setData] = useState([]);
