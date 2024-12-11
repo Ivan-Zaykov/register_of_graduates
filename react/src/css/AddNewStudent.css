@@ -24,7 +24,8 @@
 }
 
 .white_placeholder::placeholder {
-    color: #D8DAD7;
+    /* color: #D8DAD7; */
+    color: #5a5c59;
     /* font-weight: bold; */
 }
 
