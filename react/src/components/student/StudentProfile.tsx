@@ -69,11 +69,27 @@ const StudentProfile = () => {
 
   const handleDelete = () => {
     openModal(
-      () => {
-        if (student.archive) {
+        async () => {
+        if (student.is_archived) {
           setAlert({ message: "Вы не можете удалить архивного студента!" });
         } else {
-          setAlert({ message: "Студент успешно удалён." });
+          try {
+            const url = `http://localhost/api/student/${student.student_id}`;
+            const response = await fetch(url, {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+
+            if (!response.ok) {
+              throw new Error(`Ошибка при удалении студента: ${response.status}`);
+            }
+
+            setAlert({ message: "Студент успешно удалён." });
+          } catch (error) {
+            console.error('Ошибка:', error.message);
+          }
         }
       },
       "Вы уверены, что хотите удалить этого студента?",
