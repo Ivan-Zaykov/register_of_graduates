@@ -310,9 +310,9 @@ const EditStudent = () => {
                 </tr>
                 <tr className="bottom_table_line">
                   <td className="bottom_data_title">
-                    Название дипломной работы:
+                    Название дипломной <br></br> работы:
                   </td>
-                  <td className="bottom_data_info">
+                  <td className="bottom_data_info" style={{ lineHeight: "1.4" }}>
                     {/* {student.diplomaTitle} */}
                     <textarea
                       type="text"
@@ -325,8 +325,8 @@ const EditStudent = () => {
                   </td>
                 </tr>
                 <tr className="bottom_table_line">
-                  <td className="bottom_data_title">
-                    Оценка за дипломную работу:
+                  <td className="bottom_data_title" style={{ lineHeight: "1.4" }}>
+                    Оценка за дипломную <br></br> работу:
                   </td>
                   <td className="bottom_data_info">
                     {/* {student.diplomaGrade} */}

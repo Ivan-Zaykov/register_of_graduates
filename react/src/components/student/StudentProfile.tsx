@@ -182,9 +182,9 @@ const StudentProfile = () => {
             </Link>
             <StarIcon />
             <Link
-              to={`/students/${student.studentId}`}
+              to={`/students/${student.student_id}`}
               className="path_line_text">
-              {student.name}
+              {student.full_name}
             </Link>
           </div>
 
@@ -278,7 +278,8 @@ const StudentProfile = () => {
                 <tr className="bottom_table_line">
                   <td
                     className="bottom_data_title"
-                    style={{ lineHeight: "1.4" }}>
+                    style={{ lineHeight: "1.4" }}
+                    >
                     Научный руководитель <br></br> курсовой работы:
                   </td>
                   <td className="bottom_data_info">
@@ -310,13 +311,13 @@ const StudentProfile = () => {
                   </td>
                 </tr>
                 <tr className="bottom_table_line">
-                  <td className="bottom_data_title">
-                    Название дипломной работы:{" "}
+                  <td className="bottom_data_title" style={{ lineHeight: "1.4" }}>
+                    Название дипломной работы:
                   </td>
                   <td className="bottom_data_info">{student.diploma_title}</td>
                 </tr>
                 <tr className="bottom_table_line">
-                  <td className="bottom_data_title">
+                  <td className="bottom_data_title" style={{ lineHeight: "1.4" }}>
                     Оценка за дипломную работу:
                   </td>
                   <td className="bottom_data_info">{student.diploma_grade}</td>
