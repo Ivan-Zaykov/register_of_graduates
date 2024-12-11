@@ -168,7 +168,7 @@ const StudentsPage = () => {
                     {/* <Link to={`/students/${student.id}`}>{student.id}</Link> */}
                     <a
                       href={`/students/${student.student_id}`}
-                      target="_blank"
+                      // target="_blank"
                     >
                       {student.ticket_number}
                     </a>
@@ -177,7 +177,7 @@ const StudentsPage = () => {
                     {/* <Link to={`/students/${student.id}`}>{student.name}</Link> */}
                     <a
                       href={`/students/${student.student_id}`}
-                      target="_blank"
+                      // target="_blank"
                     >
                       {student.full_name}
                     </a>
