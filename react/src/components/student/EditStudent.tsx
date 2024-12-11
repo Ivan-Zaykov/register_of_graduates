@@ -33,6 +33,7 @@ const EditStudent = () => {
     }
   };
 
+
   const [editableStudent, setEditableStudent] = useState({
     name: student.name,
     faculty: student.faculty,
