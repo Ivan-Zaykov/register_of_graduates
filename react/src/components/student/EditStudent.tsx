@@ -107,7 +107,7 @@ const EditStudent = () => {
               // Новая информация идет в консоль, из-за перехода назад может быть не видно,
               // так что пока закомментируй эту строчку
               onClick={handleSave}
-              style={{ textDecoration: "none" }}>
+              style={{ textDecoration: "none", color: "inherit"}}>
               Сохранить
             </a>
             <div className="student_profile_top_wrapper">
@@ -115,7 +115,7 @@ const EditStudent = () => {
                 <a
                   className="edit_student_cancel_button"
                   href={`/students/${studentId}`}
-                  style={{ textDecoration: "none" }}>
+                  style={{ textDecoration: "none", color: "#AE1010" }}>
                   Отмена
                 </a>
 

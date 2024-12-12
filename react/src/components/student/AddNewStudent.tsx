@@ -100,7 +100,7 @@ const AddNewStudent = () => {
               className="edit_student_save_button"
               // href="/students"
               onClick={handleSave}
-              style={{ textDecoration: "none" }}>
+              style={{ textDecoration: "none", color: "inherit" }}>
               Сохранить
             </a>
             <div className="student_profile_top_wrapper">
@@ -108,7 +108,7 @@ const AddNewStudent = () => {
                 <a
                   className="edit_student_cancel_button"
                   href="/students"
-                  style={{ textDecoration: "none" }}>
+                  style={{ textDecoration: "none", color: "#AE1010" }}>
                   Отмена
                 </a>
 
