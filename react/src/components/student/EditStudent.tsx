@@ -33,6 +33,12 @@ const EditStudent = () => {
     }
   };
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ru-RU'); // Форматирует как "день.месяц.год"
+  };
+  
+
 
   const [editableStudent, setEditableStudent] = useState({
     name: student.name,
@@ -212,12 +218,18 @@ const EditStudent = () => {
 
                 <div className="table_line">
                   <div className="title">Дата создания:</div>
-                  <div className="data">{student.creationDate}</div>
+                  <div className="data">
+                    {student.creationDate}
+                    {/* {formatDate(student.created_at)} */}
+                  </div>
                 </div>
 
                 <div className="table_line last_line">
                   <div className="title">Дата обновления:</div>
-                  <div className="data">{student.updateDate}</div>
+                  <div className="data">
+                    {student.updateDate}
+                    {/* {formatDate(student.updated_at)} */}
+                  </div>
                 </div>
               </div>
             </div>
@@ -309,10 +321,10 @@ const EditStudent = () => {
                   </td>
                 </tr>
                 <tr className="bottom_table_line">
-                  <td className="bottom_data_title">
+                  <td className="bottom_data_title" style={{ lineHeight: "1.4" }}>
                     Название дипломной <br></br> работы:
                   </td>
-                  <td className="bottom_data_info" style={{ lineHeight: "1.4" }}>
+                  <td className="bottom_data_info">
                     {/* {student.diplomaTitle} */}
                     <textarea
                       type="text"

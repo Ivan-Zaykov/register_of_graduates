@@ -21,6 +21,13 @@ const StudentProfile = () => {
   const [alert, setAlert] = useState(null);
 
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ru-RU'); // Форматирует как "день.месяц.год"
+  };
+
+
+
   // Новое для модалки
   const [modal, setModal] = useState({
     isOpen: false,
@@ -211,7 +218,6 @@ const StudentProfile = () => {
 
               <div className="picture_block">
                 <img
-                  // src={student.image}
                   src={student.image}
                   alt={student.name}
                   className="student_photo"
@@ -254,12 +260,18 @@ const StudentProfile = () => {
 
               <div className="table_line">
                 <div className="title">Дата создания:</div>
-                <div className="data">{student.created_at}</div>
+                <div className="data">
+                {/* {student.created_at} */}
+                {formatDate(student.created_at)}
+                </div>
               </div>
 
               <div className="table_line last_line">
                 <div className="title">Дата обновления:</div>
-                <div className="data">{student.updated_at}</div>
+                <div className="data">
+                  {/* {student.updated_at} */}
+                  {formatDate(student.updated_at)}
+                </div>
               </div>
             </div>
           </div>
