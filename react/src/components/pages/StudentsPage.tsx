@@ -87,7 +87,7 @@ const StudentsPage = () => {
     // Фильтруем данные
     const filteredData = students.filter((student) =>
       Object.values(student).some((value) =>
-        value.toString().toLowerCase().includes(searchStudent.toLowerCase())
+        value != null && value.toString().toLowerCase().includes(searchStudent.toLowerCase())
       )
     );
   
