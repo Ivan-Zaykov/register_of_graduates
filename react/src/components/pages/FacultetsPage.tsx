@@ -5,7 +5,6 @@ import Header from "../Header";
 import { ReactComponent as StarIcon } from "../../pictures/star_icon.svg";
 import { ReactComponent as SearchIcon } from "../../pictures/search_icon.svg";
 
-
 const FacultetsPage = () => {
   const [faculties, setFaculties] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,7 +29,6 @@ const FacultetsPage = () => {
 
     fetchFaculties(); // Вызываем функцию
   }, []); // Пустой массив зависимостей означает, что эффект сработает один раз при монтировании
-
 
   const [sortConfig, setSortConfig] = useState({
     key: null,
@@ -57,14 +55,41 @@ const FacultetsPage = () => {
 
   const [searchFacult, setSearchFacult] = useState(""); //строка ввода
 
+  const [filteredFaculties, setFilteredFaculties] = useState([]); // отфильтрованные данные
+
+  useEffect(() => {
+    // При загрузке из API сразу отображаем все данные
+    setFilteredFaculties(faculties);
+  }, [faculties]);
+
+
   const handleSearchFacultChange = (event) => {
     setSearchFacult(event.target.value); // обновляем ввод
   };
 
+
   const handleSearchFacultSubmit = (event) => {
     event.preventDefault();
-    console.log("Поиск по факультетам:", searchFacult); // cохраняем введенную строку
+  
+    if (searchFacult.trim() === "") {
+      // Если строка поиска пуста, сбрасываем фильтр
+      setFilteredFaculties(faculties);
+      console.log("Поиск сброшен, отображаются все факультеты");
+      return;
+    }
+  
+    // Фильтруем данные
+    const filteredData = faculties.filter((faculty) =>
+      Object.values(faculty).some((value) =>
+        value.toString().toLowerCase().includes(searchFacult.toLowerCase())
+      )
+    );
+  
+    setFilteredFaculties(filteredData);
+    console.log("Поиск по факультетам:", searchFacult);
   };
+  
+
   if (loading) {
     return <div>Загрузка...</div>;
   }
@@ -75,36 +100,6 @@ const FacultetsPage = () => {
 
   return (
     <>
-      {/* <header className="header">
-        <NavLink
-          to="/"
-          className={({ isActive }) =>
-            isActive ? "nav-link active" : "nav-link"
-          }>
-          Главная
-        </NavLink>
-        <NavLink
-          to="/facultets"
-          className={({ isActive }) =>
-            isActive ? "nav-link active" : "nav-link"
-          }>
-          Факультеты
-        </NavLink>
-        <NavLink
-          to="/students"
-          className={({ isActive }) =>
-            isActive ? "nav-link active" : "nav-link"
-          }>
-          Студенты
-        </NavLink>
-        <NavLink
-          to="/departments"
-          className={({ isActive }) =>
-            isActive ? "nav-link active" : "nav-link"
-          }>
-          Кафедры
-        </NavLink>
-      </header> */}
       <Header />
       <div className="facult_content">
         <div className="header_line">
@@ -134,13 +129,19 @@ const FacultetsPage = () => {
           <table className="facult_table">
             <thead className="facult_thead">
               <tr className="facult_tr">
-                <th className="facult_th" onClick={() => requestSort("faculty_id")}>
+                <th
+                  className="facult_th"
+                  onClick={() => requestSort("faculty_id")}>
                   Идентификатор факультета
                 </th>
-                <th className="facult_th" onClick={() => requestSort("faculty_name")}>
+                <th
+                  className="facult_th"
+                  onClick={() => requestSort("faculty_name")}>
                   Наименование факультета
                 </th>
-                <th className="facult_th" onClick={() => requestSort("faculty_dean")}>
+                <th
+                  className="facult_th"
+                  onClick={() => requestSort("faculty_dean")}>
                   ФИО декана
                 </th>
                 <th
@@ -151,7 +152,8 @@ const FacultetsPage = () => {
               </tr>
             </thead>
             <tbody className="facult_tbody">
-              {sortedData.map((faculty) => (
+              {/* {sortedData.map((faculty) => ( */}
+              {filteredFaculties.map((faculty) => (
                 <tr className="facult_tr" key={faculty.faculty_id}>
                   <td className="facult_td">{faculty.faculty_id}</td>
                   <td className="facult_td">{faculty.faculty_name}</td>
@@ -182,7 +184,6 @@ const FacultetsPage = () => {
         </div>
       </div>
     </>
-
   );
 };
 

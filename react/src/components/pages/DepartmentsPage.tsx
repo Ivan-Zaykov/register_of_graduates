@@ -56,6 +56,8 @@ const DepartmentsPage = () => {
   //search field
 
   const [searchDepart, setSearchDepart] = useState(""); //строка ввода
+  const [filteredDeparts, setFilteredDeparts] = useState([]); // отфильтрованные данные
+  
 
   const handleSearchDepartChange = (event) => {
     setSearchDepart(event.target.value); // обновляем ввод
@@ -63,7 +65,23 @@ const DepartmentsPage = () => {
 
   const handleSearchDepartSubmit = (event) => {
     event.preventDefault();
-    console.log("Поиск по кафедрам:", searchDepart); // cохраняем введенную строку
+  
+    if (searchDepart.trim() === "") {
+      // Если строка поиска пуста, сбрасываем фильтр
+      setFilteredDeparts(departsData);
+      console.log("Поиск сброшен, отображаются все кафедры");
+      return;
+    }
+  
+    // Фильтруем данные
+    const filteredData = departsData.filter((department) =>
+      Object.values(department).some((value) =>
+        value.toString().toLowerCase().includes(searchDepart.toLowerCase())
+      )
+    );
+  
+    setFilteredDeparts(filteredData);
+    console.log("Поиск по кафедрам:", searchDepart);
   };
 
   if (loading) return <p>Loading...</p>;
@@ -71,37 +89,7 @@ const DepartmentsPage = () => {
 
   return (
     <>
-      {/* <header className="header">
-        <NavLink
-          to="/"
-          className={({ isActive }) =>
-            isActive ? "nav-link active" : "nav-link"
-          }>
-          Главная
-        </NavLink>
-        <NavLink
-          to="/facultets"
-          className={({ isActive }) =>
-            isActive ? "nav-link active" : "nav-link"
-          }>
-          Факультеты
-        </NavLink>
-        <NavLink
-          to="/students"
-          className={({ isActive }) =>
-            isActive ? "nav-link active" : "nav-link"
-          }>
-          Студенты
-        </NavLink>
-        <NavLink
-          to="/departments"
-          className={({ isActive }) =>
-            isActive ? "nav-link active" : "nav-link"
-          }>
-          Кафедры
-        </NavLink>
-      </header> */}
-      <Header /> 
+      <Header />
       <div className="depart_content">
         <div className="header_line">
           <div className="path_line">
@@ -130,13 +118,19 @@ const DepartmentsPage = () => {
           <table className="depart_table">
             <thead className="depart_thead">
               <tr className="depart_tr">
-                <th className="depart_th" onClick={() => requestSort("department_id")}>
+                <th
+                  className="depart_th"
+                  onClick={() => requestSort("department_id")}>
                   Идентификатор кафедры
                 </th>
-                <th className="depart_th" onClick={() => requestSort("department_name")}>
+                <th
+                  className="depart_th"
+                  onClick={() => requestSort("department_name")}>
                   Наименование кафедры
                 </th>
-                <th className="depart_th" onClick={() => requestSort("head_of_department")}>
+                <th
+                  className="depart_th"
+                  onClick={() => requestSort("head_of_department")}>
                   Заведующий кафедрой
                 </th>
                 <th className="depart_th" onClick={() => requestSort("deputy")}>
@@ -145,14 +139,15 @@ const DepartmentsPage = () => {
               </tr>
             </thead>
             <tbody className="depart_tbody">
-              {sortedData.map((department) => (
+              {/* {sortedData.map((department) => ( */}
+              {filteredDeparts.map((department) => (
                 <tr className="depart_tr" key={department.department_id}>
                   <td className="depart_td">{department.department_id}</td>
                   <td className="depart_td">{department.department_name}</td>
                   <td className="depart_td">{department.head_of_department}</td>
                   <td className="depart_td">{department.deputy}</td>
                 </tr>
-              ))}      
+              ))}
               <tr className="depart_tr">
                 <td className="depart_td"></td>
                 <td className="depart_td"></td>
