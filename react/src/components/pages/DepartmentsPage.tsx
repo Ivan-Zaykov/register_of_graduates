@@ -32,6 +32,11 @@ const DepartmentsPage = () => {
     fetchData();
   }, []); // Пустой массив означает, что эффект выполнится только при монтировании
 
+  useEffect(() => {
+    setFilteredDeparts(departsData);
+  }, [departsData]);
+
+
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",

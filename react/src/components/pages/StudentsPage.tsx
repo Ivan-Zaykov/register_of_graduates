@@ -41,6 +41,14 @@ const StudentsPage = () => {
     fetchStudents(); // Вызываем функцию при монтировании компонента
   }, []);
 
+
+   useEffect(() => {
+      // При загрузке из API сразу отображаем все данные
+      setFilteredStudents(students);
+    }, [students]);
+
+
+
   const sortedData = [...students].sort((a, b) => {
     if (sortConfig.key) {
       const order = sortConfig.direction === "ascending" ? 1 : -1;
