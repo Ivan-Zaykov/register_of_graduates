@@ -228,7 +228,7 @@
 
 .custom_modal_content {
   background-color: #E3E6E2;
-  padding: 10px;
+  padding: 20px;
   text-align: center;
   font-family: 'Cormorant Infant', serif;
   font-weight: bold;
@@ -258,6 +258,7 @@
 
 .confirm_button:hover {
   background-color:#d4aaaa;
+  color: black;
 }
 
 .cancel_button {
@@ -267,4 +268,5 @@
 
 .cancel_button:hover {
   background-color:#d2d4d0;
+  color: #AE1010;
 }

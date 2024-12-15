@@ -20,7 +20,14 @@ const StudentProfile = () => {
   const [error, setError] = useState(null); // Состояние для ошибок
   const [alert, setAlert] = useState(null);
 
-  
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ru-RU'); // Форматирует как "день.месяц.год"
+  };
+
+
+
   // Новое для модалки
   const [modal, setModal] = useState({
     isOpen: false,
@@ -182,9 +189,9 @@ const StudentProfile = () => {
             </Link>
             <StarIcon />
             <Link
-              to={`/students/${student.studentId}`}
+              to={`/students/${student.student_id}`}
               className="path_line_text">
-              {student.name}
+              {student.full_name}
             </Link>
           </div>
 
@@ -211,7 +218,6 @@ const StudentProfile = () => {
 
               <div className="picture_block">
                 <img
-                  // src={student.image}
                   src={student.image}
                   alt={student.name}
                   className="student_photo"
@@ -254,12 +260,18 @@ const StudentProfile = () => {
 
               <div className="table_line">
                 <div className="title">Дата создания:</div>
-                <div className="data">{student.created_at}</div>
+                <div className="data">
+                {/* {student.created_at} */}
+                {formatDate(student.created_at)}
+                </div>
               </div>
 
               <div className="table_line last_line">
                 <div className="title">Дата обновления:</div>
-                <div className="data">{student.updated_at}</div>
+                <div className="data">
+                  {/* {student.updated_at} */}
+                  {formatDate(student.updated_at)}
+                </div>
               </div>
             </div>
           </div>
@@ -278,7 +290,8 @@ const StudentProfile = () => {
                 <tr className="bottom_table_line">
                   <td
                     className="bottom_data_title"
-                    style={{ lineHeight: "1.4" }}>
+                    style={{ lineHeight: "1.4" }}
+                    >
                     Научный руководитель <br></br> курсовой работы:
                   </td>
                   <td className="bottom_data_info">
@@ -310,13 +323,13 @@ const StudentProfile = () => {
                   </td>
                 </tr>
                 <tr className="bottom_table_line">
-                  <td className="bottom_data_title">
-                    Название дипломной работы:{" "}
+                  <td className="bottom_data_title" style={{ lineHeight: "1.4" }}>
+                    Название дипломной работы:
                   </td>
                   <td className="bottom_data_info">{student.diploma_title}</td>
                 </tr>
                 <tr className="bottom_table_line">
-                  <td className="bottom_data_title">
+                  <td className="bottom_data_title" style={{ lineHeight: "1.4" }}>
                     Оценка за дипломную работу:
                   </td>
                   <td className="bottom_data_info">{student.diploma_grade}</td>

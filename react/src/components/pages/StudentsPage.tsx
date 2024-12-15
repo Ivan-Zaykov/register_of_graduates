@@ -18,6 +18,8 @@ const StudentsPage = () => {
 
   const [searchStudent, setSearchStudent] = useState("");
 
+  const [filteredStudents, setFilteredStudents] = useState([]); // отфильтрованные данные
+  
 
   useEffect(() => {
     // Функция для получения данных
@@ -38,6 +40,14 @@ const StudentsPage = () => {
 
     fetchStudents(); // Вызываем функцию при монтировании компонента
   }, []);
+
+
+   useEffect(() => {
+      // При загрузке из API сразу отображаем все данные
+      setFilteredStudents(students);
+    }, [students]);
+
+
 
   const sortedData = [...students].sort((a, b) => {
     if (sortConfig.key) {
@@ -63,10 +73,37 @@ const StudentsPage = () => {
     setSearchStudent(event.target.value); // обновляем ввод
   };
 
+
   const handleSearchStudentSubmit = (event) => {
     event.preventDefault();
-    console.log("Поиск по студентам:", searchStudent); // cохраняем введенную строку
+  
+    if (searchStudent.trim() === "") {
+      // Если строка поиска пуста, сбрасываем фильтр
+      setFilteredStudents(students);
+      console.log("Поиск сброшен, отображаются все студенты");
+      return;
+    }
+  
+    // Фильтруем данные
+    const filteredData = students.filter((student) =>
+      Object.values(student).some((value) =>
+        value != null && value.toString().toLowerCase().includes(searchStudent.toLowerCase())
+      )
+    );
+  
+    setFilteredStudents(filteredData);
+    console.log("Поиск по студентам:", searchStudent);
   };
+
+
+  const sortedAndFilteredData = [...filteredStudents].sort((a, b) => {
+    if (sortConfig.key) {
+      const order = sortConfig.direction === "ascending" ? 1 : -1;
+      return a[sortConfig.key] > b[sortConfig.key] ? order : -order;
+    }
+    return 0;
+  });
+
 
   return (
     <>
@@ -162,7 +199,9 @@ const StudentsPage = () => {
               </tr>
             </thead>
             <tbody className="student_tbody">
-              {sortedData.map((student) => (
+              {/* {sortedData.map((student) => ( */}
+              {/* {filteredStudents.map((student) => ( */}
+              {sortedAndFilteredData.map((student) => (
                 <tr className="student_tr" key={student.student_id}>
                   <td className="student_td">
                     {/* <Link to={`/students/${student.id}`}>{student.id}</Link> */}

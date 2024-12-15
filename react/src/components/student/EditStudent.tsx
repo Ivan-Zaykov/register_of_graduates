@@ -33,6 +33,12 @@ const EditStudent = () => {
     }
   };
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ru-RU'); // Форматирует как "день.месяц.год"
+  };
+  
+
 
   const [editableStudent, setEditableStudent] = useState({
     name: student.name,
@@ -107,7 +113,7 @@ const EditStudent = () => {
               // Новая информация идет в консоль, из-за перехода назад может быть не видно,
               // так что пока закомментируй эту строчку
               onClick={handleSave}
-              style={{ textDecoration: "none" }}>
+              style={{ textDecoration: "none", color: "inherit"}}>
               Сохранить
             </a>
             <div className="student_profile_top_wrapper">
@@ -115,7 +121,7 @@ const EditStudent = () => {
                 <a
                   className="edit_student_cancel_button"
                   href={`/students/${studentId}`}
-                  style={{ textDecoration: "none" }}>
+                  style={{ textDecoration: "none", color: "#AE1010" }}>
                   Отмена
                 </a>
 
@@ -212,12 +218,18 @@ const EditStudent = () => {
 
                 <div className="table_line">
                   <div className="title">Дата создания:</div>
-                  <div className="data">{student.creationDate}</div>
+                  <div className="data">
+                    {student.creationDate}
+                    {/* {formatDate(student.created_at)} */}
+                  </div>
                 </div>
 
                 <div className="table_line last_line">
                   <div className="title">Дата обновления:</div>
-                  <div className="data">{student.updateDate}</div>
+                  <div className="data">
+                    {student.updateDate}
+                    {/* {formatDate(student.updated_at)} */}
+                  </div>
                 </div>
               </div>
             </div>
@@ -309,8 +321,8 @@ const EditStudent = () => {
                   </td>
                 </tr>
                 <tr className="bottom_table_line">
-                  <td className="bottom_data_title">
-                    Название дипломной работы:
+                  <td className="bottom_data_title" style={{ lineHeight: "1.4" }}>
+                    Название дипломной <br></br> работы:
                   </td>
                   <td className="bottom_data_info">
                     {/* {student.diplomaTitle} */}
@@ -325,8 +337,8 @@ const EditStudent = () => {
                   </td>
                 </tr>
                 <tr className="bottom_table_line">
-                  <td className="bottom_data_title">
-                    Оценка за дипломную работу:
+                  <td className="bottom_data_title" style={{ lineHeight: "1.4" }}>
+                    Оценка за дипломную <br></br> работу:
                   </td>
                   <td className="bottom_data_info">
                     {/* {student.diplomaGrade} */}
