@@ -35,7 +35,7 @@ const FacultetsPage = () => {
     direction: "ascending",
   });
 
-  const sortedData = [...data].sort((a, b) => {
+  const sortedData = [...faculties].sort((a, b) => {
     if (sortConfig.key) {
       const order = sortConfig.direction === "ascending" ? 1 : -1;
       return a[sortConfig.key] > b[sortConfig.key] ? order : -order;
@@ -62,7 +62,6 @@ const FacultetsPage = () => {
     setFilteredFaculties(faculties);
   }, [faculties]);
 
-
   const handleSearchFacultChange = (event) => {
     setSearchFacult(event.target.value); // обновляем ввод
   };
@@ -70,25 +69,25 @@ const FacultetsPage = () => {
 
   const handleSearchFacultSubmit = (event) => {
     event.preventDefault();
-  
+
     if (searchFacult.trim() === "") {
       // Если строка поиска пуста, сбрасываем фильтр
       setFilteredFaculties(faculties);
       console.log("Поиск сброшен, отображаются все факультеты");
       return;
     }
-  
+
     // Фильтруем данные
     const filteredData = faculties.filter((faculty) =>
       Object.values(faculty).some((value) =>
         value.toString().toLowerCase().includes(searchFacult.toLowerCase())
       )
     );
-  
+
     setFilteredFaculties(filteredData);
     console.log("Поиск по факультетам:", searchFacult);
   };
-  
+
 
   const sortedAndFilteredData = [...filteredFaculties].sort((a, b) => {
     if (sortConfig.key) {
