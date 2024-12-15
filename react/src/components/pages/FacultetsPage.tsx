@@ -90,6 +90,15 @@ const FacultetsPage = () => {
   };
   
 
+  const sortedAndFilteredData = [...filteredFaculties].sort((a, b) => {
+    if (sortConfig.key) {
+      const order = sortConfig.direction === "ascending" ? 1 : -1;
+      return a[sortConfig.key] > b[sortConfig.key] ? order : -order;
+    }
+    return 0;
+  });
+
+
   if (loading) {
     return <div>Загрузка...</div>;
   }
@@ -153,7 +162,8 @@ const FacultetsPage = () => {
             </thead>
             <tbody className="facult_tbody">
               {/* {sortedData.map((faculty) => ( */}
-              {filteredFaculties.map((faculty) => (
+              {/* {filteredFaculties.map((faculty) => ( */}
+              {sortedAndFilteredData.map((faculty) => (
                 <tr className="facult_tr" key={faculty.faculty_id}>
                   <td className="facult_td">{faculty.faculty_id}</td>
                   <td className="facult_td">{faculty.faculty_name}</td>
