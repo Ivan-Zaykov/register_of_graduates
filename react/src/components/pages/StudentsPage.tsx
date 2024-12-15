@@ -96,6 +96,14 @@ const StudentsPage = () => {
   };
 
 
+  const sortedAndFilteredData = [...filteredStudents].sort((a, b) => {
+    if (sortConfig.key) {
+      const order = sortConfig.direction === "ascending" ? 1 : -1;
+      return a[sortConfig.key] > b[sortConfig.key] ? order : -order;
+    }
+    return 0;
+  });
+
 
   return (
     <>
@@ -192,7 +200,8 @@ const StudentsPage = () => {
             </thead>
             <tbody className="student_tbody">
               {/* {sortedData.map((student) => ( */}
-              {filteredStudents.map((student) => (
+              {/* {filteredStudents.map((student) => ( */}
+              {sortedAndFilteredData.map((student) => (
                 <tr className="student_tr" key={student.student_id}>
                   <td className="student_td">
                     {/* <Link to={`/students/${student.id}`}>{student.id}</Link> */}

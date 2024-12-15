@@ -89,6 +89,14 @@ const DepartmentsPage = () => {
     console.log("Поиск по кафедрам:", searchDepart);
   };
 
+  const sortedAndFilteredData = [...filteredDeparts].sort((a, b) => {
+    if (sortConfig.key) {
+      const order = sortConfig.direction === "ascending" ? 1 : -1;
+      return a[sortConfig.key] > b[sortConfig.key] ? order : -order;
+    }
+    return 0;
+  });
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
 
@@ -145,7 +153,7 @@ const DepartmentsPage = () => {
             </thead>
             <tbody className="depart_tbody">
               {/* {sortedData.map((department) => ( */}
-              {filteredDeparts.map((department) => (
+              {sortedAndFilteredData.map((department) => (
                 <tr className="depart_tr" key={department.department_id}>
                   <td className="depart_td">{department.department_id}</td>
                   <td className="depart_td">{department.department_name}</td>
