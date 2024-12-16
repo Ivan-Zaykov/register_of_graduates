@@ -171,18 +171,6 @@ const FacultetsPage = () => {
                 </tr>
               ))}
               <tr className="facult_tr">
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-              </tr>
-              <tr className="facult_tr">
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-                <td className="facult_td"></td>
-              </tr>
-              <tr className="facult_tr">
                 <td className="facult_td bottom_td"></td>
                 <td className="facult_td bottom_td"></td>
                 <td className="facult_td bottom_td"></td>

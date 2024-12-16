@@ -162,18 +162,6 @@ const DepartmentsPage = () => {
                 </tr>
               ))}
               <tr className="depart_tr">
-                <td className="depart_td"></td>
-                <td className="depart_td"></td>
-                <td className="depart_td"></td>
-                <td className="depart_td"></td>
-              </tr>
-              <tr className="depart_tr">
-                <td className="depart_td"></td>
-                <td className="depart_td"></td>
-                <td className="depart_td"></td>
-                <td className="depart_td"></td>
-              </tr>
-              <tr className="depart_tr">
                 <td className="depart_td bottom_td"></td>
                 <td className="depart_td bottom_td"></td>
                 <td className="depart_td bottom_td"></td>

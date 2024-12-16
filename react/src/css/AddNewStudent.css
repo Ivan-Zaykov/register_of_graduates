@@ -40,3 +40,45 @@
     color: #ae1010;
     font-weight: bold;
 }
+
+
+/* ------------------------------------------------- */
+.add_student_select {
+    border: none;
+    font-size: 22px;
+    padding-right: 5px;
+    text-align: right;
+    cursor: pointer;
+    box-sizing: border-box;
+    background-color: transparent;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+.add_student_select:focus {
+    outline: none; 
+    border: none;  
+}
+
+.add_student_select_grade {
+    width: 225px;
+}
+
+.add_student_select_level {
+    width: 230px;
+}
+
+.add_student_select_success {
+    width: 275px;
+}
+
+
+
+
+
+
+
+
+
