@@ -55,7 +55,7 @@
   font-weight: bold;
 }
 
-.student_table tbody .bottom_td {
+.student_table tbody .bottom_td td {
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
 }
