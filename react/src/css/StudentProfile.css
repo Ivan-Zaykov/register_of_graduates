@@ -23,6 +23,7 @@
 .student_profile_content {
   margin: 0 60px;
   /* border: 1px solid red; */
+  zoom: 0.95;
 }
 
 .student_profile_wrapper {

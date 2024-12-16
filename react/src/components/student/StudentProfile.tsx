@@ -288,7 +288,8 @@ const StudentProfile = () => {
                     Кафедра:
                   </td>
                   <td className="bottom_data_info bottom_data_title_first_right">
-                    {student.department_id}
+                    {/* {student.department_id} */}
+                    {student.department_name}
                   </td>
                 </tr>
                 <tr className="bottom_table_line">
