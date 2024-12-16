@@ -201,8 +201,14 @@ const StudentsPage = () => {
             <tbody className="student_tbody">
               {/* {sortedData.map((student) => ( */}
               {/* {filteredStudents.map((student) => ( */}
-              {sortedAndFilteredData.map((student) => (
-                <tr className="student_tr" key={student.student_id}>
+              {sortedAndFilteredData.map((student, index) => (
+                 <tr
+                 className={`student_tr ${
+                   index === sortedAndFilteredData.length - 1 ? "bottom_td" : ""
+                 }`}
+                 key={student.student_id}
+               >
+                {/* <tr className="student_tr" key={student.student_id}> */}
                   <td className="student_td">
                     {/* <Link to={`/students/${student.id}`}>{student.id}</Link> */}
                     <a
@@ -229,14 +235,6 @@ const StudentsPage = () => {
                   </td>
                 </tr>
               ))}
-              <tr className="student_tr">
-                <td className="student_td bottom_td"></td>
-                <td className="student_td bottom_td"></td>
-                <td className="student_td bottom_td"></td>
-                <td className="student_td bottom_td"></td>
-                <td className="student_td bottom_td"></td>
-                <td className="student_td bottom_td"></td>
-              </tr>
             </tbody>
           </table>
         </div>

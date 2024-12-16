@@ -45,8 +45,16 @@
   border-bottom: 5px solid #e3e6e2;
 }
 
-.depart_table tbody .bottom_td {
+/* .depart_table tbody .bottom_td {
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
   height: 15px;
+} */
+
+.depart_table tbody .bottom_td td:first-child {
+  border-bottom-left-radius: 20px;
+}
+
+.depart_table tbody .bottom_td td:last-child {
+  border-bottom-right-radius: 20px;
 }
