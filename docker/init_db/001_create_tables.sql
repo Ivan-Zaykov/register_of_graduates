@@ -10,6 +10,7 @@ CREATE TABLE Departments (
                              faculty_id UUID,
                              department_name VARCHAR(100),
                              head_of_department VARCHAR(100),
+                             department_substitute VARCHAR(100),
                              FOREIGN KEY (faculty_id) REFERENCES Faculty (faculty_id)
 );
 

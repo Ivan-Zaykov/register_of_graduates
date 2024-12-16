@@ -10,10 +10,11 @@ import (
 )
 
 type Department struct {
-	DepartmentID     uuid.UUID `json:"department_id"`
-	FacultyID        uuid.UUID `json:"faculty_id"`
-	DepartmentName   string    `json:"department_name"`
-	HeadOfDepartment string    `json:"head_of_department"`
+	DepartmentID         uuid.UUID `json:"department_id"`
+	FacultyID            uuid.UUID `json:"faculty_id"`
+	DepartmentName       string    `json:"department_name"`
+	HeadOfDepartment     string    `json:"head_of_department"`
+	DepartmentSubstitute string    `json:"department_substitute"`
 }
 
 func GetAllDepartmentHandler(conn *pgx.Conn) http.HandlerFunc {
@@ -25,7 +26,8 @@ func GetAllDepartmentHandler(conn *pgx.Conn) http.HandlerFunc {
              department_id,
              faculty_id,
              department_name,
-             head_of_department
+             head_of_department,
+             department_substitute
         FROM departments
     `
 
@@ -46,6 +48,7 @@ func GetAllDepartmentHandler(conn *pgx.Conn) http.HandlerFunc {
 				&department.FacultyID,
 				&department.DepartmentName,
 				&department.HeadOfDepartment,
+				&department.DepartmentSubstitute,
 			)
 			if err != nil {
 				http.Error(w, "Error scanning rows", http.StatusInternalServerError)
