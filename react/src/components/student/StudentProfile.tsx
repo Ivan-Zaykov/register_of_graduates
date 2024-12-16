@@ -26,6 +26,10 @@ const StudentProfile = () => {
     return date.toLocaleDateString('ru-RU'); // Форматирует как "день.месяц.год"
   };
 
+  const extractYear = (dateString) => {
+    return new Date(dateString).getFullYear();
+  };
+
 
 
   // Новое для модалки
@@ -245,7 +249,7 @@ const StudentProfile = () => {
 
               <div className="table_line">
                 <div className="title">Год поступления:</div>
-                <div className="data">{student.enrollment_date}</div>
+                <div className="data">{extractYear(student.enrollment_date)}</div>
               </div>
 
               <div className="table_line">
@@ -336,7 +340,7 @@ const StudentProfile = () => {
                 </tr>
                 <tr className="bottom_table_line">
                   <td className="bottom_data_title">Год окончания:</td>
-                  <td className="bottom_data_info">{student.graduation_date}</td>
+                  <td className="bottom_data_info">{extractYear(student.graduation_date)}</td>
                 </tr>
 
                 <tr className="bottom_table_line">

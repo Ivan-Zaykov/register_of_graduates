@@ -54,7 +54,7 @@ body {
 
 
 .main_pict {
-  width: 42.5%;
+  width: 40.4%;
 }
 
 .project_students_block {
@@ -80,7 +80,7 @@ body {
 
 .list_item {
   /* border: 1px solid purple; */
-  padding: 12px;
+  padding: 15px;
   text-align: left;
 }
 
@@ -195,7 +195,7 @@ body {
 
 .table_wrapper {
   margin-top: 10px;
-  max-height: 75vh;
+  max-height: 70vh;
   overflow-y: auto;
 }
 
