@@ -45,7 +45,7 @@ const AddNewStudent = () => {
     studentId: "",
     yearOfAdmission: "",
     level: "",
-    archive: "Нет (по дефолту, если что - добавим туда)",
+    archive: "Нет",
     department: "",
     courseSupervisor: "",
     courseWorkTitle: "",
