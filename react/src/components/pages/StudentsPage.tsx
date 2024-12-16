@@ -40,10 +40,13 @@ const StudentsPage = () => {
     fetchStudents(); // Вызываем функцию при монтировании компонента
   }, []);
 
-  useEffect(() => {
-    // При загрузке из API сразу отображаем все данные
-    setFilteredStudents(students);
-  }, [students]);
+
+   useEffect(() => {
+      // При загрузке из API сразу отображаем все данные
+      setFilteredStudents(students);
+    }, [students]);
+
+
 
   const sortedData = [...students].sort((a, b) => {
     if (sortConfig.key) {
@@ -200,44 +203,42 @@ const StudentsPage = () => {
               </tr>
             </thead>
             <tbody className="student_tbody">
-              
-              {sortedAndFilteredData.length > 0 ? (
-                sortedAndFilteredData.map((student, index) => (
-                  <tr
-                    className={`student_tr ${
-                      index === sortedAndFilteredData.length - 1
-                        ? "bottom_td"
-                        : ""
-                    }`}
-                    key={student.student_id}>
-                    <td className="student_td">
-                      <a href={`/students/${student.student_id}`}>
-                        {student.ticket_number}
-                      </a>
-                    </td>
-                    <td className="student_td">
-                      <a href={`/students/${student.student_id}`}>
-                        {student.full_name}
-                      </a>
-                    </td>
-                    <td className="student_td">{student.education_level}</td>
-                    <td className="student_td">{student.faculty_name}</td>
-                    <td className="student_td">{student.department_name}</td>
-                    <td className="student_td">
-                      {student.is_archived ? "Да" : "Нет"}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr className="student_tr">
-                  <td className="student_td alone_td"></td>
-                  <td className="student_td alone_td"></td>
-                  <td className="student_td alone_td"></td>
-                  <td className="student_td alone_td"></td>
-                  <td className="student_td alone_td"></td>
-                  <td className="student_td alone_td"></td>
+              {/* {sortedData.map((student) => ( */}
+              {/* {filteredStudents.map((student) => ( */}
+              {sortedAndFilteredData.map((student, index) => (
+                 <tr
+                 className={`student_tr ${
+                   index === sortedAndFilteredData.length - 1 ? "bottom_td" : ""
+                 }`}
+                 key={student.student_id}
+               >
+                {/* <tr className="student_tr" key={student.student_id}> */}
+                  <td className="student_td">
+                    {/* <Link to={`/students/${student.id}`}>{student.id}</Link> */}
+                    <a
+                      href={`/students/${student.student_id}`}
+                      // target="_blank"
+                    >
+                      {student.ticket_number}
+                    </a>
+                  </td>
+                  <td className="student_td">
+                    {/* <Link to={`/students/${student.id}`}>{student.name}</Link> */}
+                    <a
+                      href={`/students/${student.student_id}`}
+                      // target="_blank"
+                    >
+                      {student.full_name}
+                    </a>
+                  </td>
+                  <td className="student_td">{student.education_level}</td>
+                  <td className="student_td">{student.faculty_name}</td>
+                  <td className="student_td">{student.department_name}</td>
+                  <td className="student_td">
+                    {student.is_archived? "Да" : "Нет"}
+                  </td>
                 </tr>
-              )}
+              ))}
             </tbody>
           </table>
         </div>
