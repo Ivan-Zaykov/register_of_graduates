@@ -234,6 +234,8 @@ const StudentsPage = () => {
                   <td className="student_td alone_td"></td>
                   <td className="student_td alone_td"></td>
                   <td className="student_td alone_td"></td>
+                  <td className="student_td alone_td"></td>
+                  <td className="student_td alone_td"></td>
                 </tr>
               )}
             </tbody>
