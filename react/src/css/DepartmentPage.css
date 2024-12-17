@@ -58,3 +58,11 @@
 .depart_table tbody .bottom_td td:last-child {
   border-bottom-right-radius: 20px;
 }
+
+
+.depart_table tbody .alone_td {
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  padding: 12px;
+  height: 50px;
+}

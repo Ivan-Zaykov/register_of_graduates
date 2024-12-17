@@ -19,7 +19,6 @@ const StudentsPage = () => {
   const [searchStudent, setSearchStudent] = useState("");
 
   const [filteredStudents, setFilteredStudents] = useState([]); // отфильтрованные данные
-  
 
   useEffect(() => {
     // Функция для получения данных
@@ -41,13 +40,10 @@ const StudentsPage = () => {
     fetchStudents(); // Вызываем функцию при монтировании компонента
   }, []);
 
-
-   useEffect(() => {
-      // При загрузке из API сразу отображаем все данные
-      setFilteredStudents(students);
-    }, [students]);
-
-
+  useEffect(() => {
+    // При загрузке из API сразу отображаем все данные
+    setFilteredStudents(students);
+  }, [students]);
 
   const sortedData = [...students].sort((a, b) => {
     if (sortConfig.key) {
@@ -73,28 +69,28 @@ const StudentsPage = () => {
     setSearchStudent(event.target.value); // обновляем ввод
   };
 
-
   const handleSearchStudentSubmit = (event) => {
     event.preventDefault();
-  
+
     if (searchStudent.trim() === "") {
       // Если строка поиска пуста, сбрасываем фильтр
       setFilteredStudents(students);
       console.log("Поиск сброшен, отображаются все студенты");
       return;
     }
-  
+
     // Фильтруем данные
     const filteredData = students.filter((student) =>
-      Object.values(student).some((value) =>
-        value != null && value.toString().toLowerCase().includes(searchStudent.toLowerCase())
+      Object.values(student).some(
+        (value) =>
+          value != null &&
+          value.toString().toLowerCase().includes(searchStudent.toLowerCase())
       )
     );
-  
+
     setFilteredStudents(filteredData);
     console.log("Поиск по студентам:", searchStudent);
   };
-
 
   const sortedAndFilteredData = [...filteredStudents].sort((a, b) => {
     if (sortConfig.key) {
@@ -103,7 +99,6 @@ const StudentsPage = () => {
     }
     return 0;
   });
-
 
   return (
     <>
@@ -172,13 +167,19 @@ const StudentsPage = () => {
           <table className="student_table">
             <thead className="student_thead">
               <tr className="student_tr">
-                <th className="student_th" onClick={() => requestSort("ticket_number")}>
+                <th
+                  className="student_th"
+                  onClick={() => requestSort("ticket_number")}>
                   Номер студенческого
                 </th>
-                <th className="student_th" onClick={() => requestSort("full_name")}>
+                <th
+                  className="student_th"
+                  onClick={() => requestSort("full_name")}>
                   ФИО
                 </th>
-                <th className="student_th" onClick={() => requestSort("education_level")}>
+                <th
+                  className="student_th"
+                  onClick={() => requestSort("education_level")}>
                   Ступень обучения
                 </th>
                 <th
@@ -199,42 +200,42 @@ const StudentsPage = () => {
               </tr>
             </thead>
             <tbody className="student_tbody">
-              {/* {sortedData.map((student) => ( */}
-              {/* {filteredStudents.map((student) => ( */}
-              {sortedAndFilteredData.map((student, index) => (
-                 <tr
-                 className={`student_tr ${
-                   index === sortedAndFilteredData.length - 1 ? "bottom_td" : ""
-                 }`}
-                 key={student.student_id}
-               >
-                {/* <tr className="student_tr" key={student.student_id}> */}
-                  <td className="student_td">
-                    {/* <Link to={`/students/${student.id}`}>{student.id}</Link> */}
-                    <a
-                      href={`/students/${student.student_id}`}
-                      // target="_blank"
-                    >
-                      {student.ticket_number}
-                    </a>
-                  </td>
-                  <td className="student_td">
-                    {/* <Link to={`/students/${student.id}`}>{student.name}</Link> */}
-                    <a
-                      href={`/students/${student.student_id}`}
-                      // target="_blank"
-                    >
-                      {student.full_name}
-                    </a>
-                  </td>
-                  <td className="student_td">{student.education_level}</td>
-                  <td className="student_td">{student.faculty_name}</td>
-                  <td className="student_td">{student.department_name}</td>
-                  <td className="student_td">
-                    {student.is_archived? "Да" : "Нет"}
-                  </td>
+              
+              {sortedAndFilteredData.length > 0 ? (
+                sortedAndFilteredData.map((student, index) => (
+                  <tr
+                    className={`student_tr ${
+                      index === sortedAndFilteredData.length - 1
+                        ? "bottom_td"
+                        : ""
+                    }`}
+                    key={student.student_id}>
+                    <td className="student_td">
+                      <a href={`/students/${student.student_id}`}>
+                        {student.ticket_number}
+                      </a>
+                    </td>
+                    <td className="student_td">
+                      <a href={`/students/${student.student_id}`}>
+                        {student.full_name}
+                      </a>
+                    </td>
+                    <td className="student_td">{student.education_level}</td>
+                    <td className="student_td">{student.faculty_name}</td>
+                    <td className="student_td">{student.department_name}</td>
+                    <td className="student_td">
+                      {student.is_archived ? "Да" : "Нет"}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr className="student_tr">
+                  <td className="student_td alone_td"></td>
+                  <td className="student_td alone_td"></td>
+                  <td className="student_td alone_td"></td>
+                  <td className="student_td alone_td"></td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
