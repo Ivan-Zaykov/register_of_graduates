@@ -46,12 +46,17 @@
   border-bottom: 5px solid #e3e6e2;
 }
 
-.facult_table tbody .bottom_td {
+.facult_table tbody .bottom_td td {
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+
+
+.facult_table tbody .alone_td {
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
   padding: 12px;
-  height: 14px;
+  height: 50px;
 }
-
 
 

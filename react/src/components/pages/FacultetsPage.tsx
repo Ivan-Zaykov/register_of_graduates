@@ -157,7 +157,10 @@ const FacultetsPage = () => {
               </tr>
             </thead>
             <tbody className="facult_tbody">
-              {/* {sortedAndFilteredData.map((faculty, index) => (
+              {/* {sortedData.map((faculty) => ( */}
+              {/* {filteredFaculties.map((faculty) => ( */}
+              {sortedAndFilteredData.map((faculty, index) => (
+                // <tr className="facult_tr" key={faculty.faculty_id}>
                 <tr
                   // className={`facult_tr ${
                   //   index === sortedAndFilteredData.length - 1
@@ -165,24 +168,24 @@ const FacultetsPage = () => {
                   //     : ""
                   // }`}
                   className="facult_tr"
-                  key={faculty.faculty_id}
-                >
+                  key={faculty.faculty_id}>
                   <td className="facult_td">{faculty.faculty_id}</td>
                   <td className="facult_td">{faculty.faculty_name}</td>
                   <td className="facult_td">{faculty.faculty_dean}</td>
                   <td className="facult_td">{faculty.faculty_substitute}</td>
                 </tr>
-                  <tr className="facult_tr" >
-                  <td className="facult_td bottom_td"></td>
-                  <td className="facult_td bottom_td"></td>
-                  <td className="facult_td bottom_td"></td>
-                  <td className="facult_td bottom_td"></td>
-                </tr>
-              ))} */}
+              ))}
 
               {sortedAndFilteredData.length > 0 ? (
-                sortedAndFilteredData.map((faculty) => (
-                  <tr className="facult_tr" key={faculty.faculty_id}>
+                sortedAndFilteredData.map((faculty, index) => (
+                  <tr
+                    className={`facult_tr ${
+                      index === sortedAndFilteredData.length - 1
+                        ? "bottom_td"
+                        : ""
+                    }`}
+                    key={faculty.faculty_id}
+                  >
                     <td className="facult_td">{faculty.faculty_id}</td>
                     <td className="facult_td">{faculty.faculty_name}</td>
                     <td className="facult_td">{faculty.faculty_dean}</td>
@@ -191,10 +194,10 @@ const FacultetsPage = () => {
                 ))
               ) : (
                 <tr className="facult_tr">
-                  <td className="facult_td bottom_td"></td>
-                  <td className="facult_td bottom_td"></td>
-                  <td className="facult_td bottom_td"></td>
-                  <td className="facult_td bottom_td"></td>
+                  <td className="facult_td alone_td"></td>
+                  <td className="facult_td alone_td"></td>
+                  <td className="facult_td alone_td"></td>
+                  <td className="facult_td alone_td"></td>
                 </tr>
               )}
             </tbody>
