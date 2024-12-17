@@ -104,7 +104,6 @@ const AddNewStudent = () => {
       setAlert({
         message: "Студент успешно создан.",
       });
-      // window.location.href = "/students";
 
       // Добавить логику сохранения данных
     }
@@ -113,6 +112,13 @@ const AddNewStudent = () => {
   const handleAlertClose = () => {
     setAlert(null); // Закрытие alert
   };
+
+  // ДОБАВИТЬ!!!!!!
+  // ЕСЛИ НОМЕР СТУДЕНЧЕСКОГО У НОВОГО СТУДЕНТА НЕ УНИКАЛЬНЫЙ
+  // setAlert({
+  //   message: "Номер студенческого должен быть уникальным!",
+  // });
+
 
   return (
     <>
@@ -138,7 +144,7 @@ const AddNewStudent = () => {
                   className="edit_student_cancel_button"
                   href="/students"
                   style={{ textDecoration: "none", color: "#AE1010" }}>
-                  Отмена
+                  Все студенты
                 </a>
 
                 <div className="picture_block">

@@ -145,7 +145,7 @@ const StudentsPage = () => {
           </div>
 
           <div className="add_and_input_block">
-            <a href="/students/add_new_student">
+            <a href="/students/add_new_student" target="_blank">
               <AddStudentIcon className="add_icon" />
             </a>
 
