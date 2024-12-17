@@ -36,7 +36,6 @@ const DepartmentsPage = () => {
     setFilteredDeparts(departsData);
   }, [departsData]);
 
-
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",
@@ -62,7 +61,6 @@ const DepartmentsPage = () => {
 
   const [searchDepart, setSearchDepart] = useState(""); //строка ввода
   const [filteredDeparts, setFilteredDeparts] = useState([]); // отфильтрованные данные
-  
 
   const handleSearchDepartChange = (event) => {
     setSearchDepart(event.target.value); // обновляем ввод
@@ -70,21 +68,21 @@ const DepartmentsPage = () => {
 
   const handleSearchDepartSubmit = (event) => {
     event.preventDefault();
-  
+
     if (searchDepart.trim() === "") {
       // Если строка поиска пуста, сбрасываем фильтр
       setFilteredDeparts(departsData);
       console.log("Поиск сброшен, отображаются все кафедры");
       return;
     }
-  
+
     // Фильтруем данные
     const filteredData = departsData.filter((department) =>
       Object.values(department).some((value) =>
         value.toString().toLowerCase().includes(searchDepart.toLowerCase())
       )
     );
-  
+
     setFilteredDeparts(filteredData);
     console.log("Поиск по кафедрам:", searchDepart);
   };
@@ -152,21 +150,30 @@ const DepartmentsPage = () => {
               </tr>
             </thead>
             <tbody className="depart_tbody">
-              {/* {sortedData.map((department) => ( */}
-              {sortedAndFilteredData.map((department, index) => (
-                <tr
-                  className={`depart_tr ${
-                    index === sortedAndFilteredData.length - 1 ? "bottom_td" : ""
-                  }`}
-                  key={department.department_id}
-                >
-                {/* <tr className="depart_tr" key={department.department_id}> */}
-                  <td className="depart_td">{department.department_id}</td>
-                  <td className="depart_td">{department.department_name}</td>
-                  <td className="depart_td">{department.head_of_department}</td>
-                  <td className="depart_td">{department.deputy}</td>
+
+              {sortedAndFilteredData.length > 0 ? (
+                sortedAndFilteredData.map((department, index) => (
+                  <tr
+                    className={`depart_tr ${
+                      index === sortedAndFilteredData.length - 1
+                        ? "bottom_td"
+                        : ""
+                    }`}
+                    key={department.department_id}>
+                    <td className="depart_td">{department.department_id}</td>
+                    <td className="depart_td">{department.department_name}</td>
+                    <td className="depart_td">{department.head_of_department}</td>
+                    <td className="depart_td">{department.deputy}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr className="depart_tr">
+                  <td className="depart_td alone_td"></td>
+                  <td className="depart_td alone_td"></td>
+                  <td className="depart_td alone_td"></td>
+                  <td className="depart_td alone_td"></td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
