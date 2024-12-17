@@ -180,7 +180,13 @@ const AddNewStudent = () => {
                     placeholder="Введите номер..."
                     name="studentId"
                     value={addNewStudent.studentId}
-                    onChange={handleInputChange}
+                    // onChange={handleInputChange}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value.length <= 7) {
+                        handleInputChange(e); // Разрешаем изменение, только если длина <= 7
+                      }
+                    }}
                     className="add_student_input"
                   />
                 </div>
