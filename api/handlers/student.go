@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"api/utils"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -14,26 +15,26 @@ import (
 )
 
 type Student struct {
-	StudentID         uuid.UUID  `json:"student_id"`
-	FacultyID         uuid.UUID  `json:"faculty_id"`
-	FacultyName       string     `json:"faculty_name"`
-	DepartmentID      uuid.UUID  `json:"department_id"`
-	DepartmentName    string     `json:"department_name"`
-	TicketNumber      string     `json:"ticket_number"`
-	FullName          string     `json:"full_name"`
-	EnrollmentDate    *time.Time `json:"enrollment_date"`
-	EducationLevel    string     `json:"education_level"`
-	GraduationDate    *time.Time `json:"graduation_date,omitempty"`
-	CompletionStatus  *bool      `json:"completion_status,omitempty"`
-	IsArchived        bool       `json:"is_archived"`
-	CreatedAt         *time.Time `json:"created_at"`
-	UpdatedAt         *time.Time `json:"updated_at"`
-	CourseworkTitle   *string    `json:"coursework_title"`
-	CourseworkGrade   *string    `json:"coursework_grade"`
-	CourseSupervisor  *string    `json:"course_supervisor"`
-	DiplomaSupervisor *string    `json:"diploma_supervisor"`
-	DiplomaTitle      *string    `json:"diploma_title"`
-	DiplomaGrade      *string    `json:"diploma_grade"`
+	StudentID         uuid.UUID              `json:"student_id"`
+	FacultyID         uuid.UUID              `json:"faculty_id"`
+	FacultyName       string                 `json:"faculty_name"`
+	DepartmentID      utils.CustomNullString `json:"department_id"`
+	DepartmentName    utils.CustomNullString `json:"department_name"`
+	TicketNumber      string                 `json:"ticket_number"`
+	FullName          string                 `json:"full_name"`
+	EnrollmentDate    *time.Time             `json:"enrollment_date"`
+	EducationLevel    string                 `json:"education_level"`
+	GraduationDate    *time.Time             `json:"graduation_date,omitempty"`
+	CompletionStatus  *bool                  `json:"completion_status,omitempty"`
+	IsArchived        bool                   `json:"is_archived"`
+	CreatedAt         *time.Time             `json:"created_at"`
+	UpdatedAt         *time.Time             `json:"updated_at"`
+	CourseworkTitle   *string                `json:"coursework_title"`
+	CourseworkGrade   *string                `json:"coursework_grade"`
+	CourseSupervisor  *string                `json:"course_supervisor"`
+	DiplomaSupervisor *string                `json:"diploma_supervisor"`
+	DiplomaTitle      *string                `json:"diploma_title"`
+	DiplomaGrade      *string                `json:"diploma_grade"`
 }
 
 func StudentExistsByTicketNumber(conn *pgx.Conn, ticketNumber string) (bool, error) {
@@ -564,6 +565,7 @@ func GetAllStudentsHandler(conn *pgx.Conn) http.HandlerFunc {
 				log.Println("Row scan error:", err)
 				return
 			}
+
 			students = append(students, student)
 		}
 
