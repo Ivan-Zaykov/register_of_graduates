@@ -26,7 +26,7 @@ func GetAllFacultyHandler(conn *pgx.Conn) http.HandlerFunc {
             faculty_name,
             faculty_dean,
             faculty_substitute
-        FROM faculty
+        FROM faculty ORDER BY faculty_name
     `
 
 		rows, err := conn.Query(ctx, query)

@@ -9,18 +9,30 @@ import "../../css/EditStudent.css";
 import "../../css/AddNewStudent.css";
 
 const AddNewStudent = () => {
+  const [faculties, setFaculties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [alert, setAlert] = useState(null);
 
-  // Состояния для факультетов и кафедр
-  const [faculties] = useState({
-    "Информационно-вычислительных технологий": [
-      "Кафедра программирования",
-      "Кафедра сетевых технологий",
-    ],
-    Исторический: ["Кафедра всеобщей истории", "Кафедра отечественной истории"],
-    Математический: ["Кафедра алгебры", "Кафедра геометрии"],
-    Юридический: ["Кафедра гражданского права", "Кафедра уголовного права"],
-  });
+  useEffect(() => {
+    // Функция для получения данных с API
+    const fetchFaculties = async () => {
+      try {
+        const response = await fetch("/api/faculties");
+        if (!response.ok) {
+          throw new Error(`Ошибка HTTP: ${response.status}`);
+        }
+        const data = await response.json();
+        setFaculties(data); // Устанавливаем полученные данные
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchFaculties(); // Вызываем функцию
+  }, []);
 
   // Код для замены фото студента (значок редактирования в углу фото)
   const [image, setImage] = useState(default_student_photo); // Изначальная картинка
@@ -120,6 +132,14 @@ const AddNewStudent = () => {
   // });
 
 
+  if (loading) {
+    return <div>Загрузка...</div>;
+  }
+
+  if (error) {
+    return <div>Ошибка: {error}</div>;
+  }
+
   return (
     <>
       {alert && (
@@ -144,7 +164,7 @@ const AddNewStudent = () => {
                   className="edit_student_cancel_button"
                   href="/students"
                   style={{ textDecoration: "none", color: "#AE1010" }}>
-                  Все студенты
+                  Отмена
                 </a>
 
                 <div className="picture_block">
@@ -224,9 +244,9 @@ const AddNewStudent = () => {
                     onChange={handleFacultyChange}
                     className="add_student_select ">
                     <option value="">Выберите факультет...</option>
-                    {Object.keys(faculties).map((faculty) => (
-                      <option key={faculty} value={faculty}>
-                        {faculty}
+                    {faculties.map((faculty) => (
+                      <option key={faculty.faculty_id} value={faculty.faculty_id}>
+                        {faculty.faculty_name}
                       </option>
                     ))}
                   </select>
