@@ -144,36 +144,39 @@ const DepartmentsPage = () => {
                   onClick={() => requestSort("head_of_department")}>
                   Заведующий кафедрой
                 </th>
-                <th className="depart_th" onClick={() => requestSort("deputy")}>
+                <th className="depart_th" onClick={() => requestSort("department_substitute")}>
                   Зам. заведующего
                 </th>
               </tr>
             </thead>
             <tbody className="depart_tbody">
-
-              {sortedAndFilteredData.length > 0 ? (
-                sortedAndFilteredData.map((department, index) => (
-                  <tr
-                    className={`depart_tr ${
-                      index === sortedAndFilteredData.length - 1
-                        ? "bottom_td"
-                        : ""
-                    }`}
-                    key={department.department_id}>
-                    <td className="depart_td">{department.department_id}</td>
-                    <td className="depart_td">{department.department_name}</td>
-                    <td className="depart_td">{department.head_of_department}</td>
-                    <td className="depart_td">{department.deputy}</td>
-                  </tr>
-                ))
-              ) : (
-                <tr className="depart_tr">
-                  <td className="depart_td alone_td"></td>
-                  <td className="depart_td alone_td"></td>
-                  <td className="depart_td alone_td"></td>
-                  <td className="depart_td alone_td"></td>
+              {/* {sortedData.map((department) => ( */}
+              {sortedAndFilteredData.map((department) => (
+                <tr className="depart_tr" key={department.department_id}>
+                  <td className="depart_td">{department.department_id}</td>
+                  <td className="depart_td">{department.department_name}</td>
+                  <td className="depart_td">{department.head_of_department}</td>
+                  <td className="depart_td">{department.department_substitute}</td>
                 </tr>
-              )}
+              ))}
+              <tr className="depart_tr">
+                <td className="depart_td"></td>
+                <td className="depart_td"></td>
+                <td className="depart_td"></td>
+                <td className="depart_td"></td>
+              </tr>
+              <tr className="depart_tr">
+                <td className="depart_td"></td>
+                <td className="depart_td"></td>
+                <td className="depart_td"></td>
+                <td className="depart_td"></td>
+              </tr>
+              <tr className="depart_tr">
+                <td className="depart_td bottom_td"></td>
+                <td className="depart_td bottom_td"></td>
+                <td className="depart_td bottom_td"></td>
+                <td className="depart_td bottom_td"></td>
+              </tr>
             </tbody>
           </table>
         </div>
