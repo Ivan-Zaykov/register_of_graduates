@@ -68,7 +68,7 @@ const AddNewStudent = () => {
     department_id: "",
     course_supervisor: "",
     coursework_title: "",
-    course_grade: "",
+    coursework_grade: "",
     diploma_supervisor: "",
     diploma_title: "",
     diploma_grade: "",
@@ -77,18 +77,19 @@ const AddNewStudent = () => {
   });
 
   const handleFacultyChange = (e) => {
+    e.preventDefault();
     const selectedFaculty = e.target.value;
     setAddNewStudent((prev) => ({
       ...prev,
-      faculty: selectedFaculty,
-      department: "", // Очистим кафедру при смене факультета
+      faculty_id: selectedFaculty,
+      department_id: "", // Очистим кафедру при смене факультета
     }));
   };
 
   const handleDepartmentChange = (e) => {
     setAddNewStudent((prev) => ({
       ...prev,
-      department: e.target.value,
+      department_id: e.target.value,
     }));
   };
 
@@ -100,13 +101,14 @@ const AddNewStudent = () => {
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async (e) => {
+    e.preventDefault();
     const requiredFields = [
-      "studentId",
-      "name",
-      "faculty",
-      "yearOfAdmission",
-      "level",
+      "ticket_number",
+      "full_name",
+      "faculty_id",
+      "enrollment_date",
+      "education_level",
     ];
     const isAllFieldsFilled = requiredFields.every(
       (field) => addNewStudent[field].trim() !== ""
@@ -118,13 +120,25 @@ const AddNewStudent = () => {
         message: "Не все обязательные поля заполнены!",
       });
     } else {
-      console.log("Сохраненные данные о студенте:", addNewStudent);
-      // alert("Студент успешно создан");
-      setAlert({
-        message: "Студент успешно создан.",
-      });
+      try {
+        const response = await fetch("/api/student", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(addNewStudent),
+        });
 
-      // Добавить логику сохранения данных
+        if (!response.ok) {
+          throw new Error(`Ошибка HTTP: ${response.status}`);
+        }
+
+        setAlert({
+          message: "Студент успешно создан.",
+        });
+      } catch (err) {
+        setError(err.message);
+      }
     }
   };
 
@@ -205,7 +219,7 @@ const AddNewStudent = () => {
                   <input
                     type="number"
                     placeholder="Введите номер..."
-                    name="studentId"
+                    name="ticket_number"
                     value={addNewStudent.ticket_number}
                     onChange={handleInputChange}
                     className="add_student_input"
@@ -218,7 +232,7 @@ const AddNewStudent = () => {
                   {/* <div className="data">{student.name}</div> */}
                   <input
                     type="text"
-                    name="name"
+                    name="full_name"
                     value={addNewStudent.full_name}
                     placeholder="Введите ФИО..."
                     onChange={handleInputChange}
@@ -230,17 +244,9 @@ const AddNewStudent = () => {
                   <div className="title">
                     Факультет<span className="red_star">*</span>:
                   </div>
-                  {/* <div className="data">{student.faculty}</div> */}
-                  {/* <input
-                    type="text"
-                    name="faculty"
-                    placeholder="Введите факультет..."
-                    value={addNewStudent.faculty}
-                    onChange={handleInputChange}
-                    className="add_student_input"
-                  /> */}
+                  { addNewStudent.faculty_id != "" ? addNewStudent.faculty_id : "" }
                   <select
-                    name="faculty"
+                    name="faculty_id"
                     value={addNewStudent.faculty_id}
                     onChange={handleFacultyChange}
                     className="add_student_select ">
@@ -271,7 +277,7 @@ const AddNewStudent = () => {
                   /> */}
 
                   <select
-                    name="yearOfAdmission"
+                    name="enrollment_date"
                     value={addNewStudent.enrollment_date}
                     onChange={handleInputChange}
                     className="add_student_select">
@@ -298,7 +304,7 @@ const AddNewStudent = () => {
                     className="add_student_input"
                   /> */}
                   <select
-                    name="level"
+                    name="education_level"
                     value={addNewStudent.education_level}
                     onChange={handleInputChange}
                     className="add_student_select add_student_select_level">
@@ -313,8 +319,7 @@ const AddNewStudent = () => {
                 <div className="table_line">
                   <div className="title">Архивность:</div>
                   <div className="data">
-                    {/* {student.archive ? "Да" : "Нет"} */}
-                    {addNewStudent.is_archived}
+                    {addNewStudent.is_archived ? "Да" : "Нет"}
                   </div>
                 </div>
 
@@ -355,16 +360,16 @@ const AddNewStudent = () => {
                       className="add_student_input add_student_big_input white_placeholder"
                     /> */}
                     <select
-                      name="department"
+                      name="department_id"
                       value={addNewStudent.department_id}
                       onChange={handleDepartmentChange}
                       className="add_student_select add_student_select_department"
                       disabled={!addNewStudent.faculty_id}>
                       <option value="">Выберите кафедру...</option>
                       {addNewStudent.faculty_id &&
-                          departments.filter((faculty_id) => {
+                          departments.filter((department, faculty_id) => {
                             return department.faculty_id = faculty_id
-                          }).map((faculty) => (
+                          }).map((department) => (
                             <option key={department.department_id} value={department.department_id}>
                               {department.department_name}
                             </option>
@@ -382,7 +387,7 @@ const AddNewStudent = () => {
                     {/* {student.courseSupervisor} */}
                     <input
                       type="text"
-                      name="courseSupervisor"
+                      name="course_supervisor"
                       placeholder="Введите научного руководителя..."
                       value={addNewStudent.course_supervisor}
                       onChange={handleInputChange}
@@ -399,7 +404,7 @@ const AddNewStudent = () => {
                     <textarea
                       type="text"
                       placeholder="Введите название..."
-                      name="courseWorkTitle"
+                      name="coursework_title"
                       value={addNewStudent.coursework_title}
                       onChange={handleInputChange}
                       className="add_student_input add_student_big_input"
@@ -424,7 +429,7 @@ const AddNewStudent = () => {
                       className="add_student_input add_student_big_input"
                     /> */}
                     <select
-                      name="courseGrade"
+                      name="course_grade"
                       value={addNewStudent.course_grade}
                       onChange={handleInputChange}
                       className="add_student_select add_student_big_input add_student_select_grade">
@@ -447,7 +452,7 @@ const AddNewStudent = () => {
                     {/* {student.diplomaSupervisor} */}
                     <input
                       type="text"
-                      name="diplomaSupervisor"
+                      name="diploma_supervisor"
                       placeholder="Введите научного руководителя..."
                       value={addNewStudent.diploma_supervisor}
                       onChange={handleInputChange}
@@ -465,7 +470,7 @@ const AddNewStudent = () => {
                     {/* {student.diplomaTitle} */}
                     <textarea
                       type="text"
-                      name="diplomaTitle"
+                      name="diploma_title"
                       placeholder="Введите название работы..."
                       value={addNewStudent.diploma_title}
                       onChange={handleInputChange}
@@ -493,7 +498,7 @@ const AddNewStudent = () => {
                       className="add_student_input add_student_big_input"
                     /> */}
                     <select
-                      name="diplomaGrade"
+                      name="diploma_grade"
                       value={addNewStudent.diploma_grade}
                       onChange={handleInputChange}
                       className="add_student_select add_student_big_input add_student_select_grade">
@@ -521,7 +526,7 @@ const AddNewStudent = () => {
                       className="add_student_input add_student_big_input"
                     /> */}
                     <select
-                      name="graduationYear"
+                      name="graduation_year"
                       value={addNewStudent.graduation_year}
                       onChange={handleInputChange}
                       className="add_student_select add_student_big_input add_student_select_grade">
@@ -550,7 +555,7 @@ const AddNewStudent = () => {
                       className="add_student_input add_student_big_input"
                     /> */}
                     <select
-                      name="successAssessment"
+                      name="completion_status"
                       value={addNewStudent.completion_status}
                       onChange={handleInputChange}
                       className="add_student_select add_student_select_success">
