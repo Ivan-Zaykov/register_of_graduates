@@ -33,7 +33,7 @@ func GetAllDepartmentHandler(conn *pgx.Conn) http.HandlerFunc {
 
 		rows, err := conn.Query(ctx, query)
 		if err != nil {
-			http.Error(w, "Failed to fetch faculty", http.StatusInternalServerError)
+			http.Error(w, "Failed to fetch departments", http.StatusInternalServerError)
 			log.Println("Query error:", err)
 			return
 		}

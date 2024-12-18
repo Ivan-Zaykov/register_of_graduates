@@ -146,7 +146,7 @@ const DepartmentsPage = () => {
                   onClick={() => requestSort("head_of_department")}>
                   Заведующий кафедрой
                 </th>
-                <th className="depart_th" onClick={() => requestSort("deputy")}>
+                <th className="depart_th" onClick={() => requestSort("department_substitute")}>
                   Зам. заведующего
                 </th>
               </tr>
@@ -158,7 +158,7 @@ const DepartmentsPage = () => {
                   <td className="depart_td">{department.department_id}</td>
                   <td className="depart_td">{department.department_name}</td>
                   <td className="depart_td">{department.head_of_department}</td>
-                  <td className="depart_td">{department.deputy}</td>
+                  <td className="depart_td">{department.department_substitute}</td>
                 </tr>
               ))}
               <tr className="depart_tr">
