@@ -196,8 +196,7 @@ func CreateStudent(conn *pgx.Conn, facultyID, departmentID uuid.UUID, ticketNumb
 	query := `
 		INSERT INTO student (
 			student_id, faculty_id, department_id, ticket_number, 
-			full_name, enrollment_date, education_level, 
-			is_archived, created_at, updated_at
+			full_name, education_level, enrollment_date, is_archived, created_at, updated_at 
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
 
 	_, err := conn.Exec(
@@ -208,8 +207,8 @@ func CreateStudent(conn *pgx.Conn, facultyID, departmentID uuid.UUID, ticketNumb
 		departmentID,   // department_id
 		ticketNumber,   // ticket_number
 		fullName,       // full_name
-		enrollmentDate, // enrollment_date
 		educationLevel, // education_level
+		enrollmentDate, // enrollment_date
 		false,          // is_archived
 		time.Now(),     // created_at
 		time.Now(),     // updated_at
@@ -226,12 +225,12 @@ func CreateStudentHandler(conn *pgx.Conn) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Парсим тело запроса
 		var req struct {
-			FacultyID      string `json:"FacultyID"`
-			DepartmentID   string `json:"DepartmentID"`
-			TicketNumber   string `json:"TicketNumber"`
-			FullName       string `json:"FullName"`
-			EducationLevel string `json:"EducationLevel"`
-			EnrollmentDate string `json:"EnrollmentDate"`
+			FacultyID      string `json:"faculty_id"`
+			DepartmentID   string `json:"department_id"`
+			TicketNumber   string `json:"ticket_number"`
+			FullName       string `json:"full_name"`
+			EducationLevel string `json:"education_level"`
+			EnrollmentDate string `json:"enrollment_date"`
 		}
 
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -252,7 +251,7 @@ func CreateStudentHandler(conn *pgx.Conn) http.HandlerFunc {
 			return
 		}
 
-		enrollmentDate, err := time.Parse("2006-01-02", req.EnrollmentDate)
+		enrollmentDate, err := time.Parse("2006", req.EnrollmentDate)
 		if err != nil {
 			http.Error(w, "Неверный формат даты", http.StatusBadRequest)
 			return
