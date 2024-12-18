@@ -184,7 +184,9 @@ func GetStudentHandler(conn *pgx.Conn) http.HandlerFunc {
 	}
 }
 
-func CreateStudent(conn *pgx.Conn, facultyID, departmentID uuid.UUID, ticketNumber string, fullName string, educationLevel string, enrollmentDate time.Time) error {
+func CreateStudent(conn *pgx.Conn, facultyID uuid.UUID, ticketNumber string, fullName string, educationLevel string, enrollmentDate time.Time) error {
+	defer conn.Close(context.Background())
+
 	// Проверяем, существует ли студент с данным номером студенческого билета
 	if exists, err := StudentExistsByTicketNumber(conn, ticketNumber); err != nil {
 		return fmt.Errorf("ошибка проверки существования студента: %v", err)
@@ -195,16 +197,15 @@ func CreateStudent(conn *pgx.Conn, facultyID, departmentID uuid.UUID, ticketNumb
 	// SQL-запрос на создание студента
 	query := `
 		INSERT INTO student (
-			student_id, faculty_id, department_id, ticket_number, 
+			student_id, faculty_id, ticket_number, 
 			full_name, education_level, enrollment_date, is_archived, created_at, updated_at 
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
 
 	_, err := conn.Exec(
 		context.Background(),
 		query,
 		uuid.New(),     // student_id
 		facultyID,      // faculty_id
-		departmentID,   // department_id
 		ticketNumber,   // ticket_number
 		fullName,       // full_name
 		educationLevel, // education_level
@@ -245,12 +246,6 @@ func CreateStudentHandler(conn *pgx.Conn) http.HandlerFunc {
 			return
 		}
 
-		departmentID, err := uuid.Parse(req.DepartmentID)
-		if err != nil {
-			http.Error(w, "Неверный UUID кафедры", http.StatusBadRequest)
-			return
-		}
-
 		enrollmentDate, err := time.Parse("2006", req.EnrollmentDate)
 		if err != nil {
 			http.Error(w, "Неверный формат даты", http.StatusBadRequest)
@@ -258,7 +253,7 @@ func CreateStudentHandler(conn *pgx.Conn) http.HandlerFunc {
 		}
 
 		// Вызов функции для создания студента
-		if err := CreateStudent(conn, facultyID, departmentID, req.TicketNumber, req.FullName, req.EducationLevel, enrollmentDate); err != nil {
+		if err := CreateStudent(conn, facultyID, req.TicketNumber, req.FullName, req.EducationLevel, enrollmentDate); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
