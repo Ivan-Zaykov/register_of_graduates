@@ -11,7 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	pgx "github.com/jackc/pgx/v5"
+	pgxpool "github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Student struct {
@@ -37,7 +37,7 @@ type Student struct {
 	DiplomaGrade      *string                `json:"diploma_grade"`
 }
 
-func StudentExistsByTicketNumber(conn *pgx.Conn, ticketNumber string) (bool, error) {
+func StudentExistsByTicketNumber(conn *pgxpool.Conn, ticketNumber string) (bool, error) {
 	query := "SELECT COUNT(*) FROM student WHERE ticket_number = $1"
 	var count int
 
@@ -49,7 +49,7 @@ func StudentExistsByTicketNumber(conn *pgx.Conn, ticketNumber string) (bool, err
 	return count > 0, nil
 }
 
-func StudentExists(conn *pgx.Conn, studentID uuid.UUID) (bool, error) {
+func StudentExists(conn *pgxpool.Conn, studentID uuid.UUID) (bool, error) {
 	query := "SELECT COUNT(*) FROM student WHERE student_id = $1"
 	var count int
 
@@ -61,7 +61,7 @@ func StudentExists(conn *pgx.Conn, studentID uuid.UUID) (bool, error) {
 	return count > 0, nil
 }
 
-func GetStudent(conn *pgx.Conn, studentID uuid.UUID) (map[string]interface{}, error) {
+func GetStudent(conn *pgxpool.Conn, studentID uuid.UUID) (map[string]interface{}, error) {
 	// Проверяем существование студента
 	exists, err := StudentExists(conn, studentID)
 	if err != nil {
@@ -160,8 +160,14 @@ func GetStudent(conn *pgx.Conn, studentID uuid.UUID) (map[string]interface{}, er
 	return result, nil
 }
 
-func GetStudentHandler(conn *pgx.Conn) http.HandlerFunc {
+func GetStudentHandler(connPool *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		conn, err := connPool.Acquire(context.Background())
+		if err != nil {
+			log.Fatalf("Ошибка при получении соединения из пула: %v\n", err)
+		}
+		defer conn.Release()
+
 		// Извлекаем student_id из параметров запроса
 		vars := mux.Vars(r)
 		studentID, err := uuid.Parse(vars["id"])
@@ -185,8 +191,8 @@ func GetStudentHandler(conn *pgx.Conn) http.HandlerFunc {
 	}
 }
 
-func CreateStudent(conn *pgx.Conn, facultyID uuid.UUID, ticketNumber string, fullName string, educationLevel string, enrollmentDate time.Time) error {
-	defer conn.Close(context.Background())
+func CreateStudent(conn *pgxpool.Conn, facultyID uuid.UUID, ticketNumber string, fullName string, educationLevel string, enrollmentDate time.Time) error {
+	defer conn.Release()
 
 	// Проверяем, существует ли студент с данным номером студенческого билета
 	if exists, err := StudentExistsByTicketNumber(conn, ticketNumber); err != nil {
@@ -223,8 +229,14 @@ func CreateStudent(conn *pgx.Conn, facultyID uuid.UUID, ticketNumber string, ful
 	return nil
 }
 
-func CreateStudentHandler(conn *pgx.Conn) http.HandlerFunc {
+func CreateStudentHandler(connPool *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		conn, err := connPool.Acquire(context.Background())
+		if err != nil {
+			log.Fatalf("Ошибка при получении соединения из пула: %v\n", err)
+		}
+		defer conn.Release()
+
 		// Парсим тело запроса
 		var req struct {
 			FacultyID      string `json:"faculty_id"`
@@ -264,7 +276,7 @@ func CreateStudentHandler(conn *pgx.Conn) http.HandlerFunc {
 	}
 }
 
-func UpdateStudent(conn *pgx.Conn, studentID uuid.UUID, facultyID *uuid.UUID, departmentID *uuid.UUID,
+func UpdateStudent(conn *pgxpool.Conn, studentID uuid.UUID, facultyID *uuid.UUID, departmentID *uuid.UUID,
 	fullName string, enrollmentDate *time.Time, educationLevel *string, graduationDate *time.Time,
 	completionStatus *bool) error {
 
@@ -346,8 +358,14 @@ func UpdateStudent(conn *pgx.Conn, studentID uuid.UUID, facultyID *uuid.UUID, de
 	return nil
 }
 
-func UpdateStudentHandler(conn *pgx.Conn) http.HandlerFunc {
+func UpdateStudentHandler(connPool *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		conn, err := connPool.Acquire(context.Background())
+		if err != nil {
+			log.Fatalf("Ошибка при получении соединения из пула: %v\n", err)
+		}
+		defer conn.Release()
+
 		vars := mux.Vars(r)
 		StudentID, err := uuid.Parse(vars["id"])
 		if err != nil {
@@ -404,7 +422,7 @@ func UpdateStudentHandler(conn *pgx.Conn) http.HandlerFunc {
 	}
 }
 
-func DeleteStudent(conn *pgx.Conn, studentID uuid.UUID) error {
+func DeleteStudent(conn *pgxpool.Conn, studentID uuid.UUID) error {
 	// Проверяем, существует ли студент
 	exists, err := StudentExists(conn, studentID)
 	if err != nil {
@@ -424,8 +442,14 @@ func DeleteStudent(conn *pgx.Conn, studentID uuid.UUID) error {
 	return nil
 }
 
-func DeleteStudentHandler(conn *pgx.Conn) http.HandlerFunc {
+func DeleteStudentHandler(connPool *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		conn, err := connPool.Acquire(context.Background())
+		if err != nil {
+			log.Fatalf("Ошибка при получении соединения из пула: %v\n", err)
+		}
+		defer conn.Release()
+
 		// Разбираем ID студента из маршрута
 		vars := mux.Vars(r)
 		studentIDStr, ok := vars["id"]
@@ -454,7 +478,7 @@ func DeleteStudentHandler(conn *pgx.Conn) http.HandlerFunc {
 	}
 }
 
-func ArchiveStudent(conn *pgx.Conn, studentID uuid.UUID) error {
+func ArchiveStudent(conn *pgxpool.Conn, studentID uuid.UUID) error {
 	// Проверяем, существует ли студент
 	exists, err := StudentExists(conn, studentID)
 	if err != nil {
@@ -487,7 +511,7 @@ func ArchiveStudent(conn *pgx.Conn, studentID uuid.UUID) error {
 	return nil
 }
 
-func ArchiveStudentHandler(conn *pgx.Conn) http.HandlerFunc {
+func ArchiveStudentHandler(conn *pgxpool.Conn) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Извлекаем ID студента из маршрута
 		vars := mux.Vars(r)
@@ -517,8 +541,14 @@ func ArchiveStudentHandler(conn *pgx.Conn) http.HandlerFunc {
 	}
 }
 
-func GetAllStudentsHandler(conn *pgx.Conn) http.HandlerFunc {
+func GetAllStudentsHandler(connPool *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		conn, err := connPool.Acquire(context.Background())
+		if err != nil {
+			log.Fatalf("Ошибка при получении соединения из пула: %v\n", err)
+		}
+		defer conn.Release()
+
 		ctx := context.Background()
 		// SQL-запрос
 		query := `

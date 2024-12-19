@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"log"
 	"net/http"
 )
@@ -17,8 +17,14 @@ type Department struct {
 	DepartmentSubstitute string    `json:"department_substitute"`
 }
 
-func GetAllDepartmentHandler(conn *pgx.Conn) http.HandlerFunc {
+func GetAllDepartmentHandler(connPool *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		conn, err := connPool.Acquire(context.Background())
+		if err != nil {
+			log.Fatalf("Ошибка при получении соединения из пула: %v\n", err)
+		}
+		defer conn.Release()
+
 		ctx := context.Background()
 		// SQL-запрос
 		query := `
