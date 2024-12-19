@@ -7,6 +7,7 @@ import CustomAlert from "../CustomAlert";
 import "../../css/StudentProfile.css";
 import "../../css/EditStudent.css";
 import "../../css/AddNewStudent.css";
+import {fetchData, handleDepartmentChange, handleFacultyChange, handleInputChange} from "../../utils/utils";
 
 const AddNewStudent = () => {
   const [faculties, setFaculties] = useState([]);
@@ -15,25 +16,12 @@ const AddNewStudent = () => {
   const [error, setError] = useState(null);
   const [alert, setAlert] = useState(null);
 
-  const fetchData = async (url, setter) => {
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      const data = await response.json();
-      setter(data);
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
   useEffect(() => {
     const fetchAllData = async () => {
       setLoading(true);
       await Promise.all([
-        fetchData("/api/faculties", setFaculties),
-        fetchData("/api/departments", setDepartments),
+        fetchData("/api/faculties", setFaculties, setError),
+        fetchData("/api/departments", setDepartments, setError),
       ]);
       setLoading(false);
     };
@@ -53,11 +41,6 @@ const AddNewStudent = () => {
     }
   };
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("ru-RU"); // Форматирует как "день.месяц.год"
-  };
-
   const [addNewStudent, setAddNewStudent] = useState({
     ticket_number: "",
     full_name: "",
@@ -75,31 +58,6 @@ const AddNewStudent = () => {
     graduation_year: "",
     completion_status: "",
   });
-
-  const handleFacultyChange = (e) => {
-    e.preventDefault();
-    const selectedFaculty = e.target.value;
-    setAddNewStudent((prev) => ({
-      ...prev,
-      faculty_id: selectedFaculty,
-      department_id: "", // Очистим кафедру при смене факультета
-    }));
-  };
-
-  const handleDepartmentChange = (e) => {
-    setAddNewStudent((prev) => ({
-      ...prev,
-      department_id: e.target.value,
-    }));
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setAddNewStudent((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -221,7 +179,7 @@ const AddNewStudent = () => {
                     placeholder="Введите номер..."
                     name="ticket_number"
                     value={addNewStudent.ticket_number}
-                    onChange={handleInputChange}
+                    onChange={(e) => handleInputChange(e, setAddNewStudent)}
                     className="add_student_input"
                   />
                 </div>
@@ -235,7 +193,7 @@ const AddNewStudent = () => {
                     name="full_name"
                     value={addNewStudent.full_name}
                     placeholder="Введите ФИО..."
-                    onChange={handleInputChange}
+                    onChange={(e) => handleInputChange(e, setAddNewStudent)}
                     className="add_student_input"
                   />
                 </div>
@@ -248,7 +206,7 @@ const AddNewStudent = () => {
                   <select
                     name="faculty_id"
                     value={addNewStudent.faculty_id}
-                    onChange={handleFacultyChange}
+                    onChange={(e) => handleFacultyChange(e, setAddNewStudent)}
                     className="add_student_select ">
                     <option value="">Выберите факультет...</option>
                     {faculties.map((faculty) => (
@@ -271,7 +229,7 @@ const AddNewStudent = () => {
                     placeholder="Введите год..."
                     name="yearOfAdmission"
                     value={addNewStudent.yearOfAdmission}
-                    onChange={handleInputChange}
+                    onChange={(e) => handleInputChange(e, setAddNewStudent)}
                     className="add_student_input"
                     
                   /> */}
@@ -279,7 +237,7 @@ const AddNewStudent = () => {
                   <select
                     name="enrollment_date"
                     value={addNewStudent.enrollment_date}
-                    onChange={handleInputChange}
+                    onChange={(e) => handleInputChange(e, setAddNewStudent)}
                     className="add_student_select">
                     <option value="">Выберите год...</option>
                     {Array.from({ length: 2024 - 1970 + 1 }, (_, i) => (
@@ -300,13 +258,13 @@ const AddNewStudent = () => {
                     name="level"
                     placeholder="Введите ступень..."
                     value={addNewStudent.level}
-                    onChange={handleInputChange}
+                    onChange={(e) => handleInputChange(e, setAddNewStudent)}
                     className="add_student_input"
                   /> */}
                   <select
                     name="education_level"
                     value={addNewStudent.education_level}
-                    onChange={handleInputChange}
+                    onChange={(e) => handleInputChange(e, setAddNewStudent)}
                     className="add_student_select add_student_select_level">
                     <option value="">Выберите ступень...</option>
                     <option value="bakalavriat">Бакалавриат</option>
@@ -350,19 +308,10 @@ const AddNewStudent = () => {
                     Кафедра:
                   </td>
                   <td className="bottom_data_info bottom_data_title_first_right">
-                    {/* {student.department} */}
-                    {/* <input
-                      type="text"
-                      name="department"
-                      placeholder="Введите кафедру..."
-                      value={addNewStudent.department}
-                      onChange={handleInputChange}
-                      className="add_student_input add_student_big_input white_placeholder"
-                    /> */}
                     <select
                       name="department_id"
                       value={addNewStudent.department_id}
-                      onChange={handleDepartmentChange}
+                      onChange={(e) => handleDepartmentChange(e, setAddNewStudent)}
                       className="add_student_select add_student_select_department"
                       disabled={!addNewStudent.faculty_id}>
                       <option value="">Выберите кафедру...</option>
@@ -391,7 +340,7 @@ const AddNewStudent = () => {
                       name="course_supervisor"
                       placeholder="Введите научного руководителя..."
                       value={addNewStudent.course_supervisor}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e, setAddNewStudent)}
                       className="add_student_input add_student_big_input"
                     />
                   </td>
@@ -407,7 +356,7 @@ const AddNewStudent = () => {
                       placeholder="Введите название..."
                       name="coursework_title"
                       value={addNewStudent.coursework_title}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e, setAddNewStudent)}
                       className="add_student_input add_student_big_input"
                       row="2"
                     />
@@ -421,18 +370,18 @@ const AddNewStudent = () => {
                     {/* {student.courseGrade} */}
                     {/* <input
                       type="number"
-                      //   min="" 
+                      //   min=""
                       //   max=""
                       name="courseGrade"
                       placeholder="Введите оценку..."
                       value={addNewStudent.courseGrade}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e, setAddNewStudent)}
                       className="add_student_input add_student_big_input"
                     /> */}
                     <select
                       name="course_grade"
                       value={addNewStudent.course_grade}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e, setAddNewStudent)}
                       className="add_student_select add_student_big_input add_student_select_grade">
                       <option value="">Выберите оценку...</option>
                       {Array.from({ length: 5 - 2 + 1 }, (_, i) => (
@@ -450,15 +399,15 @@ const AddNewStudent = () => {
                     Научный руководитель <br></br> дипломной работы:
                   </td>
                   <td className="bottom_data_info">
-                    {/* {student.diplomaSupervisor} */}
                     <input
                       type="text"
                       name="diploma_supervisor"
                       placeholder="Введите научного руководителя..."
                       value={addNewStudent.diploma_supervisor}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e, setAddNewStudent)}
                       className="add_student_input add_student_big_input"
                     />
+                    {/* {student.diplomaSupervisor} */}
                   </td>
                 </tr>
                 <tr className="bottom_table_line">
@@ -474,7 +423,7 @@ const AddNewStudent = () => {
                       name="diploma_title"
                       placeholder="Введите название работы..."
                       value={addNewStudent.diploma_title}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e, setAddNewStudent)}
                       className="add_student_input add_student_big_input"
                       row="2"
                     />
@@ -495,13 +444,13 @@ const AddNewStudent = () => {
                       name="diplomaGrade"
                       placeholder="Введите оценку..."
                       value={addNewStudent.diplomaGrade}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e, setAddNewStudent)}
                       className="add_student_input add_student_big_input"
                     /> */}
                     <select
                       name="diploma_grade"
                       value={addNewStudent.diploma_grade}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e, setAddNewStudent)}
                       className="add_student_select add_student_big_input add_student_select_grade">
                       <option value="">Выберите оценку...</option>
                       {Array.from({ length: 5 - 2 + 1 }, (_, i) => (
@@ -523,13 +472,13 @@ const AddNewStudent = () => {
                       name="graduationYear"
                       placeholder="Введите год..."
                       value={addNewStudent.graduationYear}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e, setAddNewStudent)}
                       className="add_student_input add_student_big_input"
                     /> */}
                     <select
                       name="graduation_year"
                       value={addNewStudent.graduation_year}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e, setAddNewStudent)}
                       className="add_student_select add_student_big_input add_student_select_grade">
                       <option value="">Выберите год...</option>
                       {Array.from({ length: 2024 - 1970 + 1 }, (_, i) => (
@@ -552,13 +501,13 @@ const AddNewStudent = () => {
                       name="successAssessment"
                       placeholder="Введите успешность..."
                       value={addNewStudent.successAssessment}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e, setAddNewStudent)}
                       className="add_student_input add_student_big_input"
                     /> */}
                     <select
                       name="completion_status"
                       value={addNewStudent.completion_status}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange(e, setAddNewStudent)}
                       className="add_student_select add_student_select_success">
                       <option value="">Выберите успешность...</option>
                       <option value="zakonchil">Закончил</option>
