@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
+import { formatDate } from "../../utils/utils";
+import { extractYear} from "../../utils/utils";
 
 import Header from "../Header";
 import { ReactComponent as StarIcon } from "../../pictures/star_icon.svg";
@@ -19,16 +21,6 @@ const StudentProfile = () => {
   const [isLoading, setIsLoading] = useState(true); // Состояние загрузки
   const [error, setError] = useState(null); // Состояние для ошибок
   const [alert, setAlert] = useState(null);
-
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ru-RU'); // Форматирует как "день.месяц.год"
-  };
-
-  const extractYear = (dateString) => {
-    return new Date(dateString).getFullYear();
-  };
 
 
 

@@ -1,15 +1,12 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-
-import Header from "../Header";
-import { ReactComponent as StarIcon } from "../../pictures/star_icon.svg";
-import { ReactComponent as AddStudentIcon } from "../../pictures/add_student_icon.svg";
-import { ReactComponent as BackIcon } from "../../pictures/back_icon.svg";
-import { ReactComponent as EditIcon } from "../../pictures/edit_icon.svg";
-import { ReactComponent as ArchiveIcon } from "../../pictures/archive_icon.svg";
-import { ReactComponent as DeleteIcon } from "../../pictures/delete_icon.svg";
-
+import {
+  formatCompletionStatus,
+  fetchData,
+  formatDate,
+  handleFacultyChange,
+  handleDepartmentChange
+} from "../../utils/utils";
 import CustomAlert from "../CustomAlert";
 
 import "../../css/StudentProfile.css";
@@ -17,379 +14,434 @@ import "../../css/EditStudent.css";
 
 const EditStudent = () => {
   const { studentId } = useParams();
-  const student = studentsData.find((s) => s.studentId === studentId);
-  const [alert, setAlert] = useState(null); 
+  const [student, setStudent] = useState(null); // Состояние для данных студента
+  const [editableStudent, setEditableStudent] = useState({}); // Инициализируем пустым объектом
+  const [faculties, setFaculties] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [isLoading, setLoading] = useState(true);
+  const [alert, setAlert] = useState(null);
+  const [error, setError] = useState(null);
 
-  // Код для замены фото студента (значок редактирования в углу фото)
-  const [image, setImage] = useState(student.image); // Изначальная картинка
-  
+  useEffect(() => {
+    const fetchAllData = async () => {
+      setLoading(true); // Показываем индикатор загрузки
 
-  const handleImageChange = (event) => {
-    const file = event.target.files[0]; // Берём первый выбранный файл
-    if (file) {
-      const reader = new FileReader(); // Создаём FileReader для преобразования файла в URL
-      reader.onload = () => setImage(reader.result); // Устанавливаем картинку после чтения
-      reader.readAsDataURL(file); // Читаем файл как Data URL
+      try {
+        // Первый запрос для получения данных студента
+        const studentResponse = await fetch(`/api/student/${studentId}`);
+
+        if (!studentResponse.ok) {
+          throw new Error(`Ошибка: ${studentResponse.status}`);
+        }
+
+        const student = await studentResponse.json();
+        setStudent(student);
+
+        // Параллельное выполнение остальных запросов
+        await Promise.all([
+          fetchData("/api/faculties", setFaculties, setError),
+          fetchData("/api/departments", setDepartments, setError),
+        ]);
+      } catch (error) {
+        console.error("Ошибка при загрузке данных:", error);
+      } finally {
+        setLoading(false); // Скрываем индикатор загрузки
+      }
+    };
+
+    fetchAllData();
+  }, []);
+
+  useEffect(() => {
+    if (student) {
+      setEditableStudent({
+        student_id: student.student_id,
+        full_name: student.full_name,
+        ticket_number: student.ticket_number,
+        faculty_id: student.faculty_id,
+        faculty_name: student.faculty_name,
+        enrollment_date: student.enrollment_date,
+        education_level: student.education_level,
+        is_archived: student.is_archived,
+        department_id: student.department_id,
+        course_supervisor: student.course_supervisor,
+        coursework_title: student.coursework_title,
+        coursework_grade: student.coursework_grade,
+        diploma_supervisor: student.diploma_supervisor,
+        diploma_title: student.diploma_title,
+        diploma_grade: student.diploma_grade,
+        graduation_date: student.graduation_date,
+        completion_status: student.completion_status,
+      });
     }
-  };
+  }, [student]); // Эта зависимость позволяет обновлять editableStudent при изменении student
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ru-RU'); // Форматирует как "день.месяц.год"
-  };
-  
+  if (isLoading) {
+    return <div>Загрузка...</div>; // Показываем индикатор загрузки
+  }
 
-
-  const [editableStudent, setEditableStudent] = useState({
-    name: student.name,
-    faculty: student.faculty,
-    studentId: student.studentId,
-    yearOfAdmission: student.yearOfAdmission,
-    level: student.level,
-    archive: student.archive,
-    department: student.department,
-    courseSupervisor: student.courseSupervisor,
-    courseWorkTitle: student.courseWorkTitle,
-    courseGrade: student.courseGrade,
-    diplomaSupervisor: student.diplomaSupervisor,
-    diplomaTitle: student.diplomaTitle,
-    diplomaGrade: student.diplomaGrade,
-    graduationYear: student.graduationYear,
-    successAssessment: student.successAssessment,
-  });
+  if (error) {
+    return <div>Ошибка: {error}</div>; // Показываем сообщение об ошибке
+  }
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, type, checked, value } = e.target;
+
     setEditableStudent((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === "checkbox" ? checked : value
     }));
+    console.log(editableStudent)
   };
 
   const handleSave = () => {
     console.log("Сохраненные данные:", editableStudent);
     setAlert({
       message: "Студент успешно изменён.",
-      // можно добавить проверку на наличие изменений, тогда не выводить alert
     });
     // Логика отправки данных на сервер
-    // НЕ ЗАБЫТЬ ПРО КАРТИНКУ!!!
   };
 
   const handleAlertClose = () => {
     setAlert(null); // Закрытие alert
   };
 
-  if (!student) {
-    // Можно убрать
-    return (
-      <>
-        <Header />
-        <div className="student_not_found">
-          Карточка студента с id = {studentId} не найдена, редактирование
-          недоступно
-        </div>
-      </>
-    );
-  }
+  const filteredDepartments = departments.filter(
+      (department) => department.faculty_id === editableStudent.faculty_id
+  );
 
   return (
-    <>
-     {alert && (
-        <CustomAlert
-          message={alert.message}
-          onClose={handleAlertClose}
-        />
-      )}
-      <div className="student_profile_content">
-        <div className="student_profile_wrapper">
-          <div className="edit_top_block">
-            <div className="edit_student_top_edit_button">
-              Редактирование студента
-            </div>
-            <a
-              className="edit_student_save_button"
-              // href={`/students/${studentId}`} 
-              // Новая информация идет в консоль, из-за перехода назад может быть не видно,
-              // так что пока закомментируй эту строчку
-              onClick={handleSave}
-              style={{ textDecoration: "none", color: "inherit"}}>
-              Сохранить
-            </a>
-            <div className="student_profile_top_wrapper">
-              <div className="button_and_picture_block">
+      <>
+        {alert && <CustomAlert message={alert.message} onClose={handleAlertClose} />}
+          {alert && (
+              <CustomAlert
+                  message={alert.message}
+                  onClose={handleAlertClose}
+              />
+          )}
+        <>
+          <div className="student_profile_content">
+            <div className="student_profile_wrapper">
+              <div className="edit_top_block">
+                <div className="edit_student_top_edit_button">
+                  Редактирование студента
+                </div>
                 <a
-                  className="edit_student_cancel_button"
-                  href={`/students/${studentId}`}
-                  style={{ textDecoration: "none", color: "#AE1010" }}>
-                  Отмена
+                    className="edit_student_save_button"
+                    // href={`/students/${studentId}`}
+                    // Новая информация идет в консоль, из-за перехода назад может быть не видно,
+                    // так что пока закомментируй эту строчку
+                    onClick={handleSave}
+                    style={{ textDecoration: "none", color: "inherit"}}>
+                  Сохранить
                 </a>
+                <div className="student_profile_top_wrapper">
+                  <div className="button_and_picture_block">
+                    <a
+                        className="edit_student_cancel_button"
+                        href={`/students/${studentId}`}
+                        style={{ textDecoration: "none", color: "#AE1010" }}>
+                      Отмена
+                    </a>
 
-                <div className="picture_block">
-                  <img
-                    src={image}
-                    alt={student.name}
-                    className="student_photo"
-                  />
-                  <label htmlFor="file-input">
-                    <EditIcon className="edit_photo_icon" />
-                  </label>
-                  <input
-                    id="file-input"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    style={{ display: "none" }}
-                  />
+                    <div className="picture_block">
+                      {/*<img*/}
+                      {/*    src={image}*/}
+                      {/*    alt={student.name}*/}
+                      {/*    className="student_photo"*/}
+                      {/*/>*/}
+                      <label htmlFor="file-input">
+                        {/*<EditIcon className="edit_photo_icon" />*/}
+                      </label>
+                      <input
+                          id="file-input"
+                          type="file"
+                          accept="image/*"
+                          // onChange={handleImageChange}
+                          style={{ display: "none" }}
+                      />
+                    </div>
+                  </div>
+                  <div className="info_table">
+                    <div className="table_line first_line">
+                      <div className="title">ID:</div>
+                      <div className="data">{student.student_id}</div>
+                    </div>
+                    <div className="table_line">
+                      <div className="title">ФИО:</div>
+                      <input
+                          type="text"
+                          name="full_name"
+                          value={editableStudent.full_name}
+                          onChange={(e) => handleInputChange(e, setEditableStudent)}
+                          className="editable_input"
+                      />
+                      <div className="data">{student.full_name}</div>
+                    </div>
+                    <div className="table_line">
+                    <div className="title">Студенческий:</div>
+                      <input
+                          type="text"
+                          name="ticket_number"
+                          value={editableStudent.ticket_number}
+                          onChange={(e) => handleInputChange(e, setEditableStudent)}
+                          className="editable_input"
+                      />
+                       <div className="data">{student.ticket_number}</div>
+                    </div>
+
+                    <div className="table_line">
+                      <div className="title">
+                        Факультет<span className="red_star">*</span>:
+                      </div>
+                      <select
+                          name="faculty_id"
+                          value={editableStudent.faculty_id}
+                          onChange={(e) => handleFacultyChange(e, setEditableStudent)}
+                          className="add_student_select">
+                        <option value="">Выберите факультет...</option>
+                        {faculties.map((faculty) => (
+                            <option key={faculty.faculty_id} value={faculty.faculty_id}>
+                              {faculty.faculty_name}
+                            </option>
+                        ))}
+                      </select>
+                      <div className="data">
+                      {editableStudent.faculty_id != "" ? faculties.filter(
+                          (faculty) => faculty.faculty_id === student.faculty_id
+                      )[0].faculty_name : ""}
+                      </div>
+                    </div>
+
+                    <div className="table_line">
+                      <div className="title">Год поступления:</div>
+                      <input
+                          type="date"
+                          min="1900"
+                          max="2024"
+                          name="enrollment_date"
+                          value={editableStudent.enrollment_date}
+                          onChange={(e) => handleInputChange(e, setEditableStudent)}
+                          className="editable_input"
+                      />
+                      <div className="data">{formatDate(student.enrollment_date)}</div>
+                    </div>
+
+                    <div className="table_line">
+                      <div className="title">Ступень образования:</div>
+                      {/* <div className="data">{student.level}</div> */}
+                      <input
+                          type="text"
+                          name="education_level"
+                          value={editableStudent.education_level}
+                          onChange={(e) => handleInputChange(e, setEditableStudent)}
+                          className="editable_input"
+                      />
+                      <div className="data">{student.education_level}</div>
+                    </div>
+
+                    <div className="table_line">
+                    <div className="title">Архивность:</div>
+                      <div className="data">
+                        {student.is_archived ? "Да" : "Нет"}
+                      </div>
+                    </div>
+
+                    <div className="table_line">
+                      <div className="title">Дата создания:</div>
+                      <div className="data">
+                         {formatDate(student.created_at)}
+                      </div>
+                    </div>
+
+                    <div className="table_line last_line">
+                      <div className="title">Дата обновления:</div>
+                      <div className="data">
+                         {formatDate(student.updated_at)}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div className="info_table">
-                <div className="table_line first_line">
-                  <div className="title">ID:</div>
-                  <div className="data">{student.id}</div>
-                </div>
-                <div className="table_line">
-                  <div className="title">ФИО:</div>
-                  {/* <div className="data">{student.name}</div> */}
-                  <input
-                    type="text"
-                    name="name"
-                    value={editableStudent.name}
-                    onChange={handleInputChange}
-                    className="editable_input"
-                  />
-                </div>
-                <div className="table_line">
-                  <div className="title">Студенческий:</div>
-                  {/* <div className="data">{student.studentId}</div> */}
-                  <input
-                    type="number"
-                    name="studentId"
-                    value={editableStudent.studentId}
-                    onChange={handleInputChange}
-                    className="editable_input"
-                  />
-                </div>
 
-                <div className="table_line">
-                  <div className="title">Факультет:</div>
-                  {/* <div className="data">{student.faculty}</div> */}
-                  <input
-                    type="text"
-                    name="faculty"
-                    value={editableStudent.faculty}
-                    onChange={handleInputChange}
-                    className="editable_input"
-                  />
-                </div>
+              <div className="student_profile_bottom_wrapper">
+                <table className="student_profile_department_info_table">
+                  <tbody className="student_profile_table_body">
+                  <tr>
+                    <td className="bottom_data_title bottom_data_title_first_left">
+                      Научная работа:
+                    </td>
+                    <td className="bottom_data_info bottom_data_title_first_right">
+                    </td>
+                  </tr>
+                  <tr className="bottom_table_line">
+                    <td className="bottom_data_title">
+                      Кафедра:
+                    </td>
+                    <td className="bottom_data_info">
+                      <select
+                          value={editableStudent.faculty_id}
+                          onChange={(e) => handleDepartmentChange(e, setEditableStudent)}
+                          className="add_student_select">
+                        <option value="">Выберите кафедру</option>
+                        {filteredDepartments.map((department) => (
+                            <option key={department.department_id} value={department.department_id}>
+                              {department.department_name}
+                            </option>
+                        ))}
+                      </select>
+                      <div className="data">
+                        {editableStudent.department_id != "" ? departments.filter(
+                            (department) => department.department_id === student.department_id
+                        )[0].department_name : ""}
+                      </div>
+                    </td>
+                  </tr>
+                  <tr className="bottom_table_line">
+                    <td
+                        className="bottom_data_title"
+                        style={{lineHeight: "1.4"}}>
+                      Научный руководитель <br></br> курсовой работы:
+                    </td>
+                    <td className="bottom_data_info">
+                      <input
+                          type="text"
+                          name="course_supervisor"
+                          value={editableStudent.course_supervisor}
+                          onChange={(e) => handleInputChange(e, setEditableStudent)}
+                          className="editable_input big_input"
+                      />
+                      {student.course_supervisor}
+                    </td>
+                  </tr>
+                  <tr className="bottom_table_line">
+                    <td className="bottom_data_title">
+                      Название курсовой работы:
+                    </td>
+                    <td className="bottom_data_info">
+                      <textarea
+                          type="text"
+                          name="coursework_title"
+                          value={editableStudent.coursework_title}
+                          onChange={(e) => handleInputChange(e, setEditableStudent)}
+                          className="editable_input big_input"
+                          row="2"
+                      />
+                      {student.coursework_title}
+                    </td>
+                  </tr>
+                  <tr className="bottom_table_line">
+                    <td className="bottom_data_title">
+                      Оценка за курсовую работу:
+                    </td>
+                    <td className="bottom_data_info">
+                      <select
+                          name="coursework_grade"
+                          value={editableStudent.coursework_grade}
+                          onChange={(e) => handleInputChange(e, setEditableStudent)}
+                          className="add_student_select add_student_big_input add_student_select_grade">
+                        <option value="">Выберите оценку...</option>
+                        {Array.from({length: 5 - 2 + 1}, (_, i) => (
+                            <option key={i} value={5 - i}>
+                              {5 - i}
+                            </option>
+                        ))}
+                      </select>
+                      {student.coursework_grade}
+                    </td>
+                  </tr>
+                  <tr className="bottom_table_line">
+                    <td
+                        className="bottom_data_title"
+                        style={{lineHeight: "1.4"}}>
+                      Научный руководитель <br></br> дипломной работы:
+                    </td>
+                    <td className="bottom_data_info">
+                      <input
+                          type="text"
+                          name="diploma_supervisor"
+                          value={editableStudent.diploma_supervisor}
+                          onChange={(e) => handleInputChange(e, setEditableStudent)}
+                          className="editable_input big_input"
+                      />
+                      {student.diploma_supervisor}
+                    </td>
+                  </tr>
+                  <tr className="bottom_table_line">
+                    <td className="bottom_data_title" style={{lineHeight: "1.4"}}>
+                      Название дипломной <br></br> работы:
+                    </td>
+                    <td className="bottom_data_info">
+                      <textarea
+                          type="text"
+                          name="diploma_title"
+                          value={editableStudent.diploma_title}
+                          onChange={(e) => handleInputChange(e, setEditableStudent)}
+                          className="editable_input big_input"
+                          row="2"
+                      />
+                      {student.diploma_title}
+                    </td>
+                  </tr>
+                  <tr className="bottom_table_line">
+                    <td className="bottom_data_title" style={{lineHeight: "1.4"}}>
+                      Оценка за дипломную <br></br> работу:
+                    </td>
+                    <td className="bottom_data_info">
+                      <select
+                          name="diploma_grade"
+                          value={editableStudent.diploma_grade}
+                          onChange={(e) => handleInputChange(e, setEditableStudent)}
+                          className="add_student_select add_student_big_input add_student_select_grade">
+                        <option value="">Выберите оценку...</option>
+                        {Array.from({length: 5 - 2 + 1}, (_, i) => (
+                            <option key={i} value={5 - i}>
+                              {5 - i}
+                            </option>
+                        ))}
+                      </select>
+                      {student.diploma_grade}
+                    </td>
+                  </tr>
+                  <tr className="bottom_table_line">
+                    <td className="bottom_data_title">Год окончания:</td>
+                    <td className="bottom_data_info">
+                      <input
+                          type="date"
+                          min="1900"
+                          max="2024" // изменить пределы?
+                          name="graduation_date"
+                          value={editableStudent.graduation_date}
+                          onChange={(e) => handleInputChange(e, setEditableStudent)}
+                          className="editable_input big_input"
+                      />
+                      {formatDate(student.graduation_date)}
+                    </td>
+                  </tr>
 
-                <div className="table_line">
-                  <div className="title">Год поступления:</div>
-                  {/* <div className="data">{student.yearOfAdmission}</div> */}
-                  <input
-                    type="number"
-                    min="1900"
-                    max="2024"
-                    name="yearOfAdmission"
-                    value={editableStudent.yearOfAdmission}
-                    onChange={handleInputChange}
-                    className="editable_input"
-                  />
-                </div>
-
-                <div className="table_line">
-                  <div className="title">Ступень образования:</div>
-                  {/* <div className="data">{student.level}</div> */}
-                  <input
-                    type="text"
-                    name="level"
-                    value={editableStudent.level}
-                    onChange={handleInputChange}
-                    className="editable_input"
-                  />
-                </div>
-
-                <div className="table_line">
-                  <div className="title">Архивность:</div>
-                  <div className="data">
-                    {student.archive ? "Да" : "Нет"}
-                  </div>
-                </div>
-
-                <div className="table_line">
-                  <div className="title">Дата создания:</div>
-                  <div className="data">
-                    {student.creationDate}
-                    {/* {formatDate(student.created_at)} */}
-                  </div>
-                </div>
-
-                <div className="table_line last_line">
-                  <div className="title">Дата обновления:</div>
-                  <div className="data">
-                    {student.updateDate}
-                    {/* {formatDate(student.updated_at)} */}
-                  </div>
-                </div>
+                  <tr className="bottom_table_line">
+                    <td className="bottom_data_title bottom_data_title_last_left">
+                      Успешность окончания:
+                    </td>
+                    <td className="bottom_data_info bottom_data_title_last_right">
+                      <input
+                          type="checkbox"
+                          name="completion_status"
+                          checked={editableStudent.completion_status}
+                          onChange={(e) => handleInputChange(e, setEditableStudent)}
+                          className="editable_input big_input"
+                      />
+                      {formatCompletionStatus(student.completion_status)}
+                    </td>
+                  </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
-
-          <div className="student_profile_bottom_wrapper">
-            <table className="student_profile_department_info_table">
-              <tbody className="student_profile_table_body">
-                <tr className="bottom_table_line">
-                  <td className="bottom_data_title bottom_data_title_first_left">
-                    Кафедра:
-                  </td>
-                  <td className="bottom_data_info bottom_data_title_first_right">
-                    {/* {student.department} */}
-                    <input
-                      type="text"
-                      name="department"
-                      value={editableStudent.department}
-                      onChange={handleInputChange}
-                      className="editable_input big_input white_border"
-                    />
-                  </td>
-                </tr>
-                <tr className="bottom_table_line">
-                  <td
-                    className="bottom_data_title"
-                    style={{ lineHeight: "1.4" }}>
-                    Научный руководитель <br></br> курсовой работы:
-                  </td>
-                  <td className="bottom_data_info">
-                    {/* {student.courseSupervisor} */}
-                    <input
-                      type="text"
-                      name="courseSupervisor"
-                      value={editableStudent.courseSupervisor}
-                      onChange={handleInputChange}
-                      className="editable_input big_input"
-                    />
-                  </td>
-                </tr>
-                <tr className="bottom_table_line">
-                  <td className="bottom_data_title">
-                    Название курсовой работы:
-                  </td>
-                  <td className="bottom_data_info">
-                    {/* {student.courseWorkTitle} */}
-                    <textarea
-                      type="text"
-                      name="courseWorkTitle"
-                      value={editableStudent.courseWorkTitle}
-                      onChange={handleInputChange}
-                      className="editable_input big_input"
-                      row="2"
-                    />
-                  </td>
-                </tr>
-                <tr className="bottom_table_line">
-                  <td className="bottom_data_title">
-                    Оценка за курсовую работу:
-                  </td>
-                  <td className="bottom_data_info">
-                    {/* {student.courseGrade} */}
-                    <input
-                      type="number"
-                      //   min="" //указать пределы оценки!!!!!
-                      //   max=""
-                      name="courseGrade"
-                      value={editableStudent.courseGrade}
-                      onChange={handleInputChange}
-                      className="editable_input big_input"
-                    />
-                  </td>
-                </tr>
-                <tr className="bottom_table_line">
-                  <td
-                    className="bottom_data_title"
-                    style={{ lineHeight: "1.4" }}>
-                    Научный руководитель <br></br> дипломной работы:
-                  </td>
-                  <td className="bottom_data_info">
-                    {/* {student.diplomaSupervisor} */}
-                    <input
-                      type="text"
-                      name="diplomaSupervisor"
-                      value={editableStudent.diplomaSupervisor}
-                      onChange={handleInputChange}
-                      className="editable_input big_input"
-                    />
-                  </td>
-                </tr>
-                <tr className="bottom_table_line">
-                  <td className="bottom_data_title" style={{ lineHeight: "1.4" }}>
-                    Название дипломной <br></br> работы:
-                  </td>
-                  <td className="bottom_data_info">
-                    {/* {student.diplomaTitle} */}
-                    <textarea
-                      type="text"
-                      name="diplomaTitle"
-                      value={editableStudent.diplomaTitle}
-                      onChange={handleInputChange}
-                      className="editable_input big_input"
-                      row="2"
-                    />
-                  </td>
-                </tr>
-                <tr className="bottom_table_line">
-                  <td className="bottom_data_title" style={{ lineHeight: "1.4" }}>
-                    Оценка за дипломную <br></br> работу:
-                  </td>
-                  <td className="bottom_data_info">
-                    {/* {student.diplomaGrade} */}
-                    <input
-                      type="number"
-                      //   min="" //указать пределы оценки!!!!!
-                      //   max=""
-                      name="diplomaGrade"
-                      value={editableStudent.diplomaGrade}
-                      onChange={handleInputChange}
-                      className="editable_input big_input"
-                    />
-                  </td>
-                </tr>
-                <tr className="bottom_table_line">
-                  <td className="bottom_data_title">Год окончания:</td>
-                  <td className="bottom_data_info">
-                    {/* {student.graduationYear} */}
-                    <input
-                      type="number"
-                      min="1900"
-                      max="2024" // изменить пределы?
-                      name="graduationYear"
-                      value={editableStudent.graduationYear}
-                      onChange={handleInputChange}
-                      className="editable_input big_input"
-                    />
-                  </td>
-                </tr>
-
-                <tr className="bottom_table_line">
-                  <td className="bottom_data_title bottom_data_title_last_left">
-                    Успешность окончания:
-                  </td>
-                  <td className="bottom_data_info bottom_data_title_last_right">
-                    {/* {student.successAssessment} */}
-                    <input
-                      type="text"
-                      name="successAssessment"
-                      value={editableStudent.successAssessment}
-                      onChange={handleInputChange}
-                      className="editable_input big_input"
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </>
+        </>
+        );
+      </>
   );
 };
 
