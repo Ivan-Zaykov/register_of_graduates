@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	pgx "github.com/jackc/pgx/v5"
+	pgxpool "github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 )
 
@@ -26,13 +26,14 @@ func main() {
 	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
 		dbUser, dbPassword, dbHost, dbPort, dbName)
 
-	conn, err := pgx.Connect(context.Background(), dsn)
+	// Пул соединений с PostgreSQL
+	connPool, err := pgxpool.New(context.Background(), dsn)
 	if err != nil {
 		log.Fatalf("Не удалось подключиться к базе данных: %v\n", err)
 	}
-	defer conn.Close(context.Background())
+	defer connPool.Close() // Закрытие пула соединений
 
 	fmt.Println("Успешное подключение к базе данных")
 
-	routes.ConfigureRouter(conn)
+	routes.ConfigureRouter(connPool)
 }
