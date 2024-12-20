@@ -93,7 +93,6 @@ const EditStudent = () => {
       ...prev,
       [name]: type === "checkbox" ? checked : value
     }));
-    console.log(editableStudent)
   };
 
   const handleSave = () => {

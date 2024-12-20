@@ -78,7 +78,6 @@ const StudentsPage = () => {
     if (searchStudent.trim() === "") {
       // Если строка поиска пуста, сбрасываем фильтр
       setFilteredStudents(students);
-      console.log("Поиск сброшен, отображаются все студенты");
       return;
     }
 
@@ -92,7 +91,6 @@ const StudentsPage = () => {
     );
 
     setFilteredStudents(filteredData);
-    console.log("Поиск по студентам:", searchStudent);
   };
 
   const sortedAndFilteredData = [...filteredStudents].sort((a, b) => {

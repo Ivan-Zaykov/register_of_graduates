@@ -312,7 +312,6 @@ const AddNewStudent = () => {
                       <option value="">Выберите кафедру...</option>
                       {addNewStudent.faculty_id &&
                           departments.filter((department, faculty_id) => {
-                            console.log(department.faculty_id + ',' +faculty_id)
                             return department.faculty_id == faculty_id
                           }).map((department) => (
                             <option key={department.department_id} value={department.department_id}>

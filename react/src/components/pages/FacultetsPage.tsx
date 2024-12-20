@@ -72,7 +72,6 @@ const FacultetsPage = () => {
     if (searchFacult.trim() === "") {
       // Если строка поиска пуста, сбрасываем фильтр
       setFilteredFaculties(faculties);
-      console.log("Поиск сброшен, отображаются все факультеты");
       return;
     }
 
