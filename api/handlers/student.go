@@ -91,8 +91,8 @@ func GetStudent(conn *pgxpool.Conn, studentID uuid.UUID) (map[string]interface{}
             st.updated_at,
             cswk.coursework_title,
             cswk.coursework_grade,
-            css.full_name as course_supervisor,
-            dps.full_name as diploma_supervisor,
+            css.supervisor_id as course_supervisor,
+            dps.supervisor_id as diploma_supervisor,
             dpm.diploma_title,
             dpm.diploma_grade
         FROM student st

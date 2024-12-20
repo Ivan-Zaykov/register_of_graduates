@@ -19,6 +19,7 @@ const EditStudent = () => {
   const [faculties, setFaculties] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [educationLevels, setEducationLevels] = useState([]);
+  const [scientificSupervisors, setScientificSupervisors] = useState([]);
   const [isLoading, setLoading] = useState(true);
   const [alert, setAlert] = useState(null);
   const [error, setError] = useState(null);
@@ -42,7 +43,8 @@ const EditStudent = () => {
         await Promise.all([
           fetchData("/api/faculties", setFaculties, setError),
           fetchData("/api/departments", setDepartments, setError),
-          fetchData('/api/education_level', setEducationLevels, setError)
+          fetchData('/api/education_level', setEducationLevels, setError),
+          fetchData('/api/scientific_supervisors', setScientificSupervisors, setError)
         ]);
       } catch (error) {
         console.error("Ошибка при загрузке данных:", error);
@@ -226,7 +228,6 @@ const EditStudent = () => {
                           onChange={(e) => handleInputChange(e, setEditableStudent)}
                           className="add_student_select">
                         <option value="">Выберите ступень образования...</option>
-                        <option value="">Выберите ступень образования...</option>
                         {Object.keys(educationLevels).map((key) => (
                             <option key={key} value={key}>
                               {educationLevels[key]}
@@ -300,14 +301,21 @@ const EditStudent = () => {
                       Научный руководитель <br></br> курсовой работы:
                     </td>
                     <td className="bottom_data_info">
-                      <input
-                          type="text"
-                          name="course_supervisor"
-                          value={editableStudent.course_supervisor}
-                          onChange={(e) => handleInputChange(e, setEditableStudent)}
-                          className="editable_input big_input"
-                      />
-                      {student.course_supervisor}
+                      <td className="bottom_data_info">
+                        <select
+                            name="course_supervisor"
+                            value={editableStudent.course_supervisor}
+                            onChange={(e) => handleInputChange(e, setEditableStudent)}
+                            className="add_student_select add_student_big_input add_student_select_grade">
+                          <option value="">Выберите руководителя курсовой...</option>
+                          {Object.keys(scientificSupervisors).map((key) => (
+                              <option key={key} value={key}>
+                                {scientificSupervisors[key]['full_name']}
+                              </option>
+                          ))}
+                        </select>
+                      </td>
+                      {scientificSupervisors[student.course_supervisor].full_name}
                     </td>
                   </tr>
                   <tr className="bottom_table_line">
@@ -353,14 +361,19 @@ const EditStudent = () => {
                       Научный руководитель <br></br> дипломной работы:
                     </td>
                     <td className="bottom_data_info">
-                      <input
-                          type="text"
+                      <select
                           name="diploma_supervisor"
                           value={editableStudent.diploma_supervisor}
                           onChange={(e) => handleInputChange(e, setEditableStudent)}
-                          className="editable_input big_input"
-                      />
-                      {student.diploma_supervisor}
+                          className="add_student_select add_student_big_input add_student_select_grade">
+                        <option value="">Выберите руководителя дипломной...</option>
+                        {Object.keys(scientificSupervisors).map((key) => (
+                            <option key={key} value={key}>
+                              {scientificSupervisors[key]['full_name']}
+                            </option>
+                        ))}
+                      </select>
+                      {scientificSupervisors[student.diploma_supervisor].full_name}
                     </td>
                   </tr>
                   <tr className="bottom_table_line">
