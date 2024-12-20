@@ -224,7 +224,6 @@ const AddNewStudent = () => {
                         </option>
                     ))}
                   </select>
-                  <div className="data">{educationLevels[addNewStudent.education_level]}</div>
                 </div>
 
                 <div className="table_line">

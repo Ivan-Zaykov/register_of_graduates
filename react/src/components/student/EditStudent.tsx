@@ -271,7 +271,7 @@ const EditStudent = () => {
                     </td>
                     <td className="bottom_data_info">
                       <select
-                          value={editableStudent.faculty_id}
+                          value={editableStudent.department_id}
                           onChange={(e) => handleDepartmentChange(e, setEditableStudent)}
                           className="add_student_select">
                         <option value="">Выберите кафедру</option>
