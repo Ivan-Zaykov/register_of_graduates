@@ -45,7 +45,8 @@ CREATE TABLE Coursework (
                             coursework_title VARCHAR(200),
                             coursework_grade INT,
                             FOREIGN KEY (student_id) REFERENCES Student (student_id) ON DELETE CASCADE,
-                            FOREIGN KEY (supervisor_id) REFERENCES Scientific_Supervisor (supervisor_id)
+                            FOREIGN KEY (supervisor_id) REFERENCES Scientific_Supervisor (supervisor_id),
+                            CONSTRAINT unique_student_id UNIQUE (student_id)
 );
 
 CREATE TABLE Diploma (
@@ -55,5 +56,6 @@ CREATE TABLE Diploma (
                          diploma_title VARCHAR(200),
                          diploma_grade INT,
                          FOREIGN KEY (student_id) REFERENCES Student (student_id) ON DELETE CASCADE,
-                         FOREIGN KEY (supervisor_id) REFERENCES Scientific_Supervisor (supervisor_id)
+                         FOREIGN KEY (supervisor_id) REFERENCES Scientific_Supervisor (supervisor_id),
+                         CONSTRAINT unique_student_id_diploma UNIQUE (student_id)
 );

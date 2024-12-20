@@ -301,31 +301,38 @@ func UpdateStudent(conn *pgxpool.Conn, student Student) error {
 		return fmt.Errorf("нельзя изменять данные архивного студента")
 	}
 
-	// Обновляем данные студента
-	query := `
-		UPDATE student
-		SET
-			faculty_id = $2,
-			department_id = $3,
-			ticket_number = $4,
-			full_name = $5,
-			enrollment_date = $6,
-			education_level = $7,
-			graduation_date = $8,
-			completion_status = $9,
-			is_archived = $10,
-			coursework_title = $11,
-			coursework_grade = $12,
-			course_supervisor = $13,
-			diploma_supervisor = $14,
-			diploma_title = $15,
-			diploma_grade = $16,
-			updated_at = $17
-		WHERE student_id = $1`
+	// Начинаем транзакцию
+	tx, err := conn.Begin(context.Background())
+	if err != nil {
+		return fmt.Errorf("ошибка при начале транзакции: %v", err)
+	}
+	defer tx.Rollback(context.Background()) // откат, если не выполнится commit
 
-	_, err = conn.Exec(
-		context.Background(),
-		query,
+	// Преобразуем объект Student в JSON
+	studentJSON, err := json.MarshalIndent(student, "", "  ") // Используем MarshalIndent для красивого вывода с отступами
+	if err != nil {
+		log.Fatalf("Ошибка при преобразовании в JSON: %v", err)
+	}
+
+	// Выводим JSON в консоль
+	fmt.Println(string(studentJSON))
+
+	// Формируем запрос для обновления студента в таблице "students"
+	query := `
+        UPDATE student
+        SET
+            faculty_id = $2,
+            department_id = $3,
+            ticket_number = $4,
+            full_name = $5,
+            enrollment_date = $6,
+            education_level = $7,
+            graduation_date = $8,
+            completion_status = $9,
+            is_archived = $10,
+            updated_at = $11
+        WHERE student_id = $1`
+	_, err = tx.Exec(context.Background(), query,
 		student.StudentID,
 		student.FacultyID,
 		student.DepartmentID,
@@ -336,16 +343,57 @@ func UpdateStudent(conn *pgxpool.Conn, student Student) error {
 		student.GraduationDate,
 		student.CompletionStatus,
 		student.IsArchived,
-		student.CourseworkTitle,
-		student.CourseworkGrade,
-		student.CourseSupervisor,
-		student.DiplomaSupervisor,
-		student.DiplomaTitle,
-		student.DiplomaGrade,
 		time.Now(),
 	)
 	if err != nil {
-		return fmt.Errorf("ошибка при обновлении студента: %w", err)
+		return fmt.Errorf("ошибка при обновлении студента: %v", err)
+	}
+
+	// Если нужно обновить таблицу "coursework", добавляем запрос
+	queryCoursework := `
+    INSERT INTO coursework (coursework_id, student_id, coursework_title, coursework_grade, supervisor_id)
+    VALUES (COALESCE($1, gen_random_uuid()), $1, $2, $3, $4)
+    ON CONFLICT (student_id) DO UPDATE
+    SET
+        coursework_title = EXCLUDED.coursework_title,
+        coursework_grade = EXCLUDED.coursework_grade,
+        supervisor_id = EXCLUDED.supervisor_id`
+
+	_, err = tx.Exec(context.Background(), queryCoursework,
+		student.StudentID,
+		student.CourseworkTitle,
+		student.CourseworkGrade,
+		student.CourseSupervisor,
+	)
+
+	if err != nil {
+		return fmt.Errorf("ошибка при обновлении данных в coursework: %v", err)
+	}
+
+	// Обновление таблицы "diploma", переносим поля "diploma_title" и "diploma_grade"
+	queryDiploma := `
+        INSERT INTO diploma (diploma_id, student_id, diploma_title, diploma_grade, supervisor_id)
+        VALUES (COALESCE($1, gen_random_uuid()), $1, $2, $3, $4)
+        ON CONFLICT (student_id) DO UPDATE
+        SET
+        diploma_title = EXCLUDED.diploma_title,
+        diploma_grade = EXCLUDED.diploma_grade,
+        supervisor_id = EXCLUDED.supervisor_id`
+
+	_, err = tx.Exec(context.Background(), queryDiploma,
+		student.StudentID,
+		student.DiplomaTitle, // Переносим сюда дипломный титул
+		student.DiplomaGrade, // Переносим сюда дипломную оценку
+		student.DiplomaSupervisor,
+	)
+
+	if err != nil {
+		return fmt.Errorf("ошибка при обновлении данных в diploma: %v", err)
+	}
+
+	// Подтверждаем транзакцию
+	if err := tx.Commit(context.Background()); err != nil {
+		return fmt.Errorf("ошибка при коммите транзакции: %v", err)
 	}
 
 	return nil
