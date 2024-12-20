@@ -12,6 +12,7 @@ import {fetchData, handleDepartmentChange, handleFacultyChange, handleInputChang
 const AddNewStudent = () => {
   const [faculties, setFaculties] = useState([]);
   const [departments, setDepartments] = useState([]);
+  const [educationLevels, setEducationLevels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [alert, setAlert] = useState(null);
@@ -22,6 +23,7 @@ const AddNewStudent = () => {
       await Promise.all([
         fetchData("/api/faculties", setFaculties, setError),
         fetchData("/api/departments", setDepartments, setError),
+        fetchData('/api/education_level', setEducationLevels, setError)
       ]);
       setLoading(false);
     };
@@ -252,26 +254,19 @@ const AddNewStudent = () => {
                   <div className="title">
                     Ступень образования<span className="red_star">*</span>:
                   </div>
-                  {/* <div className="data">{student.level}</div> */}
-                  {/* <input
-                    type="text"
-                    name="level"
-                    placeholder="Введите ступень..."
-                    value={addNewStudent.level}
-                    onChange={(e) => handleInputChange(e, setAddNewStudent)}
-                    className="add_student_input"
-                  /> */}
                   <select
-                    name="education_level"
-                    value={addNewStudent.education_level}
-                    onChange={(e) => handleInputChange(e, setAddNewStudent)}
-                    className="add_student_select add_student_select_level">
-                    <option value="">Выберите ступень...</option>
-                    <option value="bakalavriat">Бакалавриат</option>
-                    <option value="magistratura">Магистратура</option>
-                    <option value="aspirantura">Аспирантура</option>
-                    <option value="specialitet">Специалитет</option>
+                      name="education_level"
+                      value={addNewStudent.education_level}
+                      onChange={(e) => handleInputChange(e, setAddNewStudent)}
+                      className="add_student_select">
+                    <option value="">Выберите ступень образования...</option>
+                    {Object.keys(educationLevels).map((key) => (
+                        <option key={key} value={key}>
+                          {educationLevels[key]}
+                        </option>
+                    ))}
                   </select>
+                  <div className="data">{educationLevels[addNewStudent.education_level]}</div>
                 </div>
 
                 <div className="table_line">

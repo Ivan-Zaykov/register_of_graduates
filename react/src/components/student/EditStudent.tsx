@@ -18,6 +18,7 @@ const EditStudent = () => {
   const [editableStudent, setEditableStudent] = useState({}); // Инициализируем пустым объектом
   const [faculties, setFaculties] = useState([]);
   const [departments, setDepartments] = useState([]);
+  const [educationLevels, setEducationLevels] = useState([]);
   const [isLoading, setLoading] = useState(true);
   const [alert, setAlert] = useState(null);
   const [error, setError] = useState(null);
@@ -41,6 +42,7 @@ const EditStudent = () => {
         await Promise.all([
           fetchData("/api/faculties", setFaculties, setError),
           fetchData("/api/departments", setDepartments, setError),
+          fetchData('/api/education_level', setEducationLevels, setError)
         ]);
       } catch (error) {
         console.error("Ошибка при загрузке данных:", error);
@@ -230,14 +232,20 @@ const EditStudent = () => {
                     <div className="table_line">
                       <div className="title">Ступень образования:</div>
                       {/* <div className="data">{student.level}</div> */}
-                      <input
-                          type="text"
+                      <select
                           name="education_level"
                           value={editableStudent.education_level}
                           onChange={(e) => handleInputChange(e, setEditableStudent)}
-                          className="editable_input"
-                      />
-                      <div className="data">{student.education_level}</div>
+                          className="add_student_select">
+                        <option value="">Выберите ступень образования...</option>
+                        <option value="">Выберите ступень образования...</option>
+                        {Object.keys(educationLevels).map((key) => (
+                            <option key={key} value={key}>
+                              {educationLevels[key]}
+                            </option>
+                        ))}
+                      </select>
+                      <div className="data">{educationLevels[student.education_level]}</div>
                     </div>
 
                     <div className="table_line">
