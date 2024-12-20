@@ -14,6 +14,8 @@ CREATE TABLE Departments (
                              FOREIGN KEY (faculty_id) REFERENCES Faculty (faculty_id)
 );
 
+CREATE TYPE status_type AS ENUM ('Бакалавр', 'Магистр', 'Аспирант', 'Специалист');
+
 CREATE TABLE Student (
                          student_id UUID PRIMARY KEY,
                          faculty_id UUID,
@@ -27,7 +29,7 @@ CREATE TABLE Student (
                          is_archived BOOL NOT NULL,
                          created_at TIMESTAMP,
                          updated_at TIMESTAMP,
-                         education_level VARCHAR,
+                         education_level status_type DEFAULT(NULL),
                          FOREIGN KEY (faculty_id) REFERENCES Faculty (faculty_id),
                          FOREIGN KEY (department_id) REFERENCES Departments (department_id)
 );
