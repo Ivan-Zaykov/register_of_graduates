@@ -5,9 +5,11 @@ import { ReactComponent as SearchIcon } from "../../pictures/search_icon.svg";
 import { ReactComponent as AddStudentIcon } from "../../pictures/add_student_icon.svg";
 
 import "../../css/StudentsPage.css";
+import {fetchData} from "../../utils/utils";
 
 const StudentsPage = () => {
   const [students, setStudents] = useState([]); // Состояние для хранения данных студентов
+  const [educationLevels, setEducationLevels] = useState([]);
   const [isLoading, setIsLoading] = useState(true); // Состояние загрузки
   const [error, setError] = useState(null); // Состояние для ошибок
 
@@ -21,23 +23,16 @@ const StudentsPage = () => {
   const [filteredStudents, setFilteredStudents] = useState([]); // отфильтрованные данные
 
   useEffect(() => {
-    // Функция для получения данных
-    const fetchStudents = async () => {
-      try {
-        const response = await fetch("/api/students"); // Запрос к API
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json(); // Парсим JSON
-        setStudents(data); // Сохраняем данные в состояние
-        setIsLoading(false); // Отключаем индикатор загрузки
-      } catch (err) {
-        setError(err.message); // Сохраняем сообщение об ошибке
-        setIsLoading(false);
-      }
+    const fetchAllData = async () => {
+      setIsLoading(true);
+      await Promise.all([
+        fetchData('/api/students', setStudents, setError),
+        fetchData('/api/education_level', setEducationLevels, setError),
+      ]);
+      setIsLoading(false);
     };
 
-    fetchStudents(); // Вызываем функцию при монтировании компонента
+    fetchAllData();
   }, []);
 
 
@@ -229,7 +224,7 @@ const StudentsPage = () => {
                       {student.full_name}
                     </a>
                   </td>
-                  <td className="student_td">{student.education_level}</td>
+                  <td className="student_td">{educationLevels[student.education_level]}</td>
                   <td className="student_td">{student.faculty_name}</td>
                   <td className="student_td">{student.department_name}</td>
                   <td className="student_td">
