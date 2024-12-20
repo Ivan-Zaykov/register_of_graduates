@@ -20,13 +20,14 @@ CREATE TABLE Student (
                          department_id UUID,
                          ticket_number VARCHAR(100) UNIQUE,
                          full_name VARCHAR(100),
+                         image VARCHAR(100) DEFAULT(NULL),
                          enrollment_date DATE,
-                         education_level VARCHAR,
                          graduation_date DATE DEFAULT(NULL),
                          completion_status BOOL DEFAULT(NULL),
                          is_archived BOOL NOT NULL,
                          created_at TIMESTAMP,
                          updated_at TIMESTAMP,
+                         education_level VARCHAR,
                          FOREIGN KEY (faculty_id) REFERENCES Faculty (faculty_id),
                          FOREIGN KEY (department_id) REFERENCES Departments (department_id)
 );
