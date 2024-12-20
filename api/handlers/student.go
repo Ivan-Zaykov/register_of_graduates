@@ -96,8 +96,8 @@ func GetStudent(conn *pgxpool.Conn, studentID uuid.UUID) (map[string]interface{}
             dpm.diploma_title,
             dpm.diploma_grade
         FROM student st
-        JOIN faculty fct ON st.faculty_id = fct.faculty_id
-        JOIN departments dpts ON st.department_id = dpts.department_id
+        LEFT JOIN faculty fct ON st.faculty_id = fct.faculty_id
+        LEFT JOIN departments dpts ON st.department_id = dpts.department_id
         LEFT JOIN coursework cswk ON st.student_id = cswk.student_id
         LEFT JOIN diploma dpm ON st.student_id = dpm.student_id
         /* Руководитель курсовой */
