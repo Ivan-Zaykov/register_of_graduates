@@ -288,7 +288,7 @@ const EditStudent = () => {
                         ))}
                       </select>
                       <div className="data">
-                        {editableStudent.department_id != "" ? departments.filter(
+                        {student.department_id != "" ? departments.filter(
                             (department) => department.department_id === student.department_id
                         )[0].department_name : ""}
                       </div>
@@ -301,22 +301,25 @@ const EditStudent = () => {
                       Научный руководитель <br></br> курсовой работы:
                     </td>
                     <td className="bottom_data_info">
-                      <td className="bottom_data_info">
-                        <select
-                            name="course_supervisor"
-                            value={editableStudent.course_supervisor}
-                            onChange={(e) => handleInputChange(e, setEditableStudent)}
-                            className="add_student_select add_student_big_input add_student_select_grade">
-                          <option value="">Выберите руководителя курсовой...</option>
-                          {Object.keys(scientificSupervisors).map((key) => (
-                              <option key={key} value={key}>
-                                {scientificSupervisors[key]['full_name']}
-                              </option>
-                          ))}
-                        </select>
-                      </td>
-                      {scientificSupervisors[student.course_supervisor] ?
-                          scientificSupervisors[student.course_supervisor].full_name : '' }
+                      <select
+                          name="course_supervisor"
+                          value={editableStudent.course_supervisor}
+                          onChange={(e) => handleInputChange(e, setEditableStudent)}
+                          className="add_student_select add_student_big_input add_student_select_grade">
+                        <option value="">Выберите руководителя курсовой...</option>
+                        {Object.keys(scientificSupervisors).map((key) => (
+                            <option key={key} value={key}>
+                              {scientificSupervisors[key]['full_name']}
+                            </option>
+                        ))}
+                      </select>
+                      <div className="data">
+                        {
+                          scientificSupervisors[student.course_supervisor] ?
+                              scientificSupervisors[student.course_supervisor].full_name :
+                              ""
+                        }
+                      </div>
                     </td>
                   </tr>
                   <tr className="bottom_table_line">
@@ -374,11 +377,13 @@ const EditStudent = () => {
                             </option>
                         ))}
                       </select>
-                      {
-                        scientificSupervisors[student.diploma_supervisor] ?
-                          scientificSupervisors[student.diploma_supervisor].full_name :
-                          ""
-                      }
+                      <div className="data">
+                        {
+                          scientificSupervisors[student.diploma_supervisor] ?
+                              scientificSupervisors[student.diploma_supervisor].full_name :
+                              ""
+                        }
+                      </div>
                     </td>
                   </tr>
                   <tr className="bottom_table_line">
