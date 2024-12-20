@@ -91,3 +91,69 @@ export const handleInputChange = (
         [name]: value,
     }));
 };
+
+export const handleSaveStudent = async (
+    e: React.ChangeEvent<HTMLSelectElement>,
+    studentData: object,
+    action: string,
+    setError: (error: string) => void,
+    setAlert: (error: string) => void
+) => {
+    e.preventDefault();
+    const requiredFields = [
+        "ticket_number",
+        "full_name",
+        "faculty_id",
+        "enrollment_date",
+        "education_level",
+    ];
+    const isAllFieldsFilled = requiredFields.every(
+        (field) => studentData[field].trim() !== ""
+    );
+
+    if (!isAllFieldsFilled) {
+        // alert("Не все обязательные поля заполнены");
+        setAlert({
+            message: "Не все обязательные поля заполнены!",
+        });
+    } else {
+        let method;
+        try {
+            switch (action) {
+                case 'new':
+                    method = "POST"
+                    break
+                case 'update':
+                    method = "PUT"
+                    break
+            }
+
+            const response = await fetch("/api/student", {
+                method: method,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(studentData),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Ошибка HTTP: ${response.status}`);
+            }
+
+            let alertText;
+            switch (action) {
+                case 'new':
+                    alertText = "создан"
+                    break
+                case 'update':
+                    alertText = "изменен"
+                    break
+            }
+            setAlert({
+                message: "Студент успешно " + alertText + ".",
+            });
+        } catch (err) {
+            setError(err.message);
+        }
+    }
+};
