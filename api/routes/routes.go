@@ -17,6 +17,7 @@ func ConfigureRouter(connPool *pgxpool.Pool) {
 	r.HandleFunc("/api/student", handlers.CreateStudentHandler(connPool)).Methods(http.MethodPost)
 	r.HandleFunc("/api/student", handlers.UpdateStudentHandler(connPool)).Methods(http.MethodPut)
 	r.HandleFunc("/api/student/{id}", handlers.DeleteStudentHandler(connPool)).Methods(http.MethodDelete)
+	r.HandleFunc("/api/student/{id}", handlers.ArchiveStudentHandler(connPool)).Methods(http.MethodPatch)
 
 	r.HandleFunc("/api/students", handlers.GetAllStudentsHandler(connPool)).Methods(http.MethodGet)
 	//r.HandleFunc("/api/students/archive", ArchiveStudentHandler(connPool)).Methods(http.MethodPost)

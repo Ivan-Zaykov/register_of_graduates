@@ -113,21 +113,40 @@ const StudentProfile = () => {
     );
   };
 
-  const handleArchive = () => {
+  const handleArchive = async () => {
     const archiveMessage = student.is_archived
-      ? "Студент успешно разархивирован."
-      : "Студент успешно архивирован.";
+        ? "Студент успешно разархивирован."
+        : "Студент успешно архивирован.";
 
     openModal(
-      () => {
-        setAlert({ message: archiveMessage });
-      },
-      `Вы уверены, что хотите ${
-        student.is_archived ? "убрать этого студента из архива" : "добавить этого студента в архив"
-      }?`,
-      student.is_archived ? "Разархивировать" : "Архивировать"
+        async () => {
+          // Отправляем PATCH-запрос на сервер
+          const response = await fetch(`/api/student/${student.student_id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ is_archived: !student.is_archived }),
+          });
+
+          if (response.ok) {
+            // Если запрос успешен, обновляем статус и показываем сообщение
+            setAlert({ message: archiveMessage });
+            // Здесь нужно обновить состояние студента или перезагрузить данные
+            // Например, обновляем стейт is_archived:
+            setStudent(prevState => ({ ...prevState, is_archived: !prevState.is_archived }));
+          } else {
+            // Обрабатываем ошибку, если запрос не успешен
+            setAlert({ message: 'Произошла ошибка при обновлении студента.' });
+          }
+        },
+        `Вы уверены, что хотите ${
+            student.is_archived ? "убрать этого студента из архива" : "добавить этого студента в архив"
+        }?`,
+        student.is_archived ? "Разархивировать" : "Архивировать"
     );
   };
+
 
 
   const handleEdit = () => {

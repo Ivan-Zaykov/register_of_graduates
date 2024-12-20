@@ -528,8 +528,14 @@ func ArchiveStudent(conn *pgxpool.Conn, studentID uuid.UUID) error {
 	return nil
 }
 
-func ArchiveStudentHandler(conn *pgxpool.Conn) http.HandlerFunc {
+func ArchiveStudentHandler(connPool *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		conn, err := connPool.Acquire(context.Background())
+		if err != nil {
+			log.Fatalf("Ошибка при получении соединения из пула: %v\n", err)
+		}
+		defer conn.Release()
+
 		// Извлекаем ID студента из маршрута
 		vars := mux.Vars(r)
 		studentIDStr, ok := vars["id"]
