@@ -72,7 +72,6 @@ const DepartmentsPage = () => {
     if (searchDepart.trim() === "") {
       // Если строка поиска пуста, сбрасываем фильтр
       setFilteredDeparts(departsData);
-      console.log("Поиск сброшен, отображаются все кафедры");
       return;
     }
 
