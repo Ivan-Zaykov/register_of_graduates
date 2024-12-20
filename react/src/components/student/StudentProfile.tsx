@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
-import { formatDate } from "../../utils/utils";
+import {fetchData, formatDate} from "../../utils/utils";
 import { extractYear} from "../../utils/utils";
 
 import Header from "../Header";
@@ -18,9 +18,10 @@ import CustomAlert from "../CustomAlert";
 const StudentProfile = () => {
   const { studentId } = useParams();
   const [student, setStudent] = useState(null); // Состояние для данных студента
-  const [isLoading, setIsLoading] = useState(true); // Состояние загрузки
+  const [isLoading, setLoading] = useState(true); // Состояние загрузки
   const [error, setError] = useState(null); // Состояние для ошибок
   const [alert, setAlert] = useState(null);
+  const [educationLevels, setEducationLevels] = useState([]);
 
 
 
@@ -35,23 +36,33 @@ const StudentProfile = () => {
 
 
   useEffect(() => {
-    const fetchStudentData = async () => {
+    const fetchAllData = async () => {
+      setLoading(true); // Показываем индикатор загрузки
+
       try {
-        const response = await fetch(`/api/student/${studentId}`);
-        if (!response.ok) {
-          throw new Error(`Ошибка: ${response.status}`);
+        // Первый запрос для получения данных студента
+        const studentResponse = await fetch(`/api/student/${studentId}`);
+
+        if (!studentResponse.ok) {
+          throw new Error(`Ошибка: ${studentResponse.status}`);
         }
-        const data = await response.json();
-        setStudent(data); // Сохраняем данные студента
-      } catch (err) {
-        setError(err.message); // Обрабатываем ошибку
+
+        const student = await studentResponse.json();
+        setStudent(student);
+
+        // Параллельное выполнение остальных запросов
+        await Promise.all([
+          fetchData('/api/education_level', setEducationLevels, setError)
+        ]);
+      } catch (error) {
+        console.error("Ошибка при загрузке данных:", error);
       } finally {
-        setIsLoading(false); // Выключаем индикатор загрузки
+        setLoading(false); // Скрываем индикатор загрузки
       }
     };
 
-    fetchStudentData(); // Запрос данных при монтировании компонента
-  }, [studentId]);
+    fetchAllData();
+  }, []);
 
   if (isLoading) {
     return <div>Загрузка...</div>; // Показываем индикатор загрузки
@@ -246,7 +257,7 @@ const StudentProfile = () => {
 
               <div className="table_line">
                 <div className="title">Ступень образования:</div>
-                <div className="data">{student.education_level}</div>
+                <div className="data">{educationLevels[student.education_level]}</div>
               </div>
 
               <div className="table_line">
