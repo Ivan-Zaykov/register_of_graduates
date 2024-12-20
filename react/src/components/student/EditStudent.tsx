@@ -5,7 +5,7 @@ import {
   fetchData,
   formatDate,
   handleFacultyChange,
-  handleDepartmentChange
+  handleDepartmentChange, handleSaveStudent, handleInputChange
 } from "../../utils/utils";
 import CustomAlert from "../CustomAlert";
 
@@ -61,7 +61,6 @@ const EditStudent = () => {
         full_name: student.full_name,
         ticket_number: student.ticket_number,
         faculty_id: student.faculty_id,
-        faculty_name: student.faculty_name,
         enrollment_date: student.enrollment_date,
         education_level: student.education_level,
         is_archived: student.is_archived,
@@ -95,14 +94,6 @@ const EditStudent = () => {
     }));
   };
 
-  const handleSave = () => {
-    console.log("Сохраненные данные:", editableStudent);
-    setAlert({
-      message: "Студент успешно изменён.",
-    });
-    // Логика отправки данных на сервер
-  };
-
   const handleAlertClose = () => {
     setAlert(null); // Закрытие alert
   };
@@ -129,10 +120,8 @@ const EditStudent = () => {
                 </div>
                 <a
                     className="edit_student_save_button"
-                    // href={`/students/${studentId}`}
-                    // Новая информация идет в консоль, из-за перехода назад может быть не видно,
-                    // так что пока закомментируй эту строчку
-                    onClick={handleSave}
+                    onClick={(e) =>
+                        handleSaveStudent(e, editableStudent, 'update', setError, setAlert)}
                     style={{ textDecoration: "none", color: "inherit"}}>
                   Сохранить
                 </a>

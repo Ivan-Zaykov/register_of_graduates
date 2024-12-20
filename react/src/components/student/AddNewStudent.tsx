@@ -7,7 +7,7 @@ import CustomAlert from "../CustomAlert";
 import "../../css/StudentProfile.css";
 import "../../css/EditStudent.css";
 import "../../css/AddNewStudent.css";
-import {fetchData, handleDepartmentChange, handleFacultyChange, handleInputChange} from "../../utils/utils";
+import {fetchData, handleDepartmentChange, handleFacultyChange, handleInputChange, handleSaveStudent} from "../../utils/utils";
 
 const AddNewStudent = () => {
   const [faculties, setFaculties] = useState([]);
@@ -61,47 +61,6 @@ const AddNewStudent = () => {
     completion_status: "",
   });
 
-  const handleSave = async (e) => {
-    e.preventDefault();
-    const requiredFields = [
-      "ticket_number",
-      "full_name",
-      "faculty_id",
-      "enrollment_date",
-      "education_level",
-    ];
-    const isAllFieldsFilled = requiredFields.every(
-      (field) => addNewStudent[field].trim() !== ""
-    );
-
-    if (!isAllFieldsFilled) {
-      // alert("Не все обязательные поля заполнены");
-      setAlert({
-        message: "Не все обязательные поля заполнены!",
-      });
-    } else {
-      try {
-        const response = await fetch("/api/student", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(addNewStudent),
-        });
-
-        if (!response.ok) {
-          throw new Error(`Ошибка HTTP: ${response.status}`);
-        }
-
-        setAlert({
-          message: "Студент успешно создан.",
-        });
-      } catch (err) {
-        setError(err.message);
-      }
-    }
-  };
-
   const handleAlertClose = () => {
     setAlert(null); // Закрытие alert
   };
@@ -134,8 +93,8 @@ const AddNewStudent = () => {
             </div>
             <a
               className="edit_student_save_button"
-              // href="/students"
-              onClick={handleSave}
+              onClick={(e) =>
+                  handleSaveStudent(e, addNewStudent, 'new', setError, setAlert)}
               style={{ textDecoration: "none", color: "inherit" }}>
               Сохранить
             </a>
@@ -204,7 +163,6 @@ const AddNewStudent = () => {
                   <div className="title">
                     Факультет<span className="red_star">*</span>:
                   </div>
-                  { addNewStudent.faculty_id != "" ? addNewStudent.faculty_id : "" }
                   <select
                     name="faculty_id"
                     value={addNewStudent.faculty_id}
