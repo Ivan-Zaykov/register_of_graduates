@@ -52,7 +52,8 @@ const MainPage = () => {
             <div className="list_item">
               Владислав Чернов в роли бэкенд разработчика;
             </div>
-            <div className="list_item">Юлия Якубив в роли дизайнера.</div>
+            <div className="list_item">Юлия Якубив в роли дизайнера;</div>
+            <div className="list_item">ChatGPT в роли духовного наставника.</div>
           </div>
         </div>
       </div>
