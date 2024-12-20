@@ -15,7 +15,7 @@ func ConfigureRouter(connPool *pgxpool.Pool) {
 	r := mux.NewRouter()
 	r.HandleFunc("/api/student/{id}", handlers.GetStudentHandler(connPool)).Methods(http.MethodGet)
 	r.HandleFunc("/api/student", handlers.CreateStudentHandler(connPool)).Methods(http.MethodPost)
-	r.HandleFunc("/api/student/{id}", handlers.UpdateStudentHandler(connPool)).Methods(http.MethodPut)
+	r.HandleFunc("/api/student", handlers.UpdateStudentHandler(connPool)).Methods(http.MethodPut)
 	r.HandleFunc("/api/student/{id}", handlers.DeleteStudentHandler(connPool)).Methods(http.MethodDelete)
 
 	r.HandleFunc("/api/students", handlers.GetAllStudentsHandler(connPool)).Methods(http.MethodGet)
