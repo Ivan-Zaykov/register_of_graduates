@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"log"
 	"net/http"
 )
@@ -16,8 +16,14 @@ type Faculty struct {
 	FacultySubstitute string    `json:"faculty_substitute"`
 }
 
-func GetAllFacultyHandler(conn *pgx.Conn) http.HandlerFunc {
+func GetAllFacultyHandler(connPool *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		conn, err := connPool.Acquire(context.Background())
+		if err != nil {
+			log.Fatalf("Ошибка при получении соединения из пула: %v\n", err)
+		}
+		defer conn.Release()
+
 		ctx := context.Background()
 		// SQL-запрос
 		query := `
@@ -26,7 +32,7 @@ func GetAllFacultyHandler(conn *pgx.Conn) http.HandlerFunc {
             faculty_name,
             faculty_dean,
             faculty_substitute
-        FROM faculty
+        FROM faculty ORDER BY faculty_name
     `
 
 		rows, err := conn.Query(ctx, query)

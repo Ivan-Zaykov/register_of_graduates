@@ -1,42 +1,44 @@
 package handlers
 
 import (
+	"api/utils"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	pgx "github.com/jackc/pgx/v5"
+	pgxpool "github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Student struct {
-	StudentID         uuid.UUID  `json:"student_id"`
-	FacultyID         uuid.UUID  `json:"faculty_id"`
-	FacultyName       string     `json:"faculty_name"`
-	DepartmentID      uuid.UUID  `json:"department_id"`
-	DepartmentName    string     `json:"department_name"`
-	TicketNumber      string     `json:"ticket_number"`
-	FullName          string     `json:"full_name"`
-	EnrollmentDate    *time.Time `json:"enrollment_date"`
-	EducationLevel    string     `json:"education_level"`
-	GraduationDate    *time.Time `json:"graduation_date,omitempty"`
-	CompletionStatus  *bool      `json:"completion_status,omitempty"`
-	IsArchived        bool       `json:"is_archived"`
-	CreatedAt         *time.Time `json:"created_at"`
-	UpdatedAt         *time.Time `json:"updated_at"`
-	CourseworkTitle   *string    `json:"coursework_title"`
-	CourseworkGrade   *string    `json:"coursework_grade"`
-	CourseSupervisor  *string    `json:"course_supervisor"`
-	DiplomaSupervisor *string    `json:"diploma_supervisor"`
-	DiplomaTitle      *string    `json:"diploma_title"`
-	DiplomaGrade      *string    `json:"diploma_grade"`
+	StudentID         uuid.UUID              `json:"student_id"`
+	FacultyID         uuid.UUID              `json:"faculty_id"`
+	FacultyName       utils.CustomNullString `json:"faculty_name"`
+	DepartmentID      utils.CustomNullString `json:"department_id"`
+	DepartmentName    utils.CustomNullString `json:"department_name"`
+	TicketNumber      string                 `json:"ticket_number"`
+	FullName          string                 `json:"full_name"`
+	EnrollmentDate    utils.CustomDate       `json:"enrollment_date"`
+	EducationLevel    string                 `json:"education_level"`
+	GraduationDate    utils.CustomDate       `json:"graduation_date,omitempty"`
+	CompletionStatus  utils.CustomBoolString `json:"completion_status,omitempty"`
+	IsArchived        utils.CustomBoolString `json:"is_archived"`
+	CreatedAt         *time.Time             `json:"created_at"`
+	UpdatedAt         *time.Time             `json:"updated_at"`
+	CourseworkTitle   utils.CustomNullString `json:"coursework_title"`
+	CourseworkGrade   utils.CustomNullString `json:"coursework_grade"`
+	CourseSupervisor  utils.CustomNullString `json:"course_supervisor"`
+	DiplomaSupervisor utils.CustomNullString `json:"diploma_supervisor"`
+	DiplomaTitle      utils.CustomNullString `json:"diploma_title"`
+	DiplomaGrade      utils.CustomNullString `json:"diploma_grade"`
 }
 
-func StudentExistsByTicketNumber(conn *pgx.Conn, ticketNumber string) (bool, error) {
+func StudentExistsByTicketNumber(conn *pgxpool.Conn, ticketNumber string) (bool, error) {
 	query := "SELECT COUNT(*) FROM student WHERE ticket_number = $1"
 	var count int
 
@@ -48,7 +50,7 @@ func StudentExistsByTicketNumber(conn *pgx.Conn, ticketNumber string) (bool, err
 	return count > 0, nil
 }
 
-func StudentExists(conn *pgx.Conn, studentID uuid.UUID) (bool, error) {
+func StudentExists(conn *pgxpool.Conn, studentID uuid.UUID) (bool, error) {
 	query := "SELECT COUNT(*) FROM student WHERE student_id = $1"
 	var count int
 
@@ -60,7 +62,7 @@ func StudentExists(conn *pgx.Conn, studentID uuid.UUID) (bool, error) {
 	return count > 0, nil
 }
 
-func GetStudent(conn *pgx.Conn, studentID uuid.UUID) (map[string]interface{}, error) {
+func GetStudent(conn *pgxpool.Conn, studentID uuid.UUID) (map[string]interface{}, error) {
 	// Проверяем существование студента
 	exists, err := StudentExists(conn, studentID)
 	if err != nil {
@@ -89,8 +91,8 @@ func GetStudent(conn *pgx.Conn, studentID uuid.UUID) (map[string]interface{}, er
             st.updated_at,
             cswk.coursework_title,
             cswk.coursework_grade,
-            css.full_name as course_supervisor,
-            dps.full_name as diploma_supervisor,
+            css.supervisor_id as course_supervisor,
+            dps.supervisor_id as diploma_supervisor,
             dpm.diploma_title,
             dpm.diploma_grade
         FROM student st
@@ -159,8 +161,14 @@ func GetStudent(conn *pgx.Conn, studentID uuid.UUID) (map[string]interface{}, er
 	return result, nil
 }
 
-func GetStudentHandler(conn *pgx.Conn) http.HandlerFunc {
+func GetStudentHandler(connPool *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		conn, err := connPool.Acquire(context.Background())
+		if err != nil {
+			log.Fatalf("Ошибка при получении соединения из пула: %v\n", err)
+		}
+		defer conn.Release()
+
 		// Извлекаем student_id из параметров запроса
 		vars := mux.Vars(r)
 		studentID, err := uuid.Parse(vars["id"])
@@ -184,7 +192,9 @@ func GetStudentHandler(conn *pgx.Conn) http.HandlerFunc {
 	}
 }
 
-func CreateStudent(conn *pgx.Conn, facultyID, departmentID uuid.UUID, ticketNumber string, fullName string, educationLevel string, enrollmentDate time.Time) error {
+func CreateStudent(conn *pgxpool.Conn, facultyID uuid.UUID, ticketNumber string, fullName string, educationLevel string, enrollmentDate time.Time) error {
+	defer conn.Release()
+
 	// Проверяем, существует ли студент с данным номером студенческого билета
 	if exists, err := StudentExistsByTicketNumber(conn, ticketNumber); err != nil {
 		return fmt.Errorf("ошибка проверки существования студента: %v", err)
@@ -195,21 +205,19 @@ func CreateStudent(conn *pgx.Conn, facultyID, departmentID uuid.UUID, ticketNumb
 	// SQL-запрос на создание студента
 	query := `
 		INSERT INTO student (
-			student_id, faculty_id, department_id, ticket_number, 
-			full_name, enrollment_date, education_level, 
-			is_archived, created_at, updated_at
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
+			student_id, faculty_id, ticket_number, 
+			full_name, education_level, enrollment_date, is_archived, created_at, updated_at 
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
 
 	_, err := conn.Exec(
 		context.Background(),
 		query,
 		uuid.New(),     // student_id
 		facultyID,      // faculty_id
-		departmentID,   // department_id
 		ticketNumber,   // ticket_number
 		fullName,       // full_name
-		enrollmentDate, // enrollment_date
 		educationLevel, // education_level
+		enrollmentDate, // enrollment_date
 		false,          // is_archived
 		time.Now(),     // created_at
 		time.Now(),     // updated_at
@@ -222,16 +230,22 @@ func CreateStudent(conn *pgx.Conn, facultyID, departmentID uuid.UUID, ticketNumb
 	return nil
 }
 
-func CreateStudentHandler(conn *pgx.Conn) http.HandlerFunc {
+func CreateStudentHandler(connPool *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		conn, err := connPool.Acquire(context.Background())
+		if err != nil {
+			log.Fatalf("Ошибка при получении соединения из пула: %v\n", err)
+		}
+		defer conn.Release()
+
 		// Парсим тело запроса
 		var req struct {
-			FacultyID      string `json:"FacultyID"`
-			DepartmentID   string `json:"DepartmentID"`
-			TicketNumber   string `json:"TicketNumber"`
-			FullName       string `json:"FullName"`
-			EducationLevel string `json:"EducationLevel"`
-			EnrollmentDate string `json:"EnrollmentDate"`
+			FacultyID      string `json:"faculty_id"`
+			DepartmentID   string `json:"department_id"`
+			TicketNumber   string `json:"ticket_number"`
+			FullName       string `json:"full_name"`
+			EducationLevel string `json:"education_level"`
+			EnrollmentDate string `json:"enrollment_date"`
 		}
 
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -246,20 +260,14 @@ func CreateStudentHandler(conn *pgx.Conn) http.HandlerFunc {
 			return
 		}
 
-		departmentID, err := uuid.Parse(req.DepartmentID)
-		if err != nil {
-			http.Error(w, "Неверный UUID кафедры", http.StatusBadRequest)
-			return
-		}
-
-		enrollmentDate, err := time.Parse("2006-01-02", req.EnrollmentDate)
+		enrollmentDate, err := time.Parse("2006", req.EnrollmentDate)
 		if err != nil {
 			http.Error(w, "Неверный формат даты", http.StatusBadRequest)
 			return
 		}
 
 		// Вызов функции для создания студента
-		if err := CreateStudent(conn, facultyID, departmentID, req.TicketNumber, req.FullName, req.EducationLevel, enrollmentDate); err != nil {
+		if err := CreateStudent(conn, facultyID, req.TicketNumber, req.FullName, req.EducationLevel, enrollmentDate); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -269,135 +277,157 @@ func CreateStudentHandler(conn *pgx.Conn) http.HandlerFunc {
 	}
 }
 
-func UpdateStudent(conn *pgx.Conn, studentID uuid.UUID, facultyID *uuid.UUID, departmentID *uuid.UUID,
-	fullName string, enrollmentDate *time.Time, educationLevel *string, graduationDate *time.Time,
-	completionStatus *bool) error {
-
+func UpdateStudent(conn *pgxpool.Conn, student Student) error {
 	// Проверяем, существует ли студент
-	exists, err := StudentExists(conn, studentID)
+	exists, err := StudentExists(conn, student.StudentID)
 	if err != nil {
-		return fmt.Errorf("ошибка при проверке существования студента: %v", err)
+		return fmt.Errorf("ошибка при проверке существования студента: %w", err)
 	}
 	if !exists {
-		return fmt.Errorf("студент с ID %s не найден", studentID)
+		return fmt.Errorf("студент с ID %s не найден", student.StudentID)
 	}
 
-	// Проверяем, не архивный ли студент
+	// Проверяем, является ли студент архивным
 	var isArchived bool
-	err = conn.QueryRow(context.Background(), `SELECT is_archived FROM student WHERE student_id = $1`, studentID).Scan(&isArchived)
+	err = conn.QueryRow(
+		context.Background(),
+		`SELECT is_archived FROM student WHERE student_id = $1`,
+		student.StudentID,
+	).Scan(&isArchived)
 	if err != nil {
-		return fmt.Errorf("ошибка при проверке архивности студента: %v", err)
+		return fmt.Errorf("ошибка при проверке архивности студента: %w", err)
 	}
 	if isArchived {
 		return fmt.Errorf("нельзя изменять данные архивного студента")
 	}
 
-	// Формируем запрос на обновление
-	query := `UPDATE student SET `
-	params := []interface{}{}
-	counter := 1
+	// Начинаем транзакцию
+	tx, err := conn.Begin(context.Background())
+	if err != nil {
+		return fmt.Errorf("ошибка при начале транзакции: %v", err)
+	}
+	defer tx.Rollback(context.Background()) // откат, если не выполнится commit
 
-	if facultyID != nil {
-		query += fmt.Sprintf("faculty_id = $%v, ", counter)
-		params = append(params, *facultyID)
-		counter++
-	}
-	if departmentID != nil {
-		query += fmt.Sprintf("department_id = $%v, ", counter)
-		params = append(params, *departmentID)
-		counter++
-	}
-	if fullName != "" {
-		query += fmt.Sprintf("full_name = $%v, ", counter)
-		params = append(params, fullName)
-		counter++
-	}
-	if enrollmentDate != nil {
-		query += fmt.Sprintf("enrollment_date = $%v, ", counter)
-		params = append(params, *enrollmentDate)
-		counter++
-	}
-	if educationLevel != nil {
-		query += fmt.Sprintf("education_level = $%v, ", counter)
-		params = append(params, *educationLevel)
-		counter++
-	}
-	if graduationDate != nil {
-		query += fmt.Sprintf("graduation_date = $%v, ", counter)
-		params = append(params, *graduationDate)
-		counter++
-	}
-	if completionStatus != nil {
-		query += fmt.Sprintf("completion_status = $%v, ", counter)
-		params = append(params, *completionStatus)
-		counter++
+	// Преобразуем объект Student в JSON
+	studentJSON, err := json.MarshalIndent(student, "", "  ") // Используем MarshalIndent для красивого вывода с отступами
+	if err != nil {
+		log.Fatalf("Ошибка при преобразовании в JSON: %v", err)
 	}
 
-	// Добавляем обновление поля updated_at
-	query += fmt.Sprintf("updated_at = $%v, ", counter)
-	params = append(params, time.Now())
-	counter++
+	// Выводим JSON в консоль
+	fmt.Println(string(studentJSON))
 
-	// Удаляем последнюю запятую и добавляем WHERE
-	query = query[:len(query)-2] + fmt.Sprintf(" WHERE student_id = $%d", counter)
-	params = append(params, studentID)
-
-	// Выполняем запрос
-	_, err = conn.Exec(context.Background(), query, params...)
+	// Формируем запрос для обновления студента в таблице "students"
+	query := `
+        UPDATE student
+        SET
+            faculty_id = $2,
+            department_id = $3,
+            ticket_number = $4,
+            full_name = $5,
+            enrollment_date = $6,
+            education_level = $7,
+            graduation_date = $8,
+            completion_status = $9,
+            is_archived = $10,
+            updated_at = $11
+        WHERE student_id = $1`
+	_, err = tx.Exec(context.Background(), query,
+		student.StudentID,
+		student.FacultyID,
+		student.DepartmentID,
+		student.TicketNumber,
+		student.FullName,
+		student.EnrollmentDate,
+		student.EducationLevel,
+		student.GraduationDate,
+		student.CompletionStatus,
+		student.IsArchived,
+		time.Now(),
+	)
 	if err != nil {
 		return fmt.Errorf("ошибка при обновлении студента: %v", err)
+	}
+
+	// Если нужно обновить таблицу "coursework", добавляем запрос
+	queryCoursework := `
+    INSERT INTO coursework (coursework_id, student_id, coursework_title, coursework_grade, supervisor_id)
+    VALUES (COALESCE($1, gen_random_uuid()), $1, $2, $3, $4)
+    ON CONFLICT (student_id) DO UPDATE
+    SET
+        coursework_title = EXCLUDED.coursework_title,
+        coursework_grade = EXCLUDED.coursework_grade,
+        supervisor_id = EXCLUDED.supervisor_id`
+
+	_, err = tx.Exec(context.Background(), queryCoursework,
+		student.StudentID,
+		student.CourseworkTitle,
+		student.CourseworkGrade,
+		student.CourseSupervisor,
+	)
+
+	if err != nil {
+		return fmt.Errorf("ошибка при обновлении данных в coursework: %v", err)
+	}
+
+	// Обновление таблицы "diploma", переносим поля "diploma_title" и "diploma_grade"
+	queryDiploma := `
+        INSERT INTO diploma (diploma_id, student_id, diploma_title, diploma_grade, supervisor_id)
+        VALUES (COALESCE($1, gen_random_uuid()), $1, $2, $3, $4)
+        ON CONFLICT (student_id) DO UPDATE
+        SET
+        diploma_title = EXCLUDED.diploma_title,
+        diploma_grade = EXCLUDED.diploma_grade,
+        supervisor_id = EXCLUDED.supervisor_id`
+
+	_, err = tx.Exec(context.Background(), queryDiploma,
+		student.StudentID,
+		student.DiplomaTitle, // Переносим сюда дипломный титул
+		student.DiplomaGrade, // Переносим сюда дипломную оценку
+		student.DiplomaSupervisor,
+	)
+
+	if err != nil {
+		return fmt.Errorf("ошибка при обновлении данных в diploma: %v", err)
+	}
+
+	// Подтверждаем транзакцию
+	if err := tx.Commit(context.Background()); err != nil {
+		return fmt.Errorf("ошибка при коммите транзакции: %v", err)
 	}
 
 	return nil
 }
 
-func UpdateStudentHandler(conn *pgx.Conn) http.HandlerFunc {
+func UpdateStudentHandler(connPool *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		StudentID, err := uuid.Parse(vars["id"])
+		conn, err := connPool.Acquire(context.Background())
 		if err != nil {
-			http.Error(w, "Некорректный ID студента", http.StatusBadRequest)
+			log.Fatalf("Ошибка при получении соединения из пула: %v\n", err)
+		}
+		defer conn.Release()
+
+		body, err := ioutil.ReadAll(r.Body)
+
+		if err != nil {
+			http.Error(w, "Failed to read request body", http.StatusInternalServerError)
 			return
 		}
+		defer r.Body.Close()
 
-		// Парсим тело запроса
-		var updateData struct {
-			FacultyID        *uuid.UUID `json:"FacultyID"`
-			DepartmentID     *uuid.UUID `json:"DepartmentID"`
-			FullName         *string    `json:"FullName"`
-			EnrollmentDate   *string    `json:"EnrollmentDate"`
-			EducationLevel   *string    `json:"EducationLevel"`
-			GraduationDate   *string    `json:"GraduationDate"`
-			CompletionStatus *bool      `json:"CompletionStatus"`
-		}
+		// Создаем экземпляр структуры Student для декодирования
+		var student Student
 
-		if err := json.NewDecoder(r.Body).Decode(&updateData); err != nil {
-			http.Error(w, "Неверный формат тела запроса", http.StatusBadRequest)
+		// Декодируем JSON в структуру
+		err = json.Unmarshal(body, &student)
+		if err != nil {
+			log.Printf("Ошибка при разборе JSON: %v\n", err)
+			http.Error(w, fmt.Sprintf("Failed to parse JSON: %v", err), http.StatusBadRequest)
 			return
-		}
-
-		// Конвертируем даты, если они были переданы
-		var enrollmentDate, graduationDate *time.Time
-		if updateData.EnrollmentDate != nil {
-			date, err := time.Parse("2006-01-02", *updateData.EnrollmentDate)
-			if err != nil {
-				http.Error(w, "Неверный формат даты для enrollment_date (ожидается YYYY-MM-DD)", http.StatusBadRequest)
-				return
-			}
-			enrollmentDate = &date
-		}
-		if updateData.GraduationDate != nil {
-			date, err := time.Parse("2006-01-02", *updateData.GraduationDate)
-			if err != nil {
-				http.Error(w, "Неверный формат даты для graduation_date (ожидается YYYY-MM-DD)", http.StatusBadRequest)
-				return
-			}
-			graduationDate = &date
 		}
 
 		// Вызываем функцию обновления данных в БД
-		err = UpdateStudent(conn, StudentID, updateData.FacultyID, updateData.DepartmentID, *updateData.FullName,
-			enrollmentDate, updateData.EducationLevel, graduationDate, updateData.CompletionStatus)
+		err = UpdateStudent(conn, student)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -409,7 +439,7 @@ func UpdateStudentHandler(conn *pgx.Conn) http.HandlerFunc {
 	}
 }
 
-func DeleteStudent(conn *pgx.Conn, studentID uuid.UUID) error {
+func DeleteStudent(conn *pgxpool.Conn, studentID uuid.UUID) error {
 	// Проверяем, существует ли студент
 	exists, err := StudentExists(conn, studentID)
 	if err != nil {
@@ -429,8 +459,14 @@ func DeleteStudent(conn *pgx.Conn, studentID uuid.UUID) error {
 	return nil
 }
 
-func DeleteStudentHandler(conn *pgx.Conn) http.HandlerFunc {
+func DeleteStudentHandler(connPool *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		conn, err := connPool.Acquire(context.Background())
+		if err != nil {
+			log.Fatalf("Ошибка при получении соединения из пула: %v\n", err)
+		}
+		defer conn.Release()
+
 		// Разбираем ID студента из маршрута
 		vars := mux.Vars(r)
 		studentIDStr, ok := vars["id"]
@@ -459,7 +495,7 @@ func DeleteStudentHandler(conn *pgx.Conn) http.HandlerFunc {
 	}
 }
 
-func ArchiveStudent(conn *pgx.Conn, studentID uuid.UUID) error {
+func ArchiveStudent(conn *pgxpool.Conn, studentID uuid.UUID) error {
 	// Проверяем, существует ли студент
 	exists, err := StudentExists(conn, studentID)
 	if err != nil {
@@ -492,7 +528,7 @@ func ArchiveStudent(conn *pgx.Conn, studentID uuid.UUID) error {
 	return nil
 }
 
-func ArchiveStudentHandler(conn *pgx.Conn) http.HandlerFunc {
+func ArchiveStudentHandler(conn *pgxpool.Conn) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Извлекаем ID студента из маршрута
 		vars := mux.Vars(r)
@@ -522,8 +558,14 @@ func ArchiveStudentHandler(conn *pgx.Conn) http.HandlerFunc {
 	}
 }
 
-func GetAllStudentsHandler(conn *pgx.Conn) http.HandlerFunc {
+func GetAllStudentsHandler(connPool *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		conn, err := connPool.Acquire(context.Background())
+		if err != nil {
+			log.Fatalf("Ошибка при получении соединения из пула: %v\n", err)
+		}
+		defer conn.Release()
+
 		ctx := context.Background()
 		// SQL-запрос
 		query := `
@@ -570,6 +612,7 @@ func GetAllStudentsHandler(conn *pgx.Conn) http.HandlerFunc {
 				log.Println("Row scan error:", err)
 				return
 			}
+
 			students = append(students, student)
 		}
 

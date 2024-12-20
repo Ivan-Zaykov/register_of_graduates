@@ -19,7 +19,6 @@ const StudentsPage = () => {
   const [searchStudent, setSearchStudent] = useState("");
 
   const [filteredStudents, setFilteredStudents] = useState([]); // отфильтрованные данные
-  
 
   useEffect(() => {
     // Функция для получения данных
@@ -73,28 +72,26 @@ const StudentsPage = () => {
     setSearchStudent(event.target.value); // обновляем ввод
   };
 
-
   const handleSearchStudentSubmit = (event) => {
     event.preventDefault();
-  
+
     if (searchStudent.trim() === "") {
       // Если строка поиска пуста, сбрасываем фильтр
       setFilteredStudents(students);
-      console.log("Поиск сброшен, отображаются все студенты");
       return;
     }
-  
+
     // Фильтруем данные
     const filteredData = students.filter((student) =>
-      Object.values(student).some((value) =>
-        value != null && value.toString().toLowerCase().includes(searchStudent.toLowerCase())
+      Object.values(student).some(
+        (value) =>
+          value != null &&
+          value.toString().toLowerCase().includes(searchStudent.toLowerCase())
       )
     );
-  
-    setFilteredStudents(filteredData);
-    console.log("Поиск по студентам:", searchStudent);
-  };
 
+    setFilteredStudents(filteredData);
+  };
 
   const sortedAndFilteredData = [...filteredStudents].sort((a, b) => {
     if (sortConfig.key) {
@@ -103,7 +100,6 @@ const StudentsPage = () => {
     }
     return 0;
   });
-
 
   return (
     <>
@@ -150,7 +146,7 @@ const StudentsPage = () => {
           </div>
 
           <div className="add_and_input_block">
-            <a href="/students/add_new_student">
+            <a href="/students/add_new_student" target="_blank">
               <AddStudentIcon className="add_icon" />
             </a>
 
@@ -172,13 +168,19 @@ const StudentsPage = () => {
           <table className="student_table">
             <thead className="student_thead">
               <tr className="student_tr">
-                <th className="student_th" onClick={() => requestSort("ticket_number")}>
+                <th
+                  className="student_th"
+                  onClick={() => requestSort("ticket_number")}>
                   Номер студенческого
                 </th>
-                <th className="student_th" onClick={() => requestSort("full_name")}>
+                <th
+                  className="student_th"
+                  onClick={() => requestSort("full_name")}>
                   ФИО
                 </th>
-                <th className="student_th" onClick={() => requestSort("education_level")}>
+                <th
+                  className="student_th"
+                  onClick={() => requestSort("education_level")}>
                   Ступень обучения
                 </th>
                 <th

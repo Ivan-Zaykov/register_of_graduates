@@ -36,7 +36,6 @@ const DepartmentsPage = () => {
     setFilteredDeparts(departsData);
   }, [departsData]);
 
-
   const [sortConfig, setSortConfig] = useState({
     key: null,
     direction: "ascending",
@@ -62,7 +61,6 @@ const DepartmentsPage = () => {
 
   const [searchDepart, setSearchDepart] = useState(""); //строка ввода
   const [filteredDeparts, setFilteredDeparts] = useState([]); // отфильтрованные данные
-  
 
   const handleSearchDepartChange = (event) => {
     setSearchDepart(event.target.value); // обновляем ввод
@@ -70,21 +68,20 @@ const DepartmentsPage = () => {
 
   const handleSearchDepartSubmit = (event) => {
     event.preventDefault();
-  
+
     if (searchDepart.trim() === "") {
       // Если строка поиска пуста, сбрасываем фильтр
       setFilteredDeparts(departsData);
-      console.log("Поиск сброшен, отображаются все кафедры");
       return;
     }
-  
+
     // Фильтруем данные
     const filteredData = departsData.filter((department) =>
       Object.values(department).some((value) =>
         value.toString().toLowerCase().includes(searchDepart.toLowerCase())
       )
     );
-  
+
     setFilteredDeparts(filteredData);
     console.log("Поиск по кафедрам:", searchDepart);
   };

@@ -52,4 +52,11 @@
 }
 
 
+.facult_table tbody .alone_td {
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  padding: 12px;
+  height: 49px;
+}
+
 

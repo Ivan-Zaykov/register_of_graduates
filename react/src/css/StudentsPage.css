@@ -55,7 +55,24 @@
   font-weight: bold;
 }
 
-.student_table tbody .bottom_td td {
+/* .student_table tbody .bottom_td {
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
+  height: 15px;
+} */
+
+.student_table tbody .bottom_td td:first-child {
+  border-bottom-left-radius: 20px;
+}
+
+.student_table tbody .bottom_td td:last-child {
+  border-bottom-right-radius: 20px;
+}
+
+
+.student_table tbody .alone_td {
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  padding: 12px;
+  height: 49px;
 }
