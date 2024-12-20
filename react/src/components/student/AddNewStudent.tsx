@@ -136,7 +136,7 @@ const AddNewStudent = () => {
                   </div>
                   {/* <div className="data">{student.studentId}</div> */}
                   <input
-                    type="number"
+                    type="text"
                     placeholder="Введите номер..."
                     name="ticket_number"
                     value={addNewStudent.ticket_number}
