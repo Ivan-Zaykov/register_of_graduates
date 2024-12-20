@@ -50,6 +50,7 @@ func (c *CustomDate) UnmarshalJSON(b []byte) error {
 	strInput = strInput[1 : len(strInput)-1]
 	layouts := []string{
 		"2006-01-02", // Простой формат
+		"2006",       // Простой формат
 	}
 	for _, layout := range layouts {
 		parsed, err := time.Parse(layout, strInput)
@@ -66,17 +67,28 @@ func (c CustomDate) MarshalJSON() ([]byte, error) {
 }
 
 func (c *CustomBoolString) UnmarshalJSON(data []byte) error {
-	// Проверяем строку
-	strValue := string(data)
-	if strValue == "true" || strValue == "false" {
-		c.BoolValue = strValue == "true"
-		c.Valid = true
-		return nil
+	// Сначала попробуем обработать как строку (true или false)
+	var strValue string
+	if err := json.Unmarshal(data, &strValue); err == nil {
+		if strValue == "true" || strValue == "false" {
+			c.BoolValue = strValue == "true"
+			c.Valid = true
+			return nil
+		}
+
+		if strValue == "" {
+			c.BoolValue = strValue == "false"
+			c.Valid = true
+			return nil
+		}
 	}
+
+	// Если строка не соответствует "true" или "false", попытаться обработать как bool
 	var boolValue bool
 	if err := json.Unmarshal(data, &boolValue); err != nil {
 		return err
 	}
+
 	c.BoolValue = boolValue
 	c.Valid = true
 	return nil

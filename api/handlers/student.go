@@ -192,35 +192,37 @@ func GetStudentHandler(connPool *pgxpool.Pool) http.HandlerFunc {
 	}
 }
 
-func CreateStudent(conn *pgxpool.Conn, facultyID uuid.UUID, ticketNumber string, fullName string, educationLevel string, enrollmentDate time.Time) error {
-	defer conn.Release()
-
+func CreateStudent(conn *pgxpool.Conn, student Student) error {
 	// Проверяем, существует ли студент с данным номером студенческого билета
-	if exists, err := StudentExistsByTicketNumber(conn, ticketNumber); err != nil {
+	if exists, err := StudentExistsByTicketNumber(conn, student.TicketNumber); err != nil {
 		return fmt.Errorf("ошибка проверки существования студента: %v", err)
 	} else if exists {
-		return fmt.Errorf("студент с номером студенческого '%s' уже существует", ticketNumber)
+		return fmt.Errorf("студент с номером студенческого '%s' уже существует", student.TicketNumber)
 	}
 
 	// SQL-запрос на создание студента
 	query := `
 		INSERT INTO student (
-			student_id, faculty_id, ticket_number, 
-			full_name, education_level, enrollment_date, is_archived, created_at, updated_at 
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
+			student_id, faculty_id, department_id, ticket_number, 
+			full_name, education_level, enrollment_date, graduation_date,
+		    completion_status, is_archived, created_at, updated_at 
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`
 
 	_, err := conn.Exec(
 		context.Background(),
 		query,
-		uuid.New(),     // student_id
-		facultyID,      // faculty_id
-		ticketNumber,   // ticket_number
-		fullName,       // full_name
-		educationLevel, // education_level
-		enrollmentDate, // enrollment_date
-		false,          // is_archived
-		time.Now(),     // created_at
-		time.Now(),     // updated_at
+		uuid.New(),             // student_id
+		student.FacultyID,      // faculty_id
+		student.DepartmentID,   // ticket_number
+		student.TicketNumber,   // ticket_number
+		student.FullName,       // full_name
+		student.EducationLevel, // education_level
+		student.EnrollmentDate, // enrollment_date
+		student.GraduationDate,
+		student.CompletionStatus,
+		false,      // is_archived
+		time.Now(), // created_at
+		time.Now(), // updated_at
 	)
 
 	if err != nil {
@@ -232,9 +234,12 @@ func CreateStudent(conn *pgxpool.Conn, facultyID uuid.UUID, ticketNumber string,
 
 func CreateStudentHandler(connPool *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// Получаем соединение из пула
 		conn, err := connPool.Acquire(context.Background())
 		if err != nil {
-			log.Fatalf("Ошибка при получении соединения из пула: %v\n", err)
+			log.Printf("Ошибка при получении соединения из пула: %v\n", err)
+			http.Error(w, "Ошибка подключения к базе данных", http.StatusInternalServerError)
+			return
 		}
 		defer conn.Release()
 
@@ -248,26 +253,27 @@ func CreateStudentHandler(connPool *pgxpool.Pool) http.HandlerFunc {
 			EnrollmentDate string `json:"enrollment_date"`
 		}
 
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			http.Error(w, "Неверный формат данных", http.StatusBadRequest)
-			return
-		}
+		body, err := ioutil.ReadAll(r.Body)
 
-		// Парсим UUID и дату
-		facultyID, err := uuid.Parse(req.FacultyID)
 		if err != nil {
-			http.Error(w, "Неверный UUID факультета", http.StatusBadRequest)
+			http.Error(w, "Failed to read request body", http.StatusInternalServerError)
 			return
 		}
+		defer r.Body.Close()
 
-		enrollmentDate, err := time.Parse("2006", req.EnrollmentDate)
+		// Создаем экземпляр структуры Student для декодирования
+		var student Student
+
+		// Декодируем JSON в структуру
+		err = json.Unmarshal(body, &student)
 		if err != nil {
-			http.Error(w, "Неверный формат даты", http.StatusBadRequest)
+			log.Printf("Ошибка при разборе JSON: %v\n", err)
+			http.Error(w, fmt.Sprintf("Failed to parse JSON: %v", err), http.StatusBadRequest)
 			return
 		}
 
-		// Вызов функции для создания студента
-		if err := CreateStudent(conn, facultyID, req.TicketNumber, req.FullName, req.EducationLevel, enrollmentDate); err != nil {
+		// Вставка студента в базу данных
+		if err := CreateStudent(conn, student); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
