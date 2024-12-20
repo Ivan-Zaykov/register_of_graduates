@@ -22,6 +22,7 @@ const StudentProfile = () => {
   const [error, setError] = useState(null); // Состояние для ошибок
   const [alert, setAlert] = useState(null);
   const [educationLevels, setEducationLevels] = useState([]);
+  const [scientificSupervisors, setScientificSupervisors] = useState([]);
 
 
 
@@ -52,7 +53,8 @@ const StudentProfile = () => {
 
         // Параллельное выполнение остальных запросов
         await Promise.all([
-          fetchData('/api/education_level', setEducationLevels, setError)
+          fetchData('/api/education_level', setEducationLevels, setError),
+          fetchData('/api/scientific_supervisors', setScientificSupervisors, setError)
         ]);
       } catch (error) {
         console.error("Ошибка при загрузке данных:", error);
@@ -303,7 +305,10 @@ const StudentProfile = () => {
                     Научный руководитель <br></br> курсовой работы:
                   </td>
                   <td className="bottom_data_info">
-                    {student.course_supervisor}
+                    {
+                      scientificSupervisors[student.course_supervisor] ?
+                          scientificSupervisors[student.course_supervisor].full_name : ""
+                    }
                   </td>
                 </tr>
                 <tr className="bottom_table_line">
@@ -327,7 +332,10 @@ const StudentProfile = () => {
                     Научный руководитель <br></br> дипломной работы:
                   </td>
                   <td className="bottom_data_info">
-                    {student.diploma_supervisor}
+                    {
+                      scientificSupervisors[student.diploma_supervisor] ?
+                          scientificSupervisors[student.diploma_supervisor].full_name : ""
+                    }
                   </td>
                 </tr>
                 <tr className="bottom_table_line">
