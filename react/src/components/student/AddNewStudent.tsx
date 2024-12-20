@@ -13,6 +13,7 @@ const AddNewStudent = () => {
   const [faculties, setFaculties] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [educationLevels, setEducationLevels] = useState([]);
+  const [scientificSupervisors, setScientificSupervisors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [alert, setAlert] = useState(null);
@@ -23,7 +24,8 @@ const AddNewStudent = () => {
       await Promise.all([
         fetchData("/api/faculties", setFaculties, setError),
         fetchData("/api/departments", setDepartments, setError),
-        fetchData('/api/education_level', setEducationLevels, setError)
+        fetchData('/api/education_level', setEducationLevels, setError),
+        fetchData('/api/scientific_supervisors', setScientificSupervisors, setError)
       ]);
       setLoading(false);
     };
@@ -285,15 +287,18 @@ const AddNewStudent = () => {
                     Научный руководитель <br></br> курсовой работы:
                   </td>
                   <td className="bottom_data_info">
-                    {/* {student.courseSupervisor} */}
-                    <input
-                      type="text"
-                      name="course_supervisor"
-                      placeholder="Введите научного руководителя..."
-                      value={addNewStudent.course_supervisor}
-                      onChange={(e) => handleInputChange(e, setAddNewStudent)}
-                      className="add_student_input add_student_big_input"
-                    />
+                    <select
+                        name="course_supervisor"
+                        value={addNewStudent.course_supervisor}
+                        onChange={(e) => handleInputChange(e, setAddNewStudent)}
+                        className="add_student_select add_student_big_input add_student_select_grade">
+                      <option value="">Выберите руководителя курсовой...</option>
+                      {Object.keys(scientificSupervisors).map((key) => (
+                          <option key={key} value={key}>
+                            {scientificSupervisors[key]['full_name']}
+                          </option>
+                      ))}
+                    </select>
                   </td>
                 </tr>
                 <tr className="bottom_table_line">
@@ -303,13 +308,13 @@ const AddNewStudent = () => {
                   <td className="bottom_data_info">
                     {/* {student.courseWorkTitle} */}
                     <textarea
-                      type="text"
-                      placeholder="Введите название..."
-                      name="coursework_title"
-                      value={addNewStudent.coursework_title}
-                      onChange={(e) => handleInputChange(e, setAddNewStudent)}
-                      className="add_student_input add_student_big_input"
-                      row="2"
+                        type="text"
+                        placeholder="Введите название..."
+                        name="coursework_title"
+                        value={addNewStudent.coursework_title}
+                        onChange={(e) => handleInputChange(e, setAddNewStudent)}
+                        className="add_student_input add_student_big_input"
+                        row="2"
                     />
                   </td>
                 </tr>
@@ -350,31 +355,35 @@ const AddNewStudent = () => {
                     Научный руководитель <br></br> дипломной работы:
                   </td>
                   <td className="bottom_data_info">
-                    <input
-                      type="text"
-                      name="diploma_supervisor"
-                      placeholder="Введите научного руководителя..."
-                      value={addNewStudent.diploma_supervisor}
-                      onChange={(e) => handleInputChange(e, setAddNewStudent)}
-                      className="add_student_input add_student_big_input"
-                    />
+                    <select
+                        name="diploma_supervisor"
+                        value={addNewStudent.diploma_supervisor}
+                        onChange={(e) => handleInputChange(e, setAddNewStudent)}
+                        className="add_student_select add_student_big_input add_student_select_grade">
+                      <option value="">Выберите руководителя дипломной...</option>
+                      {Object.keys(scientificSupervisors).map((key) => (
+                          <option key={key} value={key}>
+                            {scientificSupervisors[key]['full_name']}
+                          </option>
+                      ))}
+                    </select>
                     {/* {student.diplomaSupervisor} */}
                   </td>
                 </tr>
                 <tr className="bottom_table_line">
                   <td
-                    className="bottom_data_title"
-                    style={{ lineHeight: "1.4" }}>
+                      className="bottom_data_title"
+                      style={{lineHeight: "1.4"}}>
                     Название дипломной работы:
                   </td>
                   <td className="bottom_data_info">
                     {/* {student.diplomaTitle} */}
                     <textarea
-                      type="text"
-                      name="diploma_title"
-                      placeholder="Введите название работы..."
-                      value={addNewStudent.diploma_title}
-                      onChange={(e) => handleInputChange(e, setAddNewStudent)}
+                        type="text"
+                        name="diploma_title"
+                        placeholder="Введите название работы..."
+                        value={addNewStudent.diploma_title}
+                        onChange={(e) => handleInputChange(e, setAddNewStudent)}
                       className="add_student_input add_student_big_input"
                       row="2"
                     />
