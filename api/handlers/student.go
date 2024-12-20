@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
@@ -17,24 +18,24 @@ import (
 type Student struct {
 	StudentID         uuid.UUID              `json:"student_id"`
 	FacultyID         uuid.UUID              `json:"faculty_id"`
-	FacultyName       string                 `json:"faculty_name"`
+	FacultyName       utils.CustomNullString `json:"faculty_name"`
 	DepartmentID      utils.CustomNullString `json:"department_id"`
 	DepartmentName    utils.CustomNullString `json:"department_name"`
 	TicketNumber      string                 `json:"ticket_number"`
 	FullName          string                 `json:"full_name"`
-	EnrollmentDate    *time.Time             `json:"enrollment_date"`
+	EnrollmentDate    utils.CustomDate       `json:"enrollment_date"`
 	EducationLevel    string                 `json:"education_level"`
-	GraduationDate    *time.Time             `json:"graduation_date,omitempty"`
-	CompletionStatus  *bool                  `json:"completion_status,omitempty"`
-	IsArchived        bool                   `json:"is_archived"`
+	GraduationDate    utils.CustomDate       `json:"graduation_date,omitempty"`
+	CompletionStatus  utils.CustomBoolString `json:"completion_status,omitempty"`
+	IsArchived        utils.CustomBoolString `json:"is_archived"`
 	CreatedAt         *time.Time             `json:"created_at"`
 	UpdatedAt         *time.Time             `json:"updated_at"`
-	CourseworkTitle   *string                `json:"coursework_title"`
-	CourseworkGrade   *string                `json:"coursework_grade"`
-	CourseSupervisor  *string                `json:"course_supervisor"`
-	DiplomaSupervisor *string                `json:"diploma_supervisor"`
-	DiplomaTitle      *string                `json:"diploma_title"`
-	DiplomaGrade      *string                `json:"diploma_grade"`
+	CourseworkTitle   utils.CustomNullString `json:"coursework_title"`
+	CourseworkGrade   utils.CustomNullString `json:"coursework_grade"`
+	CourseSupervisor  utils.CustomNullString `json:"course_supervisor"`
+	DiplomaSupervisor utils.CustomNullString `json:"diploma_supervisor"`
+	DiplomaTitle      utils.CustomNullString `json:"diploma_title"`
+	DiplomaGrade      utils.CustomNullString `json:"diploma_grade"`
 }
 
 func StudentExistsByTicketNumber(conn *pgxpool.Conn, ticketNumber string) (bool, error) {
@@ -276,83 +277,75 @@ func CreateStudentHandler(connPool *pgxpool.Pool) http.HandlerFunc {
 	}
 }
 
-func UpdateStudent(conn *pgxpool.Conn, studentID uuid.UUID, facultyID *uuid.UUID, departmentID *uuid.UUID,
-	fullName string, enrollmentDate *time.Time, educationLevel *string, graduationDate *time.Time,
-	completionStatus *bool) error {
-
+func UpdateStudent(conn *pgxpool.Conn, student Student) error {
 	// Проверяем, существует ли студент
-	exists, err := StudentExists(conn, studentID)
+	exists, err := StudentExists(conn, student.StudentID)
 	if err != nil {
-		return fmt.Errorf("ошибка при проверке существования студента: %v", err)
+		return fmt.Errorf("ошибка при проверке существования студента: %w", err)
 	}
 	if !exists {
-		return fmt.Errorf("студент с ID %s не найден", studentID)
+		return fmt.Errorf("студент с ID %s не найден", student.StudentID)
 	}
 
-	// Проверяем, не архивный ли студент
+	// Проверяем, является ли студент архивным
 	var isArchived bool
-	err = conn.QueryRow(context.Background(), `SELECT is_archived FROM student WHERE student_id = $1`, studentID).Scan(&isArchived)
+	err = conn.QueryRow(
+		context.Background(),
+		`SELECT is_archived FROM student WHERE student_id = $1`,
+		student.StudentID,
+	).Scan(&isArchived)
 	if err != nil {
-		return fmt.Errorf("ошибка при проверке архивности студента: %v", err)
+		return fmt.Errorf("ошибка при проверке архивности студента: %w", err)
 	}
 	if isArchived {
 		return fmt.Errorf("нельзя изменять данные архивного студента")
 	}
 
-	// Формируем запрос на обновление
-	query := `UPDATE student SET `
-	params := []interface{}{}
-	counter := 1
+	// Обновляем данные студента
+	query := `
+		UPDATE student
+		SET
+			faculty_id = $2,
+			department_id = $3,
+			ticket_number = $4,
+			full_name = $5,
+			enrollment_date = $6,
+			education_level = $7,
+			graduation_date = $8,
+			completion_status = $9,
+			is_archived = $10,
+			coursework_title = $11,
+			coursework_grade = $12,
+			course_supervisor = $13,
+			diploma_supervisor = $14,
+			diploma_title = $15,
+			diploma_grade = $16,
+			updated_at = $17
+		WHERE student_id = $1`
 
-	if facultyID != nil {
-		query += fmt.Sprintf("faculty_id = $%v, ", counter)
-		params = append(params, *facultyID)
-		counter++
-	}
-	if departmentID != nil {
-		query += fmt.Sprintf("department_id = $%v, ", counter)
-		params = append(params, *departmentID)
-		counter++
-	}
-	if fullName != "" {
-		query += fmt.Sprintf("full_name = $%v, ", counter)
-		params = append(params, fullName)
-		counter++
-	}
-	if enrollmentDate != nil {
-		query += fmt.Sprintf("enrollment_date = $%v, ", counter)
-		params = append(params, *enrollmentDate)
-		counter++
-	}
-	if educationLevel != nil {
-		query += fmt.Sprintf("education_level = $%v, ", counter)
-		params = append(params, *educationLevel)
-		counter++
-	}
-	if graduationDate != nil {
-		query += fmt.Sprintf("graduation_date = $%v, ", counter)
-		params = append(params, *graduationDate)
-		counter++
-	}
-	if completionStatus != nil {
-		query += fmt.Sprintf("completion_status = $%v, ", counter)
-		params = append(params, *completionStatus)
-		counter++
-	}
-
-	// Добавляем обновление поля updated_at
-	query += fmt.Sprintf("updated_at = $%v, ", counter)
-	params = append(params, time.Now())
-	counter++
-
-	// Удаляем последнюю запятую и добавляем WHERE
-	query = query[:len(query)-2] + fmt.Sprintf(" WHERE student_id = $%d", counter)
-	params = append(params, studentID)
-
-	// Выполняем запрос
-	_, err = conn.Exec(context.Background(), query, params...)
+	_, err = conn.Exec(
+		context.Background(),
+		query,
+		student.StudentID,
+		student.FacultyID,
+		student.DepartmentID,
+		student.TicketNumber,
+		student.FullName,
+		student.EnrollmentDate,
+		student.EducationLevel,
+		student.GraduationDate,
+		student.CompletionStatus,
+		student.IsArchived,
+		student.CourseworkTitle,
+		student.CourseworkGrade,
+		student.CourseSupervisor,
+		student.DiplomaSupervisor,
+		student.DiplomaTitle,
+		student.DiplomaGrade,
+		time.Now(),
+	)
 	if err != nil {
-		return fmt.Errorf("ошибка при обновлении студента: %v", err)
+		return fmt.Errorf("ошибка при обновлении студента: %w", err)
 	}
 
 	return nil
@@ -366,51 +359,27 @@ func UpdateStudentHandler(connPool *pgxpool.Pool) http.HandlerFunc {
 		}
 		defer conn.Release()
 
-		vars := mux.Vars(r)
-		StudentID, err := uuid.Parse(vars["id"])
+		body, err := ioutil.ReadAll(r.Body)
+
 		if err != nil {
-			http.Error(w, "Некорректный ID студента", http.StatusBadRequest)
+			http.Error(w, "Failed to read request body", http.StatusInternalServerError)
 			return
 		}
+		defer r.Body.Close()
 
-		// Парсим тело запроса
-		var updateData struct {
-			FacultyID        *uuid.UUID `json:"FacultyID"`
-			DepartmentID     *uuid.UUID `json:"DepartmentID"`
-			FullName         *string    `json:"FullName"`
-			EnrollmentDate   *string    `json:"EnrollmentDate"`
-			EducationLevel   *string    `json:"EducationLevel"`
-			GraduationDate   *string    `json:"GraduationDate"`
-			CompletionStatus *bool      `json:"CompletionStatus"`
-		}
+		// Создаем экземпляр структуры Student для декодирования
+		var student Student
 
-		if err := json.NewDecoder(r.Body).Decode(&updateData); err != nil {
-			http.Error(w, "Неверный формат тела запроса", http.StatusBadRequest)
+		// Декодируем JSON в структуру
+		err = json.Unmarshal(body, &student)
+		if err != nil {
+			log.Printf("Ошибка при разборе JSON: %v\n", err)
+			http.Error(w, fmt.Sprintf("Failed to parse JSON: %v", err), http.StatusBadRequest)
 			return
-		}
-
-		// Конвертируем даты, если они были переданы
-		var enrollmentDate, graduationDate *time.Time
-		if updateData.EnrollmentDate != nil {
-			date, err := time.Parse("2006-01-02", *updateData.EnrollmentDate)
-			if err != nil {
-				http.Error(w, "Неверный формат даты для enrollment_date (ожидается YYYY-MM-DD)", http.StatusBadRequest)
-				return
-			}
-			enrollmentDate = &date
-		}
-		if updateData.GraduationDate != nil {
-			date, err := time.Parse("2006-01-02", *updateData.GraduationDate)
-			if err != nil {
-				http.Error(w, "Неверный формат даты для graduation_date (ожидается YYYY-MM-DD)", http.StatusBadRequest)
-				return
-			}
-			graduationDate = &date
 		}
 
 		// Вызываем функцию обновления данных в БД
-		err = UpdateStudent(conn, StudentID, updateData.FacultyID, updateData.DepartmentID, *updateData.FullName,
-			enrollmentDate, updateData.EducationLevel, graduationDate, updateData.CompletionStatus)
+		err = UpdateStudent(conn, student)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
