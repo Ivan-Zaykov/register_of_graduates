@@ -148,3 +148,21 @@ func (d CustomDate) Value() (driver.Value, error) {
 	// Преобразуем CustomDate в строку в формате 'YYYY-MM-DD' (тип DATE)
 	return d.Time.Format("2006-01-02"), nil
 }
+
+func (n *CustomNullString) Scan(value interface{}) error {
+	if value == nil {
+		n.String = ""
+		n.Valid = false
+		return nil
+	}
+	n.String, n.Valid = value.(string)
+	return nil
+}
+
+// Value для передачи в базу данных.
+func (n CustomNullString) Value() (driver.Value, error) {
+	if n.Valid && n.String != "" {
+		return n.String, nil
+	}
+	return nil, nil // Заменяем "" на NULL
+}
