@@ -27,6 +27,8 @@ func ConfigureRouter(connPool *pgxpool.Pool) {
 
 	r.HandleFunc("/api/education_level", handlers.GetEducationLevels()).Methods(http.MethodGet)
 
+	r.HandleFunc("/api/scientific_supervisors", handlers.GetScientificSupervisors(connPool)).Methods(http.MethodGet)
+
 	log.Print("Listening 5000")
 	log.Fatal(http.ListenAndServe(":5000", logHandlers.LoggingHandler(os.Stdout, r)))
 }
