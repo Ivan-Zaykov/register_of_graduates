@@ -315,7 +315,8 @@ const EditStudent = () => {
                           ))}
                         </select>
                       </td>
-                      {scientificSupervisors[student.course_supervisor].full_name}
+                      {scientificSupervisors[student.course_supervisor] ?
+                          scientificSupervisors[student.course_supervisor].full_name : '' }
                     </td>
                   </tr>
                   <tr className="bottom_table_line">
@@ -373,7 +374,11 @@ const EditStudent = () => {
                             </option>
                         ))}
                       </select>
-                      {scientificSupervisors[student.diploma_supervisor].full_name}
+                      {
+                        scientificSupervisors[student.diploma_supervisor] ?
+                          scientificSupervisors[student.diploma_supervisor].full_name :
+                          ""
+                      }
                     </td>
                   </tr>
                   <tr className="bottom_table_line">
