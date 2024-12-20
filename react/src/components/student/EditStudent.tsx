@@ -168,7 +168,7 @@ const EditStudent = () => {
                           onChange={(e) => handleInputChange(e, setEditableStudent)}
                           className="editable_input"
                       />
-                      <div className="data">{student.full_name}</div>
+                      {/*<div className="data">{student.full_name}</div>*/}
                     </div>
                     <div className="table_line">
                     <div className="title">Студенческий:</div>
@@ -179,7 +179,7 @@ const EditStudent = () => {
                           onChange={(e) => handleInputChange(e, setEditableStudent)}
                           className="editable_input"
                       />
-                       <div className="data">{student.ticket_number}</div>
+                       {/*<div className="data">{student.ticket_number}</div>*/}
                     </div>
 
                     <div className="table_line">
@@ -198,11 +198,6 @@ const EditStudent = () => {
                             </option>
                         ))}
                       </select>
-                      <div className="data">
-                      {editableStudent.faculty_id != "" ? faculties.filter(
-                          (faculty) => faculty.faculty_id === student.faculty_id
-                      )[0].faculty_name : ""}
-                      </div>
                     </div>
 
                     <div className="table_line">
@@ -216,7 +211,7 @@ const EditStudent = () => {
                           onChange={(e) => handleInputChange(e, setEditableStudent)}
                           className="editable_input"
                       />
-                      <div className="data">{formatDate(student.enrollment_date)}</div>
+                      {/*<div className="data">{formatDate(student.enrollment_date)}</div>*/}
                     </div>
 
                     <div className="table_line">
@@ -234,7 +229,6 @@ const EditStudent = () => {
                             </option>
                         ))}
                       </select>
-                      <div className="data">{educationLevels[student.education_level]}</div>
                     </div>
 
                     <div className="table_line">
@@ -287,11 +281,11 @@ const EditStudent = () => {
                             </option>
                         ))}
                       </select>
-                      <div className="data">
-                        {student.department_id != "" ? departments.filter(
-                            (department) => department.department_id === student.department_id
-                        )[0].department_name : ""}
-                      </div>
+                      {/*<div className="data">*/}
+                      {/*  {student.department_id != "" ? departments.filter(*/}
+                      {/*      (department) => department.department_id === student.department_id*/}
+                      {/*  )[0].department_name : ""}*/}
+                      {/*</div>*/}
                     </td>
                   </tr>
                   <tr className="bottom_table_line">
@@ -313,13 +307,13 @@ const EditStudent = () => {
                             </option>
                         ))}
                       </select>
-                      <div className="data">
-                        {
-                          scientificSupervisors[student.course_supervisor] ?
-                              scientificSupervisors[student.course_supervisor].full_name :
-                              ""
-                        }
-                      </div>
+                      {/*<div className="data">*/}
+                      {/*  {*/}
+                      {/*    scientificSupervisors[student.course_supervisor] ?*/}
+                      {/*        scientificSupervisors[student.course_supervisor].full_name :*/}
+                      {/*        ""*/}
+                      {/*  }*/}
+                      {/*</div>*/}
                     </td>
                   </tr>
                   <tr className="bottom_table_line">
@@ -335,7 +329,7 @@ const EditStudent = () => {
                           className="editable_input big_input"
                           row="2"
                       />
-                      {student.coursework_title}
+                      {/*{student.coursework_title}*/}
                     </td>
                   </tr>
                   <tr className="bottom_table_line">
@@ -355,7 +349,7 @@ const EditStudent = () => {
                             </option>
                         ))}
                       </select>
-                      {student.coursework_grade}
+                      {/*{student.coursework_grade}*/}
                     </td>
                   </tr>
                   <tr className="bottom_table_line">
@@ -377,13 +371,13 @@ const EditStudent = () => {
                             </option>
                         ))}
                       </select>
-                      <div className="data">
-                        {
-                          scientificSupervisors[student.diploma_supervisor] ?
-                              scientificSupervisors[student.diploma_supervisor].full_name :
-                              ""
-                        }
-                      </div>
+                      {/*<div className="data">*/}
+                      {/*  {*/}
+                      {/*    scientificSupervisors[student.diploma_supervisor] ?*/}
+                      {/*        scientificSupervisors[student.diploma_supervisor].full_name :*/}
+                      {/*        ""*/}
+                      {/*  }*/}
+                      {/*</div>*/}
                     </td>
                   </tr>
                   <tr className="bottom_table_line">
@@ -399,7 +393,6 @@ const EditStudent = () => {
                           className="editable_input big_input"
                           row="2"
                       />
-                      {student.diploma_title}
                     </td>
                   </tr>
                   <tr className="bottom_table_line">
@@ -419,7 +412,7 @@ const EditStudent = () => {
                             </option>
                         ))}
                       </select>
-                      {student.diploma_grade}
+                      {/*{student.diploma_grade}*/}
                     </td>
                   </tr>
                   <tr className="bottom_table_line">
@@ -434,7 +427,6 @@ const EditStudent = () => {
                           onChange={(e) => handleInputChange(e, setEditableStudent)}
                           className="editable_input big_input"
                       />
-                      {formatDate(student.graduation_date)}
                     </td>
                   </tr>
 
